@@ -130,13 +130,13 @@ namespace CryoAutomation
             return null;
         }
 
-        public IS7SWItem addSourceModuleSCL(string programName, string filename)
+        private IS7SWItem addSourceModuleWithType(string programName, SimaticLib.S7SWObjType sourceType, string filename)
         {
             S7SWItems src_modules = getSourceModules(programName);
             IS7SWItem item;
             try
             {
-                item = src_modules.Add(System.IO.Path.GetFileNameWithoutExtension(filename), SimaticLib.S7SWObjType.S7Source, filename);
+                item = src_modules.Add(System.IO.Path.GetFileNameWithoutExtension(filename), sourceType, filename);
             }
             catch( System.Exception exc )
             {
@@ -150,8 +150,9 @@ namespace CryoAutomation
         {
             string filename = System.IO.Path.GetFileName(filenameFullPath);
             string extension = System.IO.Path.GetExtension(filename);
-            if (extension.ToLower() == ".scl")
-                return addSourceModuleSCL(programName, filenameFullPath);
+            if (extension.ToLower() == ".scl" || extension.ToLower() == ".awl")
+            //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
+                return addSourceModuleWithType(programName, SimaticLib.S7SWObjType.S7Source, filenameFullPath);
             else
             {
                 Console.Write("Unknown source extension '" + extension + "' (file: " + filename + ")\n");
