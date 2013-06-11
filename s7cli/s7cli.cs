@@ -47,6 +47,41 @@ namespace CryoAutomation
         }   
     }
 
+    
+    public class SimaticCompile : SimaticCommand 
+    {
+        string projectDirectory;
+        string program;
+        string [] sources;
+        S7Project project;
+
+        public SimaticCompile(string projectDir, string programName, string CSVSourceList)
+        {
+            projectDirectory = projectDir;
+            program = programName;
+            string sourceListCSV = CSVSourceList;
+
+            //System.Console.Write("\nprojectDirectory: " + projectDirectory + "\n");
+            //System.Console.Write("\nprogram: " + programName + "\n");
+            System.Console.Write("\nsourceFiles: " + sourceListCSV + "\n");
+
+            project = new S7Project(projectDirectory);
+
+            sources = sourceListCSV.Split(',');
+        }
+
+        public override void exec()
+        {
+            System.Console.Write("\nBuilding program: " + program + "\n\n");
+            foreach (string src in sources)
+            {
+                System.Console.Write("\nCompiling file: " + src);
+                project.compileSource(program, src);
+            }
+            
+        }   
+    }
+
 
 
     class s7cli
@@ -92,12 +127,16 @@ namespace CryoAutomation
             }
             else if (command == "compile")
             {
-                string projectDirectory = args[0];
-                string program = args[1];
-                string sourceFiles = args[2];
+                string projectDirectory = args[1];
+                string program = args[2];
+                string srclist = args[3];
                 S7Project project = new S7Project(projectDirectory);
 
-                S7SWItem src_module = project.getSourceModule("ARC56_program", "4_Compilation_OB");
+                //S7SWItem src_module = project.getSourceModule("ARC56_program", "4_Compilation_OB");
+
+                SimaticCompile compile = new SimaticCompile(projectDirectory, program, srclist);
+                compile.exec();
+
             }
             else
                 System.Console.WriteLine("Unknown command: " + command + "\n\n");

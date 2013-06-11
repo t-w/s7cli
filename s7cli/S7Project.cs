@@ -160,5 +160,28 @@ namespace CryoAutomation
             }
         }
 
+
+        public S7Source getS7SourceModule(string programName, string moduleName)
+        {
+            //S7SWItem item = getSourceModule(programName, moduleName);
+            //SimaticLib.S7Source source = (SimaticLib.S7Source) item.Program.;
+
+            //IS7Source src = getSources("ARC56_program").get_Child("test11"); //get_Collection("test11");
+
+            foreach (S7Source src in simaticProject.Programs[programName].Next["Sources"].Next)
+            {
+                if (src.Name == moduleName)
+                    return src;
+            }
+            return null;
+        }
+
+
+        public void compileSource(string programName, string moduleName)
+        {
+            S7Source src = getS7SourceModule(programName, moduleName);
+            src.Compile();
+            //src.AppWindowHandle
+        }
     }
 }
