@@ -25,7 +25,7 @@ static extern IntPtr FindWindowByCaption(IntPtr ZeroOnly, string lpWindowName);
 // You can also call FindWindow(default(string), lpWindowName) or FindWindow((string)null, lpWindowName)
 */
 
-namespace CryoAutomation
+namespace S7_cli
 {
 /*
 [DllImport("user32", SetLastError=true)]

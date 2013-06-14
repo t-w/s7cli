@@ -46,6 +46,8 @@
     <Reference Include="UIAutomationClient" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Option_parser.cs" />
+    <Compile Include="S7Command.cs" />
     <Compile Include="WinAPI.cs" />
     <Compile Include="s7cli.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

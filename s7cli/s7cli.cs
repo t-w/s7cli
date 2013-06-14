@@ -6,7 +6,7 @@ using System.Text;
 
 using SimaticLib;
 
-namespace CryoAutomation
+namespace S7_cli
 {
     public abstract class SimaticCommand
     {

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.IO;
 //using System.Runtime.InteropServices;
 //using System.Windows.Automation;
 
 using SimaticLib;
 
-namespace CryoAutomation
+namespace S7_cli
 {
 
 
@@ -25,7 +26,8 @@ namespace CryoAutomation
                 System.Console.Write("Project creator: " + project.Creator + "\n");
                 System.Console.Write("Project comment: " + project.Comment + "\n");
                 System.Console.Write("Project LogPath: " + project.LogPath + "\n");
-                System.Console.Write("stations count: " + project.Stations.Count + "\n"); */
+                System.Console.Write("stations count: " + project.Stations.Count + "\n");
+                System.Console.Write("path from command: " + Path + "\n");*/
 
                 if ( //project.Name == "ARC_LSS" and 
                     //project.LogPath == "D:\\controls\\apps\\sector56\\plc\\mirror56")
@@ -46,6 +48,150 @@ namespace CryoAutomation
                 }
             }
         }
+
+        public S7Project(string projectName, string projectDirPath)
+        {
+            simatic = new SimaticLib.Simatic();
+
+            // checking if the project dir path ends with "\"
+            if (!projectDirPath.EndsWith("\\"))
+            {
+                projectDirPath = projectDirPath + "\\";
+            }
+
+            // concatenating real project dir path
+            string projectPath;
+
+            if(projectName.Length > 8)
+            {
+                projectPath = projectDirPath + projectName.Substring(0, 8);
+            }
+            else
+            {
+                projectPath = projectDirPath + projectName;
+            }
+
+            // checking if directory path is not taken
+            if (Directory.Exists(projectPath))
+            {
+                System.Console.Write("Error: Cannot create project because folder " + projectPath + " already exists!\n");
+                System.Console.Write("Error: Project not created! Exiting program!\n");
+                Environment.Exit(1);
+            }
+            else
+            {
+                try
+                {
+                    simaticProject = simatic.Projects.Add(projectName, projectDirPath, S7ProjectType.S7Project);
+                }
+                catch (SystemException exc)
+                {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                }
+            }
+        }
+
+        public void importConfig(string projectConfigPath)
+        {
+            // checking if config file exists
+            if (!File.Exists(projectConfigPath))
+            {
+                System.Console.Write("Error: Cannot create project because config file " + projectConfigPath + " does not exist!\n");
+            }
+            else if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+            }
+            else
+            {
+                try
+                {
+                    simaticProject.Stations.Import(projectConfigPath);
+                }
+                catch (SystemException exc)
+                {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                }
+            }
+        }
+
+        public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
+        {
+            if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+                return 0;
+            }
+            else if (!File.Exists(symbolsPath))
+            {
+                System.Console.Write("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
+                return 0;
+            }
+            else
+            {
+                int nrOfSymbols = 0;
+
+                try
+                {
+                    nrOfSymbols = simaticProject.Programs[programName].SymbolTable.Import(symbolsPath);
+                }
+                catch(SystemException exc)
+                {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                }
+
+                return nrOfSymbols;
+            }
+        }
+
+        public void importSources(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+        {
+            if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+            }
+            else
+            {
+                Simatic libSimatic = new Simatic();
+                
+                try
+                {
+                    foreach (SimaticLib.S7Source source in libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next)
+                    {
+                        source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
+                    }
+                }
+                catch (SystemException exc)
+                {
+                    Console.WriteLine("Error: " + exc.Message + "\n");
+                }
+            }
+        }
+
+        public void importBlocks(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+        {
+            if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+            }
+            else
+            {
+                Simatic libSimatic = new Simatic();
+
+                try
+                {
+                    foreach (SimaticLib.S7Block block in libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next)
+                    {
+                        block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
+                    }
+                }
+                catch (SystemException exc)
+                {
+                    Console.WriteLine("Error: " + exc.Message + "\n");
+                }
+            }
+        }
+
 
 
         private void addProject(string Name, string Path)
