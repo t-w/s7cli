@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Runtime.InteropServices;
+//using System.Runtime.InteropServices;
 
 using SimaticLib;
-//using CryoAutomation;
 
 namespace CryoAutomation
 {
@@ -26,19 +25,27 @@ namespace CryoAutomation
             projectDirectory = projectDir;
             program = programName;
             string sourceFilesCSV = CSVFileList;
+            sourceFiles = sourceFilesCSV.Split(',');
 
             //System.Console.Write("\nprojectDirectory: " + projectDirectory + "\n");
             //System.Console.Write("\nprogram: " + programName + "\n");
             //System.Console.Write("\nsourceFiles: " + sourceFilesCSV + "\n");
 
+            project = new S7Project(projectDirectory);            
+        }
+
+        public SimaticImport(string projectDir, string programName, string [] fileList)
+        {
+            projectDirectory = projectDir;
+            program = programName;
+            sourceFiles = fileList;
+
             project = new S7Project(projectDirectory);
-            
-            sourceFiles = sourceFilesCSV.Split(',');
         }
 
         public override void exec()
         {
-            System.Console.Write("\nExecuting import to program: " + program + "\n\n");
+            System.Console.Write("\nImporting to program: " + program + "\n\n");
             foreach (string srcfile in sourceFiles)
             {
                 System.Console.Write("\nImporting file: " + srcfile);
@@ -86,21 +93,34 @@ namespace CryoAutomation
 
     class s7cli
     {
-        static public void testc()
-        {
-            string t = "blab,bla,bla";
-            string [] s = t.Split(',');
-            System.Console.Write(s[0] +" " + s[1] + " " + s[2]);
-        }
+        static readonly string [] implemented_commands = { "import", "importdir", "compile" };
+
+        static readonly string logo = @"
+                                      
+                  _|_|_|_|_|            _|  _|
+          _|_|_|          _|    _|_|_|  _|    
+        _|_|            _|    _|        _|  _|
+            _|_|      _|      _|        _|  _|
+        _|_|_|      _|          _|_|_|  _|  _|
+
+        Simatic Step7 command-line interface, v0.1
+        (C) 2013 CERN, TE-CRG-CE Controls
+
+        Authors: Michal Dudek, Tomasz Wolak
+";
+
 
         static public void usage()
         {
-            Console.Write("\n\nUsage: s7cli <command> [command args]\n\n");
+            Console.Write("\n\nUsage: s7cli <command> [command args]\n\nAvailable commands: ");
+            foreach (string cmd in implemented_commands)
+                Console.Write(cmd + ", ");
+            Console.Write("\n\n");
         }
 
         static void Main(string[] args)
         {
-            //testc();
+            Console.Write(logo);
 
             if (args.Length < 4)
             {
@@ -110,7 +130,9 @@ namespace CryoAutomation
             string command;
             command = args[0];
             //System.Console.Write("\ncommand: " + command + "\n");
-
+            //WinAPI winAPI = new WinAPI();
+            //winAPI.test();
+            //return;
             // 
             if (command == "import")
             {
@@ -123,6 +145,27 @@ namespace CryoAutomation
                 System.Console.Write("\nsources to import: " + srclist + "\n"); */
 
                 SimaticImport import = new SimaticImport(projectDir, program, srclist);
+                import.exec();
+            }
+            else if (command == "importdir")
+            {
+                string projectDir = args[1];
+                string program = args[2];
+                string srcdir = args[3];
+                /*System.Console.Write("\nImporting source files\n\n");
+                System.Console.Write("\nProject: " + projectDir + "\n");
+                System.Console.Write("\nProgram: " + program + "\n");
+                System.Console.Write("\ndirectory with sources to import: " + srcdir + "\n"); */
+                List<string> srcfileslist = new List<string>();
+                srcfileslist = new List<string>();
+                string[] ext2import = { "*.SCL", "*.AWL", "*.INP" };
+                foreach (string ext in ext2import)
+                    srcfileslist.AddRange(                    
+                        System.IO.Directory.GetFiles( srcdir, ext, 
+                            System.IO.SearchOption.TopDirectoryOnly ));
+                string [] srcfiles = srcfileslist.ToArray();
+
+                SimaticImport import = new SimaticImport(projectDir, program, srcfiles);
                 import.exec();
             }
             else if (command == "compile")
@@ -139,8 +182,10 @@ namespace CryoAutomation
 
             }
             else
+            {
                 System.Console.WriteLine("Unknown command: " + command + "\n\n");
-
+                usage();
+            }
 
 
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");

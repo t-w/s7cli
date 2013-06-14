@@ -1,10 +1,12 @@
 ﻿using System;
+//using System.Runtime.InteropServices;
+//using System.Windows.Automation;
 
 using SimaticLib;
 
-
 namespace CryoAutomation
 {
+
 
     public class S7Project
     {
@@ -150,7 +152,7 @@ namespace CryoAutomation
         {
             string filename = System.IO.Path.GetFileName(filenameFullPath);
             string extension = System.IO.Path.GetExtension(filename);
-            if (extension.ToLower() == ".scl" || extension.ToLower() == ".awl")
+            if (extension.ToLower() == ".scl" || extension.ToLower() == ".awl" || extension.ToLower() == ".inp")
             //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
                 return addSourceModuleWithType(programName, SimaticLib.S7SWObjType.S7Source, filenameFullPath);
             else
@@ -177,11 +179,48 @@ namespace CryoAutomation
         }
 
 
-        public void compileSource(string programName, string moduleName)
+        public int compileSource(string programName, string sourceName)
         {
-            S7Source src = getS7SourceModule(programName, moduleName);
-            src.Compile();
+            S7Source src = getS7SourceModule(programName, sourceName);
+            if (src == null)
+            {
+                return -1;
+            }
+            try
+            {
+                IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
+            }
+            catch (System.Exception exc)
+            {
+                System.Console.Write("\n** Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                return -1;
+            }
+            //IntPtr ptr = new IntPtr((Void *) items. );
+            /*Console.Write("\n" + items. ToString() + "\n" + items.Count + "\n");
+            Type itype = items.GetType();
+            Console.Write("\n" + itype + "\n");
+            
+            int i=0;
+            foreach (S7SWItem item in items)
+            {
+                i++;
+            }
+            Console.Write("\ni = " + i + "\n");
+
+            int a = src.AppWindowHandle; */
+            //Console.Write("\n" + src.AppWindowHandle + "\n");
             //src.AppWindowHandle
+            //src.AppWindowHandle
+            //try{
+              //  AutomationElement s7scl = AutomationElement.FromHandle(new IntPtr(src.AppWindowHandle));
+            //}
+            //catch (System.Exception e)
+            //{
+            //    e.HResult.get();
+            //}
+            //System.HR 
+            //s7scl.SetFocus();
+            return 1;
         }
     }
 }
