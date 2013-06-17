@@ -198,7 +198,9 @@ namespace S7_cli
                     show_available_commands();
                 }
 
-            } catch (S7ProjectNotOpenException e) { }
+            } catch (S7ProjectNotOpenException e) {
+                Logger.log("Error: exception: project not opened with info:\n" + e.ToString() + ", " + e.Message + "\n");
+            }
 
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 

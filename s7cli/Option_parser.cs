@@ -102,6 +102,7 @@ namespace S7_cli
             
             // nr of passed arguments to the program
             int nrOfArguments = args.Length;
+            Logger.log_debug("\nparseOptions(): Number of arguments: " + nrOfArguments);
 
             // C# does not count program name as argument
             if (nrOfArguments != 0)  {
@@ -126,13 +127,15 @@ namespace S7_cli
                         if (args[currentArgument].CompareTo(option.Key) == 0 ||     // long option
                              args[currentArgument].CompareTo(option.Value[0]) == 0)  // short option
                         {
-                            if (nrOfArguments >= (currentArgument + 1)) {
+                            if (nrOfArguments > (currentArgument + 1)) {
                                 //this.projectConfigPath = args[currentArgument + 1];
                                 this.options_parsed.Add(option.Key, args[currentArgument + 1]);
                                 Logger.log_debug("Adding parsed arg: " + option.Key);
                             } else {
-                                Console.Write("Error: " + option.Value[0] + " is not correctly specified.\n");
-                                Environment.Exit(1);
+                                //Console.Write("Error: " + option.Value[0] + " is not correctly specified.\n");
+                                Logger.log("\n\n*** Error: option " + option.Key + " needs an argument.\n");
+                                //Environment.Exit(1);
+                                return false;
                             }
                         }
                     }
