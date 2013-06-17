@@ -146,7 +146,7 @@ namespace S7_cli
                                                options.getOption("--program"));
 
                 else if (command == "importLibBlocks")
-                    s7command.importLibSources(options.getOption("--project"),
+                    s7command.importLibBlocks(options.getOption("--project"),
                                                options.getOption("--library"),
                                                options.getOption("--libprg"),
                                                options.getOption("--program"));
