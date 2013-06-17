@@ -8,93 +8,52 @@ using SimaticLib;
 
 namespace S7_cli
 {
-    public abstract class SimaticCommand
+    static class Logger
     {
-        public virtual void exec() { }
-    }
+        public const int level_none = 0;
+        public const int level_error = 1;
+        public const int level_warning = 2;
+        public const int level_debug = 3;
+        static int level = 1;       // default is error level
 
-    public class SimaticImport : SimaticCommand 
-    {
-        string projectDirectory;
-        string program;
-        string [] sourceFiles;
-        S7Project project;
-
-        public SimaticImport(string projectDir, string programName, string CSVFileList)
-        {
-            projectDirectory = projectDir;
-            program = programName;
-            string sourceFilesCSV = CSVFileList;
-            sourceFiles = sourceFilesCSV.Split(',');
-
-            //System.Console.Write("\nprojectDirectory: " + projectDirectory + "\n");
-            //System.Console.Write("\nprogram: " + programName + "\n");
-            //System.Console.Write("\nsourceFiles: " + sourceFilesCSV + "\n");
-
-            project = new S7Project(projectDirectory);            
+        public static void setLevel(int log_level)  {
+            level = log_level;
         }
 
-        public SimaticImport(string projectDir, string programName, string [] fileList)
-        {
-            projectDirectory = projectDir;
-            program = programName;
-            sourceFiles = fileList;
-
-            project = new S7Project(projectDirectory);
+        public static int getLevel()  {
+            return level;
         }
 
-        public override void exec()
+        public static void log(string info)
         {
-            System.Console.Write("\nImporting to program: " + program + "\n\n");
-            foreach (string srcfile in sourceFiles)
-            {
-                System.Console.Write("\nImporting file: " + srcfile);
-                project.addSourceModule(program, srcfile);
-            }
-        }   
-    }
-
-    
-    public class SimaticCompile : SimaticCommand 
-    {
-        string projectDirectory;
-        string program;
-        string [] sources;
-        S7Project project;
-
-        public SimaticCompile(string projectDir, string programName, string CSVSourceList)
-        {
-            projectDirectory = projectDir;
-            program = programName;
-            string sourceListCSV = CSVSourceList;
-
-            //System.Console.Write("\nprojectDirectory: " + projectDirectory + "\n");
-            //System.Console.Write("\nprogram: " + programName + "\n");
-            System.Console.Write("\nsourceFiles: " + sourceListCSV + "\n");
-
-            project = new S7Project(projectDirectory);
-
-            sources = sourceListCSV.Split(',');
+            Console.Write(info + "\n");
         }
 
-        public override void exec()
-        {
-            System.Console.Write("\nBuilding program: " + program + "\n\n");
-            foreach (string src in sources)
-            {
-                System.Console.Write("\nCompiling file: " + src);
-                project.compileSource(program, src);
-            }
-            
-        }   
+        public static void log_debug(string info)  {
+            // only console output
+            if (level >= level_debug)
+                log ("Debug: " + info + "\n");
+        }
+
+        public static void log_warning(string info)   {
+            // only console output
+            if (level >= level_warning)
+                log ("Warning: " + info + "\n");
+        }
+
+        public static void log_error(string info)  {
+            // only console output
+            if (level >= level_error)
+                log ("Error: " + info + "\n");
+        }
+
+        public static void log_result(string info)  {
+            log("Result: " + info);
+        }
     }
-
-
 
     class s7cli
     {
-        static readonly string [] implemented_commands = { "import", "importdir", "compile" };
-
         static readonly string logo = @"
                                       
                   _|_|_|_|_|            _|  _|
@@ -108,85 +67,138 @@ namespace S7_cli
 
         Authors: Michal Dudek, Tomasz Wolak
 ";
+        static Option_parser options;
 
+        static public void show_available_commands()
+        {
+            Console.Write("\n\nAvailable commands:\n\n");
+            foreach (string cmd in Option_parser.commands)
+                Console.Write(String.Format("  {0:20}\n      - {1}\n\n", cmd, options.getCommandHelp(cmd)));
+            Console.Write("\n\n");
+        }
 
         static public void usage()
         {
-            Console.Write("\n\nUsage: s7cli <command> [command args]\n\nAvailable commands: ");
-            foreach (string cmd in implemented_commands)
-                Console.Write(cmd + ", ");
-            Console.Write("\n\n");
+            Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
         }
 
         static void Main(string[] args)
         {
+            //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
+
             Console.Write(logo);
 
-            if (args.Length < 4)
-            {
+            options = new Option_parser(args);
+
+            if ( ( ! options.optionsOK() )  || options.needHelp())  {
                 usage();
+                if (options.needHelp()) {
+                    Console.Write("\nCommand line options for '" + options.getCommand() + "':" +
+                        options.getCommandOptionsHelp(options.getCommand()) + "\n");
+                } else {
+                    Console.Write("\nOption -h displays help for specified command.\n");
+                    show_available_commands();
+                }
                 return;
             }
-            string command;
-            command = args[0];
+
+            string command = options.getCommand();
+
             //System.Console.Write("\ncommand: " + command + "\n");
             //WinAPI winAPI = new WinAPI();
             //winAPI.test();
             //return;
-            // 
-            if (command == "import")
-            {
-                string projectDir = args[1];
-                string program = args[2];
-                string srclist = args[3];
-                /*System.Console.Write("\nImporting source files\n\n");
-                System.Console.Write("\nProject: " + projectDir + "\n");
-                System.Console.Write("\nProgram: " + program + "\n");
-                System.Console.Write("\nsources to import: " + srclist + "\n"); */
+            
 
-                SimaticImport import = new SimaticImport(projectDir, program, srclist);
-                import.exec();
-            }
-            else if (command == "importdir")
-            {
-                string projectDir = args[1];
-                string program = args[2];
-                string srcdir = args[3];
-                /*System.Console.Write("\nImporting source files\n\n");
-                System.Console.Write("\nProject: " + projectDir + "\n");
-                System.Console.Write("\nProgram: " + program + "\n");
-                System.Console.Write("\ndirectory with sources to import: " + srcdir + "\n"); */
-                List<string> srcfileslist = new List<string>();
-                srcfileslist = new List<string>();
-                string[] ext2import = { "*.SCL", "*.AWL", "*.INP" };
-                foreach (string ext in ext2import)
-                    srcfileslist.AddRange(                    
-                        System.IO.Directory.GetFiles( srcdir, ext, 
-                            System.IO.SearchOption.TopDirectoryOnly ));
-                string [] srcfiles = srcfileslist.ToArray();
+            Console.Write("\n\n");
 
-                SimaticImport import = new SimaticImport(projectDir, program, srcfiles);
-                import.exec();
-            }
-            else if (command == "compile")
-            {
-                string projectDirectory = args[1];
-                string program = args[2];
-                string srclist = args[3];
-                S7Project project = new S7Project(projectDirectory);
+            S7Command s7command = new S7Command();
 
-                //S7SWItem src_module = project.getSourceModule("ARC56_program", "4_Compilation_OB");
+            try   {
 
-                SimaticCompile compile = new SimaticCompile(projectDirectory, program, srclist);
-                compile.exec();
+                if (command == "listProjects")
+                    s7command.getListOfProjects();
 
-            }
-            else
-            {
-                System.Console.WriteLine("Unknown command: " + command + "\n\n");
-                usage();
-            }
+                else if (command == "createProject")
+                    s7command.createProject(options.getOption("--projname"),
+                                            options.getOption("--projdir"));
 
+                else if (command == "importConfig")
+                    s7command.importConfig(options.getOption("--project"),
+                                           options.getOption("--config"));
+
+                else if (command == "listPrograms")
+                    s7command.getListOfPrograms(options.getOption("--project"));
+
+                else if (command == "importSymbols")
+                    s7command.importSymbols(options.getOption("--project"),
+                                            options.getOption("--symbols"),
+                                            options.getOption("--program"));
+
+                else if (command == "listSources")
+                    s7command.listSources(options.getOption("--project"),
+                                          options.getOption("--program"));
+
+                else if (command == "importLibSources")
+                    s7command.importLibSources(options.getOption("--project"),
+                                               options.getOption("--library"),
+                                               options.getOption("--libprg"),
+                                               options.getOption("--program"));
+
+                else if (command == "importLibBlocks")
+                    s7command.importLibSources(options.getOption("--project"),
+                                               options.getOption("--library"),
+                                               options.getOption("--libprg"),
+                                               options.getOption("--program"));
+
+                else if (command == "importSources")
+                    if (options.optionSet("--force"))
+                        s7command.importSources(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                options.getOption("--sources").Split(','),
+                                                options.getOption("--force") == "y");
+                    else
+                        s7command.importSources(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                options.getOption("--sources").Split(','));
+
+
+                else if (command == "importSourcesDir")     {
+                    string srcdir = options.getOption("--srcdir");
+                    /*Logger.log_debug("\nImporting source files\n\n");
+                    Logger.log_debug("\nProject: " + projectDir + "\n");
+                    Logger.log_debug("\nProgram: " + program + "\n");
+                    Logger.log_debug("\ndirectory with sources to import: " + srcdir + "\n"); */
+                    List<string> srcfileslist = new List<string>();
+                    srcfileslist = new List<string>();
+                    string[] ext2import = { "*.SCL", "*.AWL", "*.INP" };
+                    foreach (string ext in ext2import)
+                        srcfileslist.AddRange(
+                            System.IO.Directory.GetFiles(srcdir, ext,
+                                System.IO.SearchOption.TopDirectoryOnly));
+                    string[] srcfiles = srcfileslist.ToArray();
+                    if (options.optionSet("--force"))
+                        s7command.importSources(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                srcfiles, 
+                                                options.getOption("--force") == "y");
+                    else
+                        s7command.importSources(options.getOption("--project"),
+                                                options.getOption("--program"), 
+                                                srcfiles);
+
+                } else if (command == "compileSources")
+                    s7command.compileSources(options.getOption("--project"),
+                                             options.getOption("--program"),
+                                             options.getOption("--sources").Split(','));
+
+                else {
+                    System.Console.WriteLine("Unknown command: " + command + "\n\n");
+                    usage();
+                    show_available_commands();
+                }
+
+            } catch (S7ProjectNotOpenException e) { }
 
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 
