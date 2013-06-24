@@ -268,7 +268,7 @@ namespace S7_cli
                 IS7SWItem src_module = getSourceModules(programName)[sourceName];
                 return src_module;
             } catch (System.Exception exc) {
-                System.Console.Write("\n** getSourceModule(): Error getting source '" + sourceName + "':\n" + exc.Message + "\n");
+                Logger.log_debug("\n** getSourceModule(): Error getting source '" + sourceName + "':\n" + exc.Message + "\n");
                 return null;
             }
         }
