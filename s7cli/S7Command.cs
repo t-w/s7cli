@@ -7,6 +7,60 @@ using System.Threading.Tasks;
 
 namespace S7_cli
 {
+
+    public static class S7Status
+    {
+        //public enum Result_code { success, failure, unknown };
+        public const int success = 0;
+        public const int failure = 1;
+        public const int unknown = 2;
+
+        static int status = -1;
+        static string[] status_info = 
+            {
+                "Success",
+                "Failure",
+                "Unknown"
+            };
+
+        static string detailed_info = "";
+
+        public static int get_status()
+        {
+            return status;
+        }
+
+        public static bool status_set()
+        {
+            return (status > -1);
+        }
+
+        public static void set_status(int new_status)
+        {
+            if (new_status < -1 && new_status > 2)
+                throw new System.Exception("S7Status::set_status() - illegal value " + new_status + "!");
+            status = new_status;
+        }
+
+        public static string get_info()
+        {
+            if (status_set())
+                return status_info[status];
+            else
+                return "Status unset!";
+        }
+
+        public static void set_detailed_info(string info)
+        {
+            detailed_info = info;
+        }
+
+        public static string get_detailed_info()
+        {
+            return detailed_info;
+        }
+    }
+
     public class S7Command
     {
         S7Project s7project;
@@ -25,21 +79,28 @@ namespace S7_cli
         {
             Logger.log("List of available projects / standard libraries:\n");
             Logger.log(S7Project.getListOfAvailableProjects());
+            S7Status.set_status(S7Status.success);
         }
 
         public bool createProject(string projectName, string projectDirectory)
         {
             s7project = new S7Project(projectName, projectDirectory);
+            if (s7project.isProjectOpened())
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
             return s7project.isProjectOpened();
         }
 
 
-        public S7Project openProject(string projectPathOrName)
+        S7Project openProject(string projectPathOrName)
         {
             Logger.log("Opening project: " + projectPathOrName);
             s7project = new S7Project(projectPathOrName);
-            if ( !s7project.isProjectOpened())
+            if (!s7project.isProjectOpened()) {
+                S7Status.set_status(S7Status.failure);
                 throw new S7ProjectNotOpenException("Project not opened!");
+            }
             return s7project;
         }
 
@@ -55,10 +116,16 @@ namespace S7_cli
             // checking if config file exists
             if (!File.Exists(projectConfigPath)) {
                 Logger.log("Error: Cannot import project configuration because config file " + projectConfigPath + " does not exist!\n");
+                S7Status.set_status(S7Status.failure);
                 return false;
             }
             this.openProject(projectPathOrName);
-            return s7project.importConfig(projectConfigPath);
+            bool cmd_status_ok = s7project.importConfig(projectConfigPath);
+            if (cmd_status_ok)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+            return cmd_status_ok;
         }
 
 
@@ -75,6 +142,7 @@ namespace S7_cli
             string [] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
                 Logger.log(program);
+            S7Status.set_status(S7Status.success);   // if project opened - should be ok...
         }
 
         public int importSymbols(string projectPathOrName, string symbolsPath, string programName = "")
@@ -93,6 +161,10 @@ namespace S7_cli
             else
                 symbolsImported = s7project.importSymbols(symbolsPath);
             Logger.log("Imported " + symbolsImported + " symbols.");
+            if (symbolsImported > 0)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
             return symbolsImported;
         }
 
@@ -101,24 +173,38 @@ namespace S7_cli
             this.openProject(projectPathOrName);
             Logger.log("List of sources in program '" + programName + "'\n");
             string [] sources = s7project.getSourcesList(programName);
+
+            if (sources == null)  {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
             foreach (string src in sources)
                 Logger.log(src);
             Logger.log("\nSources found: " + sources.Length);
-
+            S7Status.set_status(S7Status.success);
         }
 
         public void importLibSources(string projectPathOrName, string libProjectName,
                                      string libProjectProgramName, string destinationProjectProgramName)
         {
             this.openProject(projectPathOrName);
-            s7project.importLibSources(libProjectName, libProjectProgramName, destinationProjectProgramName);
+            if (s7project.importLibSources(libProjectName, libProjectProgramName, 
+                    destinationProjectProgramName))
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+                    
         }
 
         public void importLibBlocks(string projectPathOrName, string libProjectName,
                                     string libProjectProgramName, string destinationProjectProgramName)
         {
             this.openProject(projectPathOrName);
-            s7project.importLibBlocks(libProjectName, libProjectProgramName, destinationProjectProgramName);
+            if (s7project.importLibBlocks(libProjectName, libProjectProgramName, 
+                    destinationProjectProgramName))
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
         }
 
         public void importSources(string projectPathOrName, string program, string[] sourceFiles, bool forceOverwrite = false)
@@ -126,10 +212,16 @@ namespace S7_cli
             this.openProject(projectPathOrName);
 
             Logger.log("\nImporting sources to program: " + program + "\n\n");
+            bool failure = false;
             foreach (string srcfile in sourceFiles)   {
                 Logger.log("\nImporting file: " + srcfile);
-                s7project.addSource(program, srcfile, forceOverwrite);
+                if (s7project.addSource(program, srcfile, forceOverwrite) == null)
+                    failure = true;
             }
+            if (!failure)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
         }
 
         public void compileSources(string projectPathOrName, string programName, string[] sources)
@@ -141,8 +233,7 @@ namespace S7_cli
                 Logger.log("\nCompiling source: " + src);
                 s7project.compileSource(programName, src);
             }
-
+            S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
         }
-
     }
 }

@@ -10,10 +10,14 @@ namespace S7_cli
 {
     static class Logger
     {
+        public const int min_debug_level = 0;
+        public const int max_debug_level = 3;
+
         public const int level_none = 0;
         public const int level_error = 1;
         public const int level_warning = 2;
         public const int level_debug = 3;
+
         static int level = 1;       // default is error level
 
         public static void setLevel(int log_level)  {
@@ -50,6 +54,38 @@ namespace S7_cli
         public static void log_result(string info)  {
             log("Result: " + info);
         }
+    }
+
+    public static class S7cli_Status
+    {
+
+        //public static void show(Result_code result_code, string result_info = "")
+        public static void show(int result_code, string result_info = "")
+        {
+            Logger.log("Result: " + S7Status.get_info());
+            string detailed_info = S7Status.get_detailed_info();
+
+            if (detailed_info != "")
+                Logger.log("Result info: " + detailed_info);
+
+            if (result_info != "")
+                Logger.log("Result info: " + result_info);
+        }
+
+        //public static void exit(Result_code result_code)
+        public static void exit(int result_code)
+        {
+            Logger.log_debug("Exiting with status:" + result_code);
+            Environment.Exit((int)result_code);
+        }
+
+        //public static void exit_with_info(Result_code result_code, string result_info = "")
+        public static void exit_with_info(int result_code, string result_info = "")
+        {
+            show(result_code, result_info);
+            exit(result_code);
+        }
+
     }
 
     class s7cli
@@ -99,7 +135,23 @@ namespace S7_cli
                     Console.Write("\nOption -h displays help for specified command.\n");
                     show_available_commands();
                 }
-                return;
+                if ( ! options.optionsOK())
+                    S7cli_Status.exit(S7Status.failure);
+                S7cli_Status.exit(S7Status.success);
+            }
+
+            if (options.optionSet("--debug"))
+            {                                         // set debug level from cmd line option
+                int debug_level;
+                int.TryParse(options.getOption("--debug"), out debug_level);
+                if (debug_level >= Logger.min_debug_level && debug_level <= Logger.max_debug_level)  {
+                    Logger.log_debug("Setting debug level to " + debug_level + ".");
+                    Logger.setLevel(debug_level);
+                } else {
+                    Logger.log("Specified bug level is out of range (" + Logger.min_debug_level +
+                        ", " + Logger.max_debug_level + ").\n");
+                    S7cli_Status.exit(S7Status.failure);
+                }
             }
 
             string command = options.getCommand();
@@ -196,12 +248,15 @@ namespace S7_cli
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();
+                    S7cli_Status.exit(S7Status.failure);
                 }
 
             } catch (S7ProjectNotOpenException e) {
                 Logger.log("Error: exception: project not opened with info:\n" + e.ToString() + ", " + e.Message + "\n");
+                S7cli_Status.exit_with_info(S7Status.failure);
             }
 
+            S7cli_Status.exit_with_info(S7Status.get_status());
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 
             //System.Console.Write("\nsources LogPath: " + sources.LogPath + "\n");
@@ -213,6 +268,7 @@ namespace S7_cli
             //System.Console.Write(src_module.Name);
             //src_modules.Add("Test1", SimaticLib.S7SWObjType.S7Source ,"D:\\test1.scl");
             //project.addSourceModuleSCL("ARC56_program", "D:\\test1.scl");
+            
         }
     }
 }

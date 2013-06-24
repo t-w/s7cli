@@ -97,7 +97,7 @@ namespace S7_cli
                 try {
                     simaticProject = simatic.Projects.Add(projectName, projectDirPath, S7ProjectType.S7Project);
                 }  catch (SystemException exc)  {
-                    System.Console.Write("Error: " + exc.Message + "\n");
+                    System.Console.Write("Error in S7Project(): " + exc.Message + "\n");
                 }
             }
         }
@@ -246,11 +246,12 @@ namespace S7_cli
         {
             List<string> srcs = new List<string>();
             S7SWItems src_modules = this.getSourceModules(programName);
-            if (src_modules != null)
-                foreach (S7SWItem src_module in getSourceModules(programName)) {
-                    //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
-                    srcs.Add(src_module.Name);
-                }
+            if (src_modules == null)
+                return null;   // failure
+            foreach (S7SWItem src_module in getSourceModules(programName)) {
+                //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
+                srcs.Add(src_module.Name);
+            }
             return srcs.ToArray();
         }
 
@@ -337,40 +338,44 @@ namespace S7_cli
             }
         }
 
-        public void importLibSources(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+        public bool importLibSources(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
         {
             if (simaticProject == null) {
                 Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
-            } else {
-                Simatic libSimatic = new Simatic();
+                return false;
+            } 
+            Simatic libSimatic = new Simatic();
 
-                try {
-                    foreach (SimaticLib.S7Source source in
-                        libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
-                        source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
-                    }
-                } catch (SystemException exc) {
-                    Console.WriteLine("Error: " + exc.Message + "\n");
+            try {
+                foreach (SimaticLib.S7Source source in
+                    libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
+                    source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
                 }
+            } catch (SystemException exc) {
+                Console.WriteLine("Error: " + exc.Message + "\n");
+                return false;
             }
+            return true;
         }
 
-        public void importLibBlocks(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+        public bool importLibBlocks(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
         {
             if (simaticProject == null) {
                 Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
-            } else {
-                Simatic libSimatic = new Simatic();
-
-                try {
-                    foreach (SimaticLib.S7Block block in
-                        libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
-                        block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
-                    }
-                } catch (SystemException exc) {
-                    Console.WriteLine("Error: " + exc.Message + "\n");
-                }
+                return false;
             }
+            Simatic libSimatic = new Simatic();
+
+            try {
+                foreach (SimaticLib.S7Block block in
+                    libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
+                    block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
+                }
+            } catch (SystemException exc) {
+                Console.WriteLine("Error: " + exc.Message + "\n");
+                return false;
+            }
+            return true;
         }
 
 

@@ -46,7 +46,8 @@ namespace S7_cli
                     { "--sources",             new string[] { "",   "list of files with source code (CSV)" }},
                     { "--force",               new string[] { "",   "force overwrite (replace) existing sources in project (y/n)" }},
 
-                    { "--help",                new string[] { "-h", "show help for command" }}
+                    { "--help",                new string[] { "-h", "show help for command" }},
+                    { "--debug",               new string[] { "-d", "debug level (0-3)" }}
                 };
 
             command_help = new Dictionary<string, string>()
@@ -66,17 +67,17 @@ namespace S7_cli
 
             options_valid = new Dictionary<string, string[]>()
                 { 
-                    { "createProject",       new string[] { "--projname", "--projdir" }},
-                    { "listProjects",        new string[] { }},
-                    { "listPrograms",        new string[] { "--project" }},
-                    { "importConfig",        new string[] { "--project", "--config" }},
-                    { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
-                    { "listSources",         new string[] { "--project", "--program" }},
-                    { "importLibSources",    new string[] { "--project", "--program", "--library", "--libprg" }},
-                    { "importLibBlocks",     new string[] { "--project", "--program", "--library", "--libprg" }}, 
-                    { "importSources",       new string[] { "--project", "--program", "--sources", "--force" }},
-                    { "importSourcesDir",    new string[] { "--project", "--program", "--srcdir",  "--force" }},
-                    { "compileSources",      new string[] { "--project", "--program", "--sources" }},
+                    { "createProject",       new string[] { "--debug", "--projname", "--projdir" }},
+                    { "listProjects",        new string[] { "--debug", }},
+                    { "listPrograms",        new string[] { "--debug", "--project" }},
+                    { "importConfig",        new string[] { "--debug", "--project", "--config" }},
+                    { "importSymbols",       new string[] { "--debug", "--project", "--program", "--symbols" }},
+                    { "listSources",         new string[] { "--debug", "--project", "--program" }},
+                    { "importLibSources",    new string[] { "--debug", "--project", "--program", "--library", "--libprg" }},
+                    { "importLibBlocks",     new string[] { "--debug", "--project", "--program", "--library", "--libprg" }}, 
+                    { "importSources",       new string[] { "--debug", "--project", "--program", "--sources", "--force" }},
+                    { "importSourcesDir",    new string[] { "--debug", "--project", "--program", "--srcdir",  "--force" }},
+                    { "compileSources",      new string[] { "--debug", "--project", "--program", "--sources" }},
                 };
 
             options_required = new Dictionary<string, string[]>()
@@ -122,6 +123,20 @@ namespace S7_cli
                         this.options_parsed.Add("--help", "");
                         return true;
                     }
+
+                    /*
+                    if (args[currentArgument] == "--debug" || args[currentArgument] == "-d") {
+                        
+                        int debug_level = -1;  // not set
+                        if ((nrOfArguments > (currentArgument + 1)) &&
+                             (int.TryParse(args[currentArgument + 1], out debug_level)))  {
+                            this.options_parsed.Add("--debug", args[currentArgument + 1]);
+                            return true;
+                        }  else  {
+                            Logger.log("\n\n*** Error: option --debug/-d needs an argument.\n");
+                            return false;
+                        }
+                    }*/
 
                     foreach (KeyValuePair<string, string[]> option in options)  {
                         if (args[currentArgument].CompareTo(option.Key) == 0 ||     // long option
