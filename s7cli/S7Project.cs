@@ -392,7 +392,13 @@ namespace S7_cli
             return null;
         }
 
-
+        /* compileSource()
+         * 
+         * return values:
+         *    0 success
+         *   -1 error
+         *    1 unknown
+         */
         public int compileSource(string programName, string sourceName)
         {
             S7Source src = getS7SourceModule(programName, sourceName);
@@ -431,7 +437,23 @@ namespace S7_cli
             //System.HR 
             //s7scl.SetFocus();
             return 1;
-        }    
-    
+        }
+
+        public int exportProgramStructure(
+            string programName, string ExportFileName, 
+            bool ExportDuplicateCalls = true, int ColumnFlags = 0)
+        {            // ExportProgramStructure(ByVal ExportFileName As String, ByVal ExportDuplicateCalls As Boolean, ByVal ColumnFlags As Long)
+            if (simaticProject == null)
+            {
+                Logger.log_debug("exportProgramStructure(): Error: Project not opened! Aborting operation!\n");
+                return 1;
+            }
+
+            //S7Program program = (S7Program) this.getProgram(programName);
+            S7Program program = (S7Program) simaticProject.Programs[programName];
+            program.ExportProgramStructure(ExportFileName, ExportDuplicateCalls, ColumnFlags);
+            return 0;
+
+        }
     }
 }

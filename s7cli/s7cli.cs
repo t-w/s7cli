@@ -215,7 +215,8 @@ namespace S7_cli
                                                 options.getOption("--sources").Split(','));
 
 
-                else if (command == "importSourcesDir")     {
+                else if (command == "importSourcesDir")
+                {
                     string srcdir = options.getOption("--srcdir");
                     /*Logger.log_debug("\nImporting source files\n\n");
                     Logger.log_debug("\nProject: " + projectDir + "\n");
@@ -232,19 +233,26 @@ namespace S7_cli
                     if (options.optionSet("--force"))
                         s7command.importSources(options.getOption("--project"),
                                                 options.getOption("--program"),
-                                                srcfiles, 
+                                                srcfiles,
                                                 options.getOption("--force") == "y");
                     else
                         s7command.importSources(options.getOption("--project"),
-                                                options.getOption("--program"), 
+                                                options.getOption("--program"),
                                                 srcfiles);
 
-                } else if (command == "compileSources")
+                }
+                else if (command == "compileSources")
                     s7command.compileSources(options.getOption("--project"),
                                              options.getOption("--program"),
                                              options.getOption("--sources").Split(','));
 
-                else {
+                else if (command == "exportProgramStructure")
+                    s7command.exportProgramStructure(options.getOption("--project"),
+                                                     options.getOption("--program"), 
+                                                     options.getOption("--output"));
+
+                else
+                {
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();

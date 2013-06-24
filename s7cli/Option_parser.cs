@@ -12,7 +12,7 @@ namespace S7_cli
         public static readonly string[] commands = { 
             "createProject", "listProjects", "listPrograms", "importConfig", "importSymbols", 
             "listSources", "importLibSources", "importLibBlocks", "importSources", 
-            "importSourcesDir", "compileSources"
+            "importSourcesDir", "compileSources", "exportProgramStructure"
         };
 
         Dictionary<string, string> command_help;
@@ -46,6 +46,8 @@ namespace S7_cli
                     { "--sources",             new string[] { "",   "list of files with source code (CSV)" }},
                     { "--force",               new string[] { "",   "force overwrite (replace) existing sources in project (y/n)" }},
 
+                    { "--output",              new string[] { "-o", "output file" }},
+
                     { "--help",                new string[] { "-h", "show help for command" }},
                     { "--debug",               new string[] { "-d", "debug level (0-3)" }}
                 };
@@ -62,7 +64,8 @@ namespace S7_cli
                     { "importLibBlocks",     "Import all blocks from a library to project" },
                     { "importSources",       "Import specified source code files" },
                     { "importSourcesDir",    "Import all source code files from specified directory (only valid ones: .SCL, .AWL, .INP)" },
-                    { "compileSources",      "Compile specified source code module(s)" }
+                    { "compileSources",      "Compile specified source code module(s)" },
+                    { "exportProgramStructure", "Exports the block calling structure into a DIF-File (not fully tested!!!)" }
                 };
 
             options_valid = new Dictionary<string, string[]>()
@@ -78,6 +81,7 @@ namespace S7_cli
                     { "importSources",       new string[] { "--debug", "--project", "--program", "--sources", "--force" }},
                     { "importSourcesDir",    new string[] { "--debug", "--project", "--program", "--srcdir",  "--force" }},
                     { "compileSources",      new string[] { "--debug", "--project", "--program", "--sources" }},
+                    { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
                 };
 
             options_required = new Dictionary<string, string[]>()
@@ -93,6 +97,7 @@ namespace S7_cli
                     { "importSources",       new string[] { "--project", "--program", "--sources" }},
                     { "importSourcesDir",    new string[] { "--project", "--program", "--srcdir" }},
                     { "compileSources",      new string[] { "--project", "--program", "--sources" }},
+                    { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
                 };
 
             if (this.parseOptions(args))

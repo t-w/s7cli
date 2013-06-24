@@ -235,5 +235,14 @@ namespace S7_cli
             }
             S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
         }
+
+        public void exportProgramStructure(string projectPathOrName, string programName, string exportFileName)
+        {
+            this.openProject(projectPathOrName);
+
+            Logger.log("\nExporting program structure of: " + programName + "\n\n");
+            s7project.exportProgramStructure(programName, exportFileName);
+        }
+
     }
 }
