@@ -12,7 +12,7 @@ namespace S7_cli
         public static readonly string[] commands = { 
             "createProject", "listProjects", "listPrograms", "importConfig", "importSymbols", 
             "listSources", "importLibSources", "importLibBlocks", "importSources", 
-            "importSourcesDir", "compileSources", "exportProgramStructure"
+            "importSourcesDir", "compileSources", "exportSources", "exportProgramStructure"
         };
 
         Dictionary<string, string> command_help;
@@ -47,6 +47,7 @@ namespace S7_cli
                     { "--force",               new string[] { "",   "force overwrite (replace) existing sources in project (y/n)" }},
 
                     { "--output",              new string[] { "-o", "output file" }},
+                    { "--outputdir",           new string[] { "",   "output directory" }},
 
                     { "--help",                new string[] { "-h", "show help for command" }},
                     { "--debug",               new string[] { "-d", "debug level (0-3)" }}
@@ -65,22 +66,24 @@ namespace S7_cli
                     { "importSources",       "Import specified source code files" },
                     { "importSourcesDir",    "Import all source code files from specified directory (only valid ones: .SCL, .AWL, .INP)" },
                     { "compileSources",      "Compile specified source code module(s)" },
-                    { "exportProgramStructure", "Exports the block calling structure into a DIF-File (not fully tested!!!)" }
+                    { "exportSources",       "Export specified source code module(s)" },
+                    { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" }
                 };
 
             options_valid = new Dictionary<string, string[]>()
                 { 
-                    { "createProject",       new string[] { "--debug", "--projname", "--projdir" }},
-                    { "listProjects",        new string[] { "--debug", }},
-                    { "listPrograms",        new string[] { "--debug", "--project" }},
-                    { "importConfig",        new string[] { "--debug", "--project", "--config" }},
-                    { "importSymbols",       new string[] { "--debug", "--project", "--program", "--symbols" }},
-                    { "listSources",         new string[] { "--debug", "--project", "--program" }},
-                    { "importLibSources",    new string[] { "--debug", "--project", "--program", "--library", "--libprg" }},
-                    { "importLibBlocks",     new string[] { "--debug", "--project", "--program", "--library", "--libprg" }}, 
-                    { "importSources",       new string[] { "--debug", "--project", "--program", "--sources", "--force" }},
-                    { "importSourcesDir",    new string[] { "--debug", "--project", "--program", "--srcdir",  "--force" }},
-                    { "compileSources",      new string[] { "--debug", "--project", "--program", "--sources" }},
+                    { "createProject",          new string[] { "--debug", "--projname", "--projdir" }},
+                    { "listProjects",           new string[] { "--debug", }},
+                    { "listPrograms",           new string[] { "--debug", "--project" }},
+                    { "importConfig",           new string[] { "--debug", "--project", "--config" }},
+                    { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
+                    { "listSources",            new string[] { "--debug", "--project", "--program" }},
+                    { "importLibSources",       new string[] { "--debug", "--project", "--program", "--library", "--libprg" }},
+                    { "importLibBlocks",        new string[] { "--debug", "--project", "--program", "--library", "--libprg" }}, 
+                    { "importSources",          new string[] { "--debug", "--project", "--program", "--sources", "--force" }},
+                    { "importSourcesDir",       new string[] { "--debug", "--project", "--program", "--srcdir",  "--force" }},
+                    { "compileSources",         new string[] { "--debug", "--project", "--program", "--sources" }},
+                    { "exportSources",          new string[] { "--debug", "--project", "--program", "--sources", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
                 };
 
@@ -97,6 +100,7 @@ namespace S7_cli
                     { "importSources",       new string[] { "--project", "--program", "--sources" }},
                     { "importSourcesDir",    new string[] { "--project", "--program", "--srcdir" }},
                     { "compileSources",      new string[] { "--project", "--program", "--sources" }},
+                    { "exportSources",          new string[] { "--project", "--program", "--sources", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
                 };
 

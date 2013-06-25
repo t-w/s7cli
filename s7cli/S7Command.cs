@@ -215,6 +215,14 @@ namespace S7_cli
             bool failure = false;
             foreach (string srcfile in sourceFiles)   {
                 Logger.log("\nImporting file: " + srcfile);
+
+                // checking if file to import exists
+                if (!File.Exists(srcfile)) {
+                    Logger.log("Error: Cannot import - source file " + srcfile + " does not exist!\n");
+                    failure = true;
+                    continue;
+                }
+
                 if (s7project.addSource(program, srcfile, forceOverwrite) == null)
                     failure = true;
             }
@@ -236,12 +244,48 @@ namespace S7_cli
             S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
         }
 
+
+        public void exportSources(string projectPathOrName, string programName, string [] sources, string exportDirectory)
+        {
+            if (!Directory.Exists(exportDirectory))  {
+                Logger.log("Error: Cannot export source(s) - destination directory '" + exportDirectory + "' does not exist!\n");
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            this.openProject(projectPathOrName);
+
+            Logger.log("\nExporting source(s) from program: " + programName + " to " + exportDirectory + ".\n\n");
+
+            bool failed = false;
+            foreach (string src in sources)  {
+                string exportFilename = exportDirectory + "\\" + src;// +
+                    //s7project.getSourceFileExtension(programName, src);
+
+                string srcType = s7project.getSourceTypeString(programName, src);
+                Logger.log("\nExporting source: " + src + " (" + srcType + ") ... ");
+
+                if (s7project.exportSource(programName, src, exportFilename) == 0)  {
+                    Logger.log("Done!");
+                } else {
+                    failed = true;
+                    Logger.log("Failed!");
+                }
+            }
+            if (!failed)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+        }
+
+
         public void exportProgramStructure(string projectPathOrName, string programName, string exportFileName)
         {
             this.openProject(projectPathOrName);
 
             Logger.log("\nExporting program structure of: " + programName + "\n\n");
             s7project.exportProgramStructure(programName, exportFileName);
+            // TO ADD - setting status (not sure yet!)
         }
 
     }

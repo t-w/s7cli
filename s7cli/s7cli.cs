@@ -62,6 +62,7 @@ namespace S7_cli
         //public static void show(Result_code result_code, string result_info = "")
         public static void show(int result_code, string result_info = "")
         {
+            Logger.log("");
             Logger.log("Result: " + S7Status.get_info());
             string detailed_info = S7Status.get_detailed_info();
 
@@ -245,6 +246,12 @@ namespace S7_cli
                     s7command.compileSources(options.getOption("--project"),
                                              options.getOption("--program"),
                                              options.getOption("--sources").Split(','));
+
+                else if (command == "exportSources")
+                    s7command.exportSources(options.getOption("--project"), 
+                                            options.getOption("--program"), 
+                                            options.getOption("--sources").Split(','),
+                                            options.getOption("--outputdir"));
 
                 else if (command == "exportProgramStructure")
                     s7command.exportProgramStructure(options.getOption("--project"),

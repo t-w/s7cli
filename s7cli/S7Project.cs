@@ -439,6 +439,80 @@ namespace S7_cli
             return 1;
         }
 
+        private S7SourceType getSourceType(string programName, string sourceName)
+        {
+            S7Source src = getS7SourceModule(programName, sourceName);
+            Logger.log_debug("getSourceType(" + programName + ", " + sourceName + ")\n\n");
+            Logger.log_debug("returns: " + src.ConcreteType.GetType() + "\n\n");
+            Logger.log_debug("returns: " + src.ConcreteType + "\n\n");
+            return //(S7SourceType) 
+                src.ConcreteType;
+        }
+
+        public string getSourceTypeString(string programName, string sourceName)
+        {
+            /*S7SourceType srcType = this.getSourceType(programName, sourceName);
+            if      (srcType == S7SourceType.S7AWL)     return "S7AWL";
+            else if (srcType == S7SourceType.S7GG)      return "S7GG";
+            else if (srcType == S7SourceType.S7GR7)     return "S7GR7";
+            else if (srcType == S7SourceType.S7NET)     return "S7NET";
+            else if (srcType == S7SourceType.S7SCL)     return "S7SCL";
+            else if (srcType == S7SourceType.S7SCLMake) return "S7SCLMake";
+            else if (srcType == S7SourceType.S7ZG)      return "S7ZG";
+            else                                        return "Unknown"; */
+            S7Source src = getS7SourceModule(programName, sourceName);
+            Logger.log_debug("getSourceType(" + programName + ", " + sourceName + ")\n\n");
+            if (src != null)   {
+                Logger.log_debug("returned: " + src.ConcreteType.GetType() + "\n\n");
+                Logger.log_debug("returned: " + src.ConcreteType + "\n\n");
+                return //(S7SourceType) 
+                    src.ConcreteType.ToString();
+            } else {
+                Logger.log_debug("returned: null(!)\n\n");
+                return null;
+            }
+
+        }
+
+        //public string getSourceFileExtension(string programName, string sourceName)
+        //{
+            //S7SourceType srcType = this.getSourceType(programName, sourceName);
+            /*if (srcType == S7SourceType.S7AWL)          return ".AWL";
+            else if (srcType == S7SourceType.S7GG)      return ".S7GG";    // to check
+            else if (srcType == S7SourceType.S7GR7)     return ".S7GR7";   // to check
+            else if (srcType == S7SourceType.S7NET)     return ".S7NET";   // to check
+            //else if (srcType == S7SourceType.S7SCL)     return ".SCL";
+            else if ((string)srcType == "S7SCL") return ".SCL";
+            else if (srcType == S7SourceType.S7SCLMake) return ".INP";
+            else if (srcType == S7SourceType.S7ZG)      return ".S7ZG";    // to check
+            else return ".UnknownSourceType";*/
+        //    Logger.log_debug("getSourceFileExtension() returns: " + this.getSourceTypeString(programName, sourceName) + "\n\n");
+        //    return this.getSourceTypeString(programName, sourceName);
+        //}
+
+        /*
+         * returned value:
+         * 0 - success
+         * !0 - error
+         */
+        public int exportSource(string programName, string sourceName, string ExportFileName)
+        {
+            S7Source src = getS7SourceModule(programName, sourceName);
+            if (src == null)
+                return -1;
+            try  {
+                Logger.log_debug("Nous sommes la");
+               src.Export(ExportFileName);
+            } catch (System.Exception exc) {
+                Logger.log("\n** Error exporting '" + sourceName + "':\n" + exc.Message + "\n");
+                return -1;
+            }
+            return 0;
+        }
+
+
+
+
         public int exportProgramStructure(
             string programName, string ExportFileName, 
             bool ExportDuplicateCalls = true, int ColumnFlags = 0)
