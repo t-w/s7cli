@@ -194,6 +194,52 @@ namespace S7_cli
             }
         }
 
+        public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
+        {
+            if (simaticProject == null)  {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+                return 0;
+            } else if (!File.Exists(symbolsPath))  {
+                System.Console.Write("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
+                return 0;
+            } else {
+                int nrOfSymbols = 0;
+
+                try {
+                    nrOfSymbols = simaticProject.Programs[programName].SymbolTable.Import(symbolsPath);
+                } catch (SystemException exc) {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                }
+
+                return nrOfSymbols;
+            }
+        }
+
+
+        /* returned value
+         * 0    - success
+         * != 0 - failure
+         */
+        public int exportSymbols(string symbolsOutputFile, string programName = "S7 Program(1)")
+        {
+            if (!isProjectOpened()) {
+                Logger.log_debug("Error: exportSymbols() called while project is not opened! Aborting export!\n");
+                return -1;
+            }
+
+            IS7SymbolTable symbol_table = this.getSymbolTable(programName);
+            if (symbol_table == null)
+                return -1;
+            try  {
+                symbol_table.Export(symbolsOutputFile);
+            } catch (SystemException e) {
+                Logger.log_debug("\n** exportSymbols(): Error exporting symbol table for program: '" +
+                     programName + "':\n" + e.Message + "\n");
+                return -1;
+            }
+            return 0;
+        }
+
 
         public S7SWItem getSoftwareItem(string programName, string itemName)
         {
@@ -316,28 +362,6 @@ namespace S7_cli
             else {
                 Logger.log("addSource(): Error - unknown source extension '" + extension + "' (file: " + filename + ")\n");
                 return null;
-            }
-        }
-
-
-        public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
-        {
-            if (simaticProject == null) {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
-                return 0;
-            } else if (!File.Exists(symbolsPath)) {
-                System.Console.Write("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
-                return 0;
-            } else {
-                int nrOfSymbols = 0;
-
-                try {
-                    nrOfSymbols = simaticProject.Programs[programName].SymbolTable.Import(symbolsPath);
-                } catch (SystemException exc) {
-                    System.Console.Write("Error: " + exc.Message + "\n");
-                }
-
-                return nrOfSymbols;
             }
         }
 

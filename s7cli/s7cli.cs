@@ -188,6 +188,18 @@ namespace S7_cli
                                             options.getOption("--symbols"),
                                             options.getOption("--program"));
 
+                else if (command == "exportSymbols")  {
+                    if (options.optionSet("--force"))
+                        s7command.exportSymbols(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                options.getOption("--output"),
+                                                options.getOption("--force") == "y");
+                    else
+                        s7command.exportSymbols(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                options.getOption("--output"));
+                }
+
                 else if (command == "listSources")
                     s7command.listSources(options.getOption("--project"),
                                           options.getOption("--program"));
@@ -204,7 +216,7 @@ namespace S7_cli
                                                options.getOption("--libprg"),
                                                options.getOption("--program"));
 
-                else if (command == "importSources")
+                else if (command == "importSources") {
                     if (options.optionSet("--force"))
                         s7command.importSources(options.getOption("--project"),
                                                 options.getOption("--program"),
@@ -214,7 +226,7 @@ namespace S7_cli
                         s7command.importSources(options.getOption("--project"),
                                                 options.getOption("--program"),
                                                 options.getOption("--sources").Split(','));
-
+                }
 
                 else if (command == "importSourcesDir")
                 {
@@ -248,8 +260,8 @@ namespace S7_cli
                                              options.getOption("--sources").Split(','));
 
                 else if (command == "exportSources")
-                    s7command.exportSources(options.getOption("--project"), 
-                                            options.getOption("--program"), 
+                    s7command.exportSources(options.getOption("--project"),
+                                            options.getOption("--program"),
                                             options.getOption("--sources").Split(','),
                                             options.getOption("--outputdir"));
 
@@ -260,7 +272,7 @@ namespace S7_cli
 
                 else if (command == "exportProgramStructure")
                     s7command.exportProgramStructure(options.getOption("--project"),
-                                                     options.getOption("--program"), 
+                                                     options.getOption("--program"),
                                                      options.getOption("--output"));
 
                 else

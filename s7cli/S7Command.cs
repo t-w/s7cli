@@ -156,7 +156,7 @@ namespace S7_cli
             //Logger.log_debug("S7Command::ImportSymbols(): " + programName + "\n");
             Logger.log("Importing symbols ");
             Logger.log("    from: " + symbolsPath);
-            Logger.log("    to: - project: " + s7project.getS7ProjectName() + ", " + projectPathOrName );
+            Logger.log("    to: - project: " + s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
             Logger.log("        - program: " + programName);
             
             int symbolsImported;
@@ -171,6 +171,44 @@ namespace S7_cli
             else
                 S7Status.set_status(S7Status.failure);
             return symbolsImported;
+        }
+
+        public void exportSymbols(string projectPathOrName, string programName, 
+                                  string symbolsOutputFile, bool force = false){
+            this.openProject(projectPathOrName);
+
+            string exportDirectory = Path.GetDirectoryName(symbolsOutputFile);
+            if (!Directory.Exists(exportDirectory))  {
+                Logger.log("Error: Cannot export symbols - destination directory '" + exportDirectory + "' does not exist!\n");
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            if (Path.GetExtension(symbolsOutputFile) != ".sdf") {
+                Logger.log("Error: Cannot export symbols - export file '" + symbolsOutputFile + 
+                    "' has incorrect extension (it must be '.sdf'!).\n");
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            if (File.Exists(symbolsOutputFile) && !force)
+            {
+                Logger.log("Error: Cannot export symbols - export file '" + symbolsOutputFile + "' already exists!\n");
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            Logger.log("Exporting symbols ");
+            Logger.log("    from: - project: " + s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
+            Logger.log("          - program: " + programName);
+            Logger.log("      to: " + symbolsOutputFile);
+
+            int status = s7project.exportSymbols(symbolsOutputFile, programName);
+
+            if (status == 0)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
         }
 
         public void listSources(string projectPathOrName, string programName = "")

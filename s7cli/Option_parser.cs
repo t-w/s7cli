@@ -10,7 +10,8 @@ namespace S7_cli
     class Option_parser
     {
         public static readonly string[] commands = { 
-            "createProject", "listProjects", "listPrograms", "importConfig", "importSymbols", 
+            "createProject", "listProjects", "listPrograms", "importConfig", 
+            "importSymbols", "exportSymbols",
             "listSources", "importLibSources", "importLibBlocks", "importSources", 
             "importSourcesDir", "compileSources", "exportSources", 
             "exportAllSources", "exportProgramStructure"
@@ -61,6 +62,7 @@ namespace S7_cli
                     { "listPrograms",        "List available programs in Simatic project/library" },
                     { "importConfig",        "Import project configuration from a file" },
                     { "importSymbols",       "Import program symbols from a file" },
+                    { "exportSymbols",       "Export program symbols to a file" },
                     { "listSources",         "List of source code modules in specified program" },
                     { "importLibSources",    "Import all sources from a library to project" },
                     { "importLibBlocks",     "Import all blocks from a library to project" },
@@ -79,6 +81,7 @@ namespace S7_cli
                     { "listPrograms",           new string[] { "--debug", "--project" }},
                     { "importConfig",           new string[] { "--debug", "--project", "--config" }},
                     { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
+                    { "exportSymbols",          new string[] { "--debug", "--project", "--program", "--output", "--force" }},
                     { "listSources",            new string[] { "--debug", "--project", "--program" }},
                     { "importLibSources",       new string[] { "--debug", "--project", "--program", "--library", "--libprg" }},
                     { "importLibBlocks",        new string[] { "--debug", "--project", "--program", "--library", "--libprg" }}, 
@@ -97,6 +100,7 @@ namespace S7_cli
                     { "listPrograms",        new string[] { "--project" }},
                     { "importConfig",        new string[] { "--project", "--config" }},
                     { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
+                    { "exportSymbols",       new string[] { "--project", "--program", "--output" }},
                     { "listSources",         new string[] { "--project", "--program" }},
                     { "importLibSources",    new string[] { "--project", "--program", "--library", "--libprg" }},
                     { "importLibBlocks",     new string[] { "--project", "--program", "--library", "--libprg" }}, 
