@@ -22,12 +22,29 @@ namespace S7_cli
 
     public class S7Project
     {
-        private static Simatic simatic;
+        private static Simatic simatic = null;
         private IS7Project simaticProject = null;
+
+        /*
+         * Class methods
+         */
+
+        private static Simatic openSimatic(){
+            if (simatic == null) {
+                simatic = new SimaticLib.Simatic();
+
+                Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
+
+                // force server mode
+                simatic.UnattendedServerMode = true;   // does not seem to help much...
+                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+            }
+            return simatic;
+        }
 
         public static string getListOfAvailableProjects()
         {
-            simatic = new SimaticLib.Simatic();
+            S7Project.openSimatic();
             string availableProjects = "";
             foreach (IS7Project project in simatic.Projects)  {
                 availableProjects += ("- " + project.Name + ", " + project.LogPath + "\n");
@@ -35,11 +52,15 @@ namespace S7_cli
             return availableProjects;
         }
 
+        /*
+         * Constructors
+         */
+
 
         //public plcProject(string Name)
         public S7Project(string pathOrName)
         {
-            simatic = new SimaticLib.Simatic();
+            S7Project.openSimatic();
 
             foreach (IS7Project project in simatic.Projects)  {
                 //System.Console.Write("Project creator: \n" + project.Creator simatic.Projects.Count + "\n");
@@ -72,7 +93,7 @@ namespace S7_cli
 
         public S7Project(string projectName, string projectDirPath)
         {
-            simatic = new SimaticLib.Simatic();
+            S7Project.openSimatic();
 
             // checking if the project dir path ends with "\"
             if (!projectDirPath.EndsWith("\\"))  {
@@ -101,6 +122,27 @@ namespace S7_cli
                 }
             }
         }
+
+
+        /*
+         * Destructor
+         */
+        ~S7Project()
+        {
+            //Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
+            //Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+
+            // make sure of saving all changes
+            if (simatic != null){
+                Logger.log_debug("Saving changes.");
+                simatic.Save();
+            }
+        }
+
+
+        /*
+         * Project methods
+         */
 
         public bool isProjectOpened()
         {
