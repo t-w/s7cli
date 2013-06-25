@@ -253,6 +253,11 @@ namespace S7_cli
                                             options.getOption("--sources").Split(','),
                                             options.getOption("--outputdir"));
 
+                else if (command == "exportAllSources")
+                    s7command.exportAllSources(options.getOption("--project"),
+                                               options.getOption("--program"),
+                                               options.getOption("--outputdir"));
+
                 else if (command == "exportProgramStructure")
                     s7command.exportProgramStructure(options.getOption("--project"),
                                                      options.getOption("--program"), 

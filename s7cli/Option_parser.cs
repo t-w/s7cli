@@ -12,7 +12,8 @@ namespace S7_cli
         public static readonly string[] commands = { 
             "createProject", "listProjects", "listPrograms", "importConfig", "importSymbols", 
             "listSources", "importLibSources", "importLibBlocks", "importSources", 
-            "importSourcesDir", "compileSources", "exportSources", "exportProgramStructure"
+            "importSourcesDir", "compileSources", "exportSources", 
+            "exportAllSources", "exportProgramStructure"
         };
 
         Dictionary<string, string> command_help;
@@ -67,6 +68,7 @@ namespace S7_cli
                     { "importSourcesDir",    "Import all source code files from specified directory (only valid ones: .SCL, .AWL, .INP)" },
                     { "compileSources",      "Compile specified source code module(s)" },
                     { "exportSources",       "Export specified source code module(s)" },
+                    { "exportAllSources",    "Export all source code module(s) from a program" },
                     { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" }
                 };
 
@@ -84,6 +86,7 @@ namespace S7_cli
                     { "importSourcesDir",       new string[] { "--debug", "--project", "--program", "--srcdir",  "--force" }},
                     { "compileSources",         new string[] { "--debug", "--project", "--program", "--sources" }},
                     { "exportSources",          new string[] { "--debug", "--project", "--program", "--sources", "--outputdir" }},
+                    { "exportAllSources",       new string[] { "--debug", "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
                 };
 
@@ -101,6 +104,7 @@ namespace S7_cli
                     { "importSourcesDir",    new string[] { "--project", "--program", "--srcdir" }},
                     { "compileSources",      new string[] { "--project", "--program", "--sources" }},
                     { "exportSources",          new string[] { "--project", "--program", "--sources", "--outputdir" }},
+                    { "exportAllSources",       new string[] { "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
                 };
 

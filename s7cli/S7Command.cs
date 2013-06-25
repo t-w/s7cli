@@ -63,7 +63,7 @@ namespace S7_cli
 
     public class S7Command
     {
-        S7Project s7project;
+        S7Project s7project = null;
         string error_info = "";
 
         public string getErrorInfo()
@@ -95,8 +95,13 @@ namespace S7_cli
 
         S7Project openProject(string projectPathOrName)
         {
-            Logger.log("Opening project: " + projectPathOrName);
-            s7project = new S7Project(projectPathOrName);
+            if (s7project == null) {
+                Logger.log("Opening project: " + projectPathOrName);
+                s7project = new S7Project(projectPathOrName);
+            } else {
+                Logger.log_debug("openProject(): a project is already opened:" +
+                    s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
+            }
             if (!s7project.isProjectOpened()) {
                 S7Status.set_status(S7Status.failure);
                 throw new S7ProjectNotOpenException("Project not opened!");
@@ -276,6 +281,14 @@ namespace S7_cli
                 S7Status.set_status(S7Status.success);
             else
                 S7Status.set_status(S7Status.failure);
+        }
+
+
+        public void exportAllSources(string projectPathOrName, string programName, string exportDirectory)
+        {
+            this.openProject(projectPathOrName);
+            string[] sources = s7project.getSourcesList(programName);
+            this.exportSources(projectPathOrName, programName, sources, exportDirectory);
         }
 
 

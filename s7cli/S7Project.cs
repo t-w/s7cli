@@ -128,7 +128,10 @@ namespace S7_cli
             return simaticProject.Name;
         }
 
-
+        public string getS7ProjectPath()
+        {
+            return simaticProject.LogPath;
+        }
 
 
         public bool importConfig(string projectConfigPath)
