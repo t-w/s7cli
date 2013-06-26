@@ -150,6 +150,18 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);   // if project opened - should be ok...
         }
 
+        private string getImportSymbolsReport()
+        {
+            // file found by accindent, seems not always named like this...
+            const string reportFile = "c:\\ProgramData\\Siemens\\Automation\\Step7\\S7Tmp\\sym_imp.txt";
+            if (File.Exists(reportFile))  {
+                return File.ReadAllText(reportFile);
+            } else {
+                return "Import report file " + reportFile + " not found!";
+            }
+
+        }
+
         public int importSymbols(string projectPathOrName, string symbolsPath, string programName = "")
         {
             this.openProject(projectPathOrName);
@@ -166,6 +178,9 @@ namespace S7_cli
             else
                 symbolsImported = s7project.importSymbols(symbolsPath);
             Logger.log("Imported " + symbolsImported + " symbols.");
+            Logger.log(@"*******************************
+*** Report file contents ***:
+" + this.getImportSymbolsReport() + "*******************************");
             if (symbolsImported > 0)
                 S7Status.set_status(S7Status.success);
             else
