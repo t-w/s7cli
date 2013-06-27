@@ -37,7 +37,7 @@ namespace S7_cli
 
         public static void set_status(int new_status)
         {
-            if (new_status < -1 && new_status > 2)
+            if (new_status < -1 || new_status > 2)
                 throw new System.Exception("S7Status::set_status() - illegal value " + new_status + "!");
             status = new_status;
         }
