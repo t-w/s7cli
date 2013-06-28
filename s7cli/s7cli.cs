@@ -203,6 +203,10 @@ namespace S7_cli
                 else if (command == "listSources")
                     s7command.listSources(options.getOption("--project"),
                                           options.getOption("--program"));
+                
+                else if (command == "listBlocks")
+                    s7command.listBlocks(options.getOption("--project"),
+                                         options.getOption("--program"));
 
                 else if (command == "importLibSources")
                     s7command.importLibSources(options.getOption("--project"),

@@ -242,6 +242,23 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
+        public void listBlocks(string projectPathOrName, string programName = "")
+        {
+            this.openProject(projectPathOrName);
+            Logger.log("List of blocks in program '" + programName + "'\n");
+            string[] blocks = s7project.getBlocksList(programName);
+
+            if (blocks == null)
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+            foreach (string block in blocks)
+                Logger.log(block);
+            Logger.log("\nBlocks found: " + blocks.Length);
+            S7Status.set_status(S7Status.success);
+        }
+
         public void importLibSources(string projectPathOrName, string libProjectName,
                                      string libProjectProgramName, string destinationProjectProgramName)
         {

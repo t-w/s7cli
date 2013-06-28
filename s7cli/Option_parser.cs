@@ -12,7 +12,7 @@ namespace S7_cli
         public static readonly string[] commands = { 
             "createProject", "listProjects", "listPrograms", "importConfig", 
             "importSymbols", "exportSymbols",
-            "listSources", "importLibSources", "importLibBlocks", "importSources", 
+            "listSources", "listBlocks", "importLibSources", "importLibBlocks", "importSources", 
             "importSourcesDir", "compileSources", "exportSources", 
             "exportAllSources", "exportProgramStructure"
         };
@@ -64,6 +64,7 @@ namespace S7_cli
                     { "importSymbols",       "Import program symbols from a file" },
                     { "exportSymbols",       "Export program symbols to a file" },
                     { "listSources",         "List of source code modules in specified program" },
+                    { "listBlocks",          "List of blocks in specified program"},
                     { "importLibSources",    "Import all sources from a library to project" },
                     { "importLibBlocks",     "Import all blocks from a library to project" },
                     { "importSources",       "Import specified source code files" },
@@ -83,6 +84,7 @@ namespace S7_cli
                     { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
                     { "exportSymbols",          new string[] { "--debug", "--project", "--program", "--output", "--force" }},
                     { "listSources",            new string[] { "--debug", "--project", "--program" }},
+                    { "listBlocks",             new string[] { "--debug", "--project", "--program" }},
                     { "importLibSources",       new string[] { "--debug", "--project", "--program", "--library", "--libprg" }},
                     { "importLibBlocks",        new string[] { "--debug", "--project", "--program", "--library", "--libprg" }}, 
                     { "importSources",          new string[] { "--debug", "--project", "--program", "--sources", "--force" }},
@@ -102,6 +104,7 @@ namespace S7_cli
                     { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
                     { "exportSymbols",       new string[] { "--project", "--program", "--output" }},
                     { "listSources",         new string[] { "--project", "--program" }},
+                    { "listBlocks",          new string[] { "--project", "--program" }},
                     { "importLibSources",    new string[] { "--project", "--program", "--library", "--libprg" }},
                     { "importLibBlocks",     new string[] { "--project", "--program", "--library", "--libprg" }}, 
                     { "importSources",       new string[] { "--project", "--program", "--sources" }},

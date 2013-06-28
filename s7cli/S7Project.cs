@@ -192,6 +192,31 @@ namespace S7_cli
             return true;
         }
 
+        public string[] getBlocksList(string projectProgramName)
+        {
+            if (simaticProject == null)
+            {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                return null;
+            }
+
+            List<string> blocks = new List<string>();
+
+            try
+            {
+                foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                {
+                    //Logger.log_debug(block.Name);
+                    blocks.Add(block.Name);
+                }
+            }
+            catch (SystemException exc)
+            {
+                Console.WriteLine("Error: " + exc.Message + "\n");
+                return null;
+            }
+            return blocks.ToArray();
+        }
 
         /**********************************************************************************
          * Program methods
