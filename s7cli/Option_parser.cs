@@ -10,11 +10,13 @@ namespace S7_cli
     class Option_parser
     {
         public static readonly string[] commands = { 
-            "createProject", "listProjects", "listPrograms", "importConfig", 
+            "createProject", "listProjects", "listPrograms", "importConfig", "exportConfig", 
             "importSymbols", "exportSymbols",
             "listSources", "listBlocks", "importLibSources", "importLibBlocks", "importSources", 
             "importSourcesDir", "compileSources", "exportSources", 
-            "exportAllSources", "exportProgramStructure"
+            "exportAllSources", "exportProgramStructure",
+            "compileStation", "downloadSystemData", "downloadAllBlocks",
+            "startCPU", "stopCPU"
         };
 
         Dictionary<string, string> command_help;
@@ -38,7 +40,8 @@ namespace S7_cli
                     { "--project",             new string[] { "-p", "project name or path" }},
                     { "--program",             new string[] { "", "program name in project" }},
 
-                    { "--config",              new string[] { "-c", "project (hardware) configuration file" }},
+                    { "--config",              new string[] { "-c", "station (hardware) configuration file" }},
+                    { "--station",              new string[] { "", "station name" }},
                     { "--srcdir",              new string[] { "",   "directory with source code files" }},
                     { "--library",             new string[] { "-l", "library name (do 'listProjects' if not sure)" }},
                     { "--libprg",              new string[] { "",   "program in library project" }},
@@ -60,7 +63,8 @@ namespace S7_cli
                     { "createProject",       "Create new, empty project in specified location" },
                     { "listProjects",        "List available Simatic projects" },
                     { "listPrograms",        "List available programs in Simatic project/library" },
-                    { "importConfig",        "Import project configuration from a file" },
+                    { "importConfig",        "Import station configuration from a file" },
+                    { "exportConfig",        "Export station configuration to a file" },
                     { "importSymbols",       "Import program symbols from a file" },
                     { "exportSymbols",       "Export program symbols to a file" },
                     { "listSources",         "List of source code modules in specified program" },
@@ -72,7 +76,12 @@ namespace S7_cli
                     { "compileSources",      "Compile specified source code module(s)" },
                     { "exportSources",       "Export specified source code module(s)" },
                     { "exportAllSources",    "Export all source code module(s) from a program" },
-                    { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" }
+                    { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" },
+                    { "compileStation",      "Compiles station hardware and connections (experimental, don't use it!!!)" },
+                    { "downloadAllBlocks",   "Downloads blocks (omits \"System data\") to the PLC" },
+                    { "downloadSystemData",  "Downloads \"System data\" to the PLC" },
+                    { "startCPU",            "Starts (new start) PLC" },
+                    { "stopCPU",             "Stops PLC" }
                 };
 
             options_valid = new Dictionary<string, string[]>()
@@ -81,6 +90,7 @@ namespace S7_cli
                     { "listProjects",           new string[] { "--debug", }},
                     { "listPrograms",           new string[] { "--debug", "--project" }},
                     { "importConfig",           new string[] { "--debug", "--project", "--config" }},
+                    { "exportConfig",           new string[] { "--debug", "--project", "--config", "--station" }},
                     { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
                     { "exportSymbols",          new string[] { "--debug", "--project", "--program", "--output", "--force" }},
                     { "listSources",            new string[] { "--debug", "--project", "--program" }},
@@ -93,6 +103,11 @@ namespace S7_cli
                     { "exportSources",          new string[] { "--debug", "--project", "--program", "--sources", "--outputdir" }},
                     { "exportAllSources",       new string[] { "--debug", "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
+                    { "compileStation",         new string[] { "--debug", "--project", "--station" }},
+                    { "downloadAllBlocks",      new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "downloadSystemData",     new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "startCPU",               new string[] { "--debug", "--project", "--program" }},
+                    { "stopCPU",                new string[] { "--debug", "--project", "--program" }}
                 };
 
             options_required = new Dictionary<string, string[]>()
@@ -101,6 +116,7 @@ namespace S7_cli
                     { "listProjects",        new string[] { }},
                     { "listPrograms",        new string[] { "--project" }},
                     { "importConfig",        new string[] { "--project", "--config" }},
+                    { "exportConfig",        new string[] { "--project", "--config", "--station" }},
                     { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
                     { "exportSymbols",       new string[] { "--project", "--program", "--output" }},
                     { "listSources",         new string[] { "--project", "--program" }},
@@ -113,6 +129,11 @@ namespace S7_cli
                     { "exportSources",          new string[] { "--project", "--program", "--sources", "--outputdir" }},
                     { "exportAllSources",       new string[] { "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
+                    { "compileStation",         new string[] { "--project", "--station" }},
+                    { "downloadAllBlocks",      new string[] { "--project", "--program" }},
+                    { "downloadSystemData",     new string[] { "--project", "--program" }},
+                    { "startCPU",               new string[] { "--project", "--program" }},
+                    { "stopCPU",                new string[] { "--project", "--program" }}
                 };
 
             if (this.parseOptions(args))

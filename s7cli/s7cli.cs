@@ -48,7 +48,8 @@ namespace S7_cli
         public static void log_error(string info)  {
             // only console output
             if (level >= level_error)
-                log ("Error: " + info + "\n");
+                //log ("Error: " + info + "\n");
+                log("Error: " + info);
         }
 
         public static void log_result(string info)  {
@@ -180,6 +181,11 @@ namespace S7_cli
                     s7command.importConfig(options.getOption("--project"),
                                            options.getOption("--config"));
 
+                else if (command == "exportConfig")
+                    s7command.exportConfig(options.getOption("--project"),
+                                           options.getOption("--station"),
+                                           options.getOption("--config"));
+
                 else if (command == "listPrograms")
                     s7command.getListOfPrograms(options.getOption("--project"));
 
@@ -278,6 +284,36 @@ namespace S7_cli
                     s7command.exportProgramStructure(options.getOption("--project"),
                                                      options.getOption("--program"),
                                                      options.getOption("--output"));
+
+                else if (command == "compileStation")
+                    s7command.compileStation(options.getOption("--project"),
+                                             options.getOption("--station"));
+
+                else if (command == "downloadSystemData")
+                    if (options.optionSet("--force"))
+                        s7command.downloadSystemData(options.getOption("--project"),
+                                                     options.getOption("--program"),
+                                                     options.getOption("--force") == "y");
+                    else
+                        s7command.downloadSystemData(options.getOption("--project"),
+                                                     options.getOption("--program"));
+
+                else if (command == "downloadAllBlocks")
+                    if (options.optionSet("--force"))
+                        s7command.downloadAllBlocks(options.getOption("--project"),
+                                                    options.getOption("--program"),
+                                                    options.getOption("--force") == "y");
+                    else
+                        s7command.downloadAllBlocks(options.getOption("--project"),
+                                                    options.getOption("--program"));
+                
+                else if (command == "startCPU")
+                    s7command.startCPU(options.getOption("--project"),
+                                       options.getOption("--program"));
+                
+                else if (command == "stopCPU")
+                    s7command.stopCPU(options.getOption("--project"),
+                                      options.getOption("--program"));
 
                 else
                 {

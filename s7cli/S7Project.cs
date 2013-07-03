@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 
 using SimaticLib;
+using S7HCOM_XLib;
 
 namespace S7_cli
 {
@@ -31,15 +32,40 @@ namespace S7_cli
 
         private static Simatic openSimatic(){
             if (simatic == null) {
-                simatic = new SimaticLib.Simatic();
+                simatic = new Simatic();
 
                 Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
 
                 // force server mode
-                simatic.UnattendedServerMode = true;   // does not seem to help much...
-                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+                enableUnattendedServerMode();
             }
             return simatic;
+        }
+
+        private static void enableUnattendedServerMode()
+        {
+            if (simatic != null)
+            {
+                simatic.UnattendedServerMode = true;
+                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+            }
+            else
+            {
+                Logger.log_error("Cannot set \"UnattendedServerMode\" to true! Simatic variable is null!");
+            }
+        }
+
+        private static void disableUnattendedServerMode()
+        {
+            if (simatic != null)
+            {
+                simatic.UnattendedServerMode = false;
+                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+            }
+            else
+            {
+                Logger.log_error("Cannot set \"UnattendedServerMode\" to false! Simatic variable is null!");
+            }
         }
 
         public static string getListOfAvailableProjects()
@@ -175,6 +201,9 @@ namespace S7_cli
             return simaticProject.LogPath;
         }
 
+        /**********************************************************************************
+         * Program methods
+         **********************************************************************************/
 
         public bool importConfig(string projectConfigPath)
         {
@@ -185,6 +214,52 @@ namespace S7_cli
                 try  {
                     simaticProject.Stations.Import(projectConfigPath);
                 } catch (SystemException exc) {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool exportConfig(string stationName, string projectConfigPath)
+        {
+            if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting export!\n");
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    S7Station station = simaticProject.Stations[stationName];
+                    station.Export(projectConfigPath);
+                }
+                catch (SystemException exc)
+                {
+                    System.Console.Write("Error: " + exc.Message + "\n");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool compileStation(string stationName)
+        {
+            if (simaticProject == null)
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting export!\n");
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    S7Station station = simaticProject.Stations[stationName];
+                    station.Compile();
+                }
+                catch (SystemException exc)
+                {
                     System.Console.Write("Error: " + exc.Message + "\n");
                     return false;
                 }
@@ -218,9 +293,160 @@ namespace S7_cli
             return blocks.ToArray();
         }
 
-        /**********************************************************************************
-         * Program methods
-         **********************************************************************************/
+        public string[] downloadSystemData(string projectProgramName, bool force = false)
+        {
+            if (simaticProject == null)
+            {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                return null;
+            }
+
+            List<string> blocks = new List<string>();
+
+            try
+            {
+                if (force)
+                {
+                    enableUnattendedServerMode();
+
+                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                    {
+                        if (block.Name == "System data")
+                        {
+                            Logger.log_debug("Downloading block: " + block.Name);
+                            block.Download(S7OverwriteFlags.S7OverwriteAll);
+                            blocks.Add(block.Name);
+                            break;
+                        }
+                        else
+                        {
+                            Logger.log_debug("Omitting block: " + block.Name);
+                        }
+                    }
+                }
+                else
+                {
+                    disableUnattendedServerMode();
+
+                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                    {
+                        if (block.Name == "System data")
+                        {
+                            Logger.log_debug("Downloading block: " + block.Name);
+                            block.Download(S7OverwriteFlags.S7OverwriteAsk);
+                            blocks.Add(block.Name);
+                            break;
+                        }
+                        else
+                        {
+                            Logger.log_debug("Omitting block: " + block.Name);
+                        }
+                    }
+                }
+            }
+            catch (SystemException exc)
+            {
+                Console.WriteLine("Error: " + exc.Message + "\n");
+                return null;
+            }
+            return blocks.ToArray();
+        }
+
+        public string[] downloadAllBlocks(string projectProgramName, bool force = false)
+        {
+            if (simaticProject == null)
+            {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                return null;
+            }
+
+            List<string> blocks = new List<string>();
+
+            try
+            {
+                if (force)
+                {
+                    enableUnattendedServerMode();
+
+                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                    {
+                        if (block.Name != "System data")
+                        {
+                            Logger.log_debug("Downloading block: " + block.Name);
+                            block.Download(S7OverwriteFlags.S7OverwriteAll);
+                            blocks.Add(block.Name);
+                        }
+                        else
+                        {
+                            Logger.log_debug("Omitting block: " + block.Name);
+                        }
+                    }
+                }
+                else
+                {
+                    disableUnattendedServerMode();
+
+                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                    {
+                        if (block.Name != "System data")
+                        {
+                            Logger.log_debug("Downloading block: " + block.Name);
+                            block.Download(S7OverwriteFlags.S7OverwriteAsk);
+                            blocks.Add(block.Name);
+                        }
+                        else
+                        {
+                            Logger.log_debug("Omitting block: " + block.Name);
+                        }
+                    }
+                }
+            }
+            catch (SystemException exc)
+            {
+                Console.WriteLine("Error: " + exc.Message + "\n");
+                return null;
+            }
+            return blocks.ToArray();
+        }
+
+        public bool startCPU(string projectProgramName)
+        {
+            if (simaticProject == null)
+            {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                return false;
+            }
+            try
+            {
+                simaticProject.Programs[projectProgramName].NewStart();
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error(exc.Message);
+                return false;
+            }
+            return true;
+        }
+
+        public bool stopCPU(string projectProgramName)
+        {
+            if (simaticProject == null)
+            {
+                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                return false;
+            }
+            try
+            {
+                simaticProject.Programs[projectProgramName].Stop();
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error(exc.Message);
+                return false;
+            }
+            return true;
+        }
+
         public string [] getListOfAvailablePrograms()
         {
             //string [] availablePrograms;
@@ -397,7 +623,7 @@ namespace S7_cli
                 return false;
         }
 
-        private IS7SWItem addSourceWithType(string programName, SimaticLib.S7SWObjType sourceType, 
+        private IS7SWItem addSourceWithType(string programName, S7SWObjType sourceType, 
                                             string filename, bool forceOverwrite = false)
         {
             S7SWItems src_modules = getSourceModules(programName);
@@ -425,7 +651,7 @@ namespace S7_cli
             string extension = System.IO.Path.GetExtension(filename);
             if (extension.ToLower() == ".scl" || extension.ToLower() == ".awl" || extension.ToLower() == ".inp")
             //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
-                return addSourceWithType(programName, SimaticLib.S7SWObjType.S7Source, filenameFullPath, forceOverwrite);
+                return addSourceWithType(programName, S7SWObjType.S7Source, filenameFullPath, forceOverwrite);
             else {
                 Logger.log("addSource(): Error - unknown source extension '" + extension + "' (file: " + filename + ")\n");
                 return null;
@@ -441,7 +667,7 @@ namespace S7_cli
             Simatic libSimatic = new Simatic();
 
             try {
-                foreach (SimaticLib.S7Source source in
+                foreach (S7Source source in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
                     source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
                 }
@@ -461,7 +687,7 @@ namespace S7_cli
             Simatic libSimatic = new Simatic();
 
             try {
-                foreach (SimaticLib.S7Block block in
+                foreach (S7Block block in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
                     block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
                 }
@@ -476,7 +702,7 @@ namespace S7_cli
         public S7Source getS7SourceModule(string programName, string moduleName)
         {
             //S7SWItem item = getSourceModule(programName, moduleName);
-            //SimaticLib.S7Source source = (SimaticLib.S7Source) item.Program.;
+            //S7Source source = (S7Source) item.Program.;
 
             //IS7Source src = getSources("ARC56_program").get_Child("test11"); //get_Collection("test11");
 

@@ -133,6 +133,27 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
+        public bool exportConfig(string projectPathOrName, string stationName, string projectConfigPath)
+        {
+            this.openProject(projectPathOrName);
+            bool cmd_status_ok = s7project.exportConfig(stationName, projectConfigPath);
+            if (cmd_status_ok)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+            return cmd_status_ok;
+        }
+
+        public bool compileStation(string projectPathOrName, string stationName)
+        {
+            this.openProject(projectPathOrName);
+            bool cmd_status_ok = s7project.compileStation(stationName);
+            if (cmd_status_ok)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+            return cmd_status_ok;
+        }
 
         /**********************************************************************************
          * Program commands
@@ -257,6 +278,102 @@ namespace S7_cli
                 Logger.log(block);
             Logger.log("\nBlocks found: " + blocks.Length);
             S7Status.set_status(S7Status.success);
+        }
+
+        public void downloadSystemData(string projectPathOrName, string projectProgramName, bool force = false)
+        {
+            this.openProject(projectPathOrName);
+            string[] blocks;
+
+            if (force)
+            {
+                blocks = s7project.downloadSystemData(projectProgramName, true);
+            }
+            else
+            {
+                blocks = s7project.downloadSystemData(projectProgramName);
+            }
+
+            Logger.log("List of blocks to be downloaded to the PLC:\n");
+
+            if (blocks == null)
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            foreach (string block in blocks)
+                Logger.log(block);
+            Logger.log("\nBlocks found: " + blocks.Length + "\n");
+
+            if (blocks.Length == 0)
+            {
+                Logger.log_error("It seems, that there is no \"System data\" in the project!");
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            S7Status.set_status(S7Status.success);
+         }
+
+        public void downloadAllBlocks(string projectPathOrName, string projectProgramName, bool force = false)
+        {
+            this.openProject(projectPathOrName);
+            string[] blocks;
+
+            if (force)
+            {
+                blocks = s7project.downloadAllBlocks(projectProgramName, true);
+            }
+            else
+            {
+                blocks = s7project.downloadAllBlocks(projectProgramName);
+            }
+
+            Logger.log("List of blocks to be downloaded to the PLC:\n");
+
+            if(blocks == null)
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
+            foreach (string block in blocks)
+                Logger.log(block);
+            Logger.log("\nBlocks found: " + blocks.Length);
+            S7Status.set_status(S7Status.success);
+        }
+
+        public void startCPU(string projectPathOrName, string projectProgramName)
+        {
+            this.openProject(projectPathOrName);
+
+            if (s7project.startCPU(projectProgramName))
+            {
+                S7Status.set_status(S7Status.success);
+                return;
+            }
+            else
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+        }
+
+        public void stopCPU(string projectPathOrName, string projectProgramName)
+        {
+            this.openProject(projectPathOrName);
+
+            if (s7project.stopCPU(projectProgramName))
+            {
+                S7Status.set_status(S7Status.success);
+                return;
+            }
+            else
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
         }
 
         public void importLibSources(string projectPathOrName, string libProjectName,
