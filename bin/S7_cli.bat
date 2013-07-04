@@ -1,41 +1,80 @@
-:: ----------------------------------------------------------------------
-:: defining variables which will be later used for executing S7 CLI
-
 @echo off
-set S7CLI=\\cern.ch\dfs\Users\m\mzapolsk\Documents\training\S7CLI\s7cli.exe
-set projectRoot=\\cern.ch\dfs\Users\m\mzapolsk\Documents\training
-set newProjectName=KnightRider
-set newProjectDirPath=%projectRoot%\%newProjectName%
-set existingProjectDirPath=%newProjectDirPath%\KnightRi
-set projectConfigPath=%projectRoot%\simatic300.CFG
-set symbolsPath=%newProjectDirPath%\Output\S7InstanceGenerator\Symbol.sdf
-set S7ProgramName="S7 Program(1)"
-set libProjectName=ucpc_plc_siemens_6_3
-set libProjectProgramName=BASELINE_S7
-set destinationProjectProgramName="S7 Program(1)"
+cls
+set error_return=0
+::----------------------------------------------------------------------
+:: path to the S7 command line interface
 
-if ""%1""=="""" goto :all
+set s7_cli_path=H:\user\m\mdudek\scm\svn\te_crg_ce\automation\s7cli\s7cli\bin\Debug\s7cli.exe
+
+::----------------------------------------------------------------------
+:: UAB
+set uab_project_path=D:\MDudek\Projects\CPC6_TEST_PLC\CPC6.generator\1.4
+set uab_project_instance_dir=%uab_project_path%\Output\S7InstanceGenerator
+set uab_project_logic_dir=%uab_project_path%\Output\S7LogicGenerator
+set uab_project_symbols=%uab_project_instance_dir%\Symbol.sdf
+set uab_project_compilation_file=1_Compilation_Baseline,2_Compilation_instance,3_Compilation_LOGIC,4_Compilation_OB
+
+::----------------------------------------------------------------------
+:: SIEMENS configuration
+
+:: siemens project configuration
+set siemens_project_name=CPC6_TEST_PLC
+set siemens_new_project_path=D:\MDudek\Projects\CPC6_TEST_PLC\Siemens
+set siemens_project_path=D:\MDudek\Projects\CPC6_TEST_PLC\Siemens\%siemens_project_name:~0,8%
+set siemens_project_config=D:\MDudek\Projects\CPC6_TEST_PLC\Siemens\simatic300.CFG
+set siemens_project_program_name="S7 Program(1)"
+
+:: siemens baseline configuration
+set siemens_baseline_project_name=ucpc_plc_siemens_6_3
+set siemens_baseline_project_program_name=BASELINE_S7
+
+::----------------------------------------------------------------------
+
+if "%1"=="" goto :eof
+if "%1"=="new" goto :new
+if "%1"=="existing" goto :existing
 goto %1
-
-call :all
 goto :eof
 
-:all
-call :createProject
+:new
+call :createNewProject
 call :importConfig
 call :importSymbols
 call :importLibSources
 call :importLibBlocks
-call :importSources
+call :importInstanceSources
+call :importLogicSources
 call :compile
 goto :eof
 
-:createProject
-:: ----------------------------------------------------------------------
+:existing
+call :importSymbols
+call :importLibSources
+call :importLibBlocks
+call :importInstanceSources
+call :importLogicSources
+call :compile
+call :stopCPU
+call :downloadSystemData
+call :downloadAllBlocks
+call :startCPU
+goto :eof
+
+:error
+@echo off
+echo.
+echo Last command was unsuccessful! Exiting *.bat file!
+goto :eof
+
+::----------------------------------------------------------------------
+:: below are only batch labels and execution of the s7 command line interface
+
+: createNewProject
+::----------------------------------------------------------------------
 :: creating new project
 
 @echo on
-%S7CLI% createProject --projname %newProjectName% --projdir %newProjectDirPath%
+%s7_cli_path% createProject --projname %siemens_project_name% --projdir %siemens_new_project_path%
 @echo off
 goto :eof
 
@@ -44,21 +83,16 @@ goto :eof
 :: importing config to existing project
 
 @echo on
-%S7CLI% importConfig -p %existingProjectDirPath% -c %projectConfigPath%
+%s7_cli_path% importConfig --project %siemens_project_name% --config %siemens_project_config%
 @echo off
 goto :eof
 
 :importSymbols
 :: ----------------------------------------------------------------------
-:: importing symbols to existing project
-
-:: %S7CLI% importSymbols -p %existingProjectDirPath% -s %symbolsPath%
-
-:: ----------------------------------------------------------------------
 :: importing symbols to existing project with the program name different that "S7 Program(1)"
 
 @echo on
-%S7CLI% importSymbols -p %existingProjectDirPath% -s %symbolsPath% --program %S7ProgramName%
+%s7_cli_path% importSymbols --project %siemens_project_name% --symbols %uab_project_symbols% --program %siemens_project_program_name%
 @echo off
 goto :eof
 
@@ -67,7 +101,7 @@ goto :eof
 :: importing sources from library
 
 @echo on
-%S7CLI% importLibSources --project %existingProjectDirPath% --program %destinationProjectProgramName% --library %libProjectName% --libprg %libProjectProgramName% 
+%s7_cli_path% importLibSources --project %siemens_project_name% --program %siemens_project_program_name% --library %siemens_baseline_project_name% --libprg %siemens_baseline_project_program_name% 
 @echo off
 goto :eof
 
@@ -76,19 +110,27 @@ goto :eof
 :: importing blocks from library
 
 @echo on
-%S7CLI% importLibBlocks --project %existingProjectDirPath% --program %destinationProjectProgramName% --library %libProjectName% --libprg %libProjectProgramName% 
+%s7_cli_path% importLibBlocks --project %siemens_project_name% --program %siemens_project_program_name% --library %siemens_baseline_project_name% --libprg %siemens_baseline_project_program_name%
 @echo off
 goto :eof
 
-:importSources
+:importInstanceSources
 :: ----------------------------------------------------------------------
 :: importing instance and logic sources
 
 @echo on
-%S7CLI% importSourcesDir --project %existingProjectDirPath% --program %destinationProjectProgramName% --srcdir %newProjectDirPath%\Output\S7InstanceGenerator 
-%S7CLI% importSourcesDir --project %existingProjectDirPath% --program %destinationProjectProgramName% --srcdir %newProjectDirPath%\Output\S7LogicGenerator 
+%s7_cli_path% importSourcesDir --project %siemens_project_name% --program %siemens_project_program_name% --srcdir %uab_project_instance_dir% 
 @echo off
+goto :eof
 
+
+:importLogicSources
+:: ----------------------------------------------------------------------
+:: importing instance and logic sources
+
+@echo on
+%s7_cli_path% importSourcesDir --project %siemens_project_name% --program %siemens_project_program_name% --srcdir %uab_project_logic_dir% 
+@echo off
 goto :eof
 
 :compile
@@ -96,7 +138,38 @@ goto :eof
 :: compiling sources
 
 @echo on
-%S7CLI% compileSources --project %existingProjectDirPath% --program %destinationProjectProgramName% --sources 1_Compilation_Baseline,2_Compilation_instance,3_Compilation_LOGIC,4_Compilation_OB
+%s7_cli_path% compileSources --project %siemens_project_name% --program %siemens_project_program_name% --sources %uab_project_compilation_file%
 @echo off
+goto :eof
 
+:downloadSystemData
+:: ----------------------------------------------------------------------
+:: downloading all blocks to the CPU
+@echo on
+%s7_cli_path% downloadSystemData --project %siemens_project_name% --program %siemens_project_program_name% --force y
+@echo off
+goto :eof
+
+:downloadAllBlocks
+:: ----------------------------------------------------------------------
+:: downloading all blocks to the CPU
+@echo on
+%s7_cli_path% downloadAllBlocks --project %siemens_project_name% --program %siemens_project_program_name% --force y
+@echo off
+goto :eof
+
+:startCPU
+:: ----------------------------------------------------------------------
+:: starting CPU
+@echo on
+%s7_cli_path% startCPU --project %siemens_project_name% --program %siemens_project_program_name%
+@echo off
+goto :eof
+
+:stopCPU
+:: ----------------------------------------------------------------------
+:: stopping CPU
+@echo on
+%s7_cli_path% stopCPU --project %siemens_project_name% --program %siemens_project_program_name%
+@echo off
 goto :eof
