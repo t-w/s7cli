@@ -1,6 +1,5 @@
 @echo off
 cls
-set error_return=0
 ::----------------------------------------------------------------------
 :: path to the S7 command line interface
 
@@ -12,7 +11,7 @@ set uab_project_path=D:\MDudek\Projects\CPC6_TEST_PLC\CPC6.generator\1.4
 set uab_project_instance_dir=%uab_project_path%\Output\S7InstanceGenerator
 set uab_project_logic_dir=%uab_project_path%\Output\S7LogicGenerator
 set uab_project_symbols=%uab_project_instance_dir%\Symbol.sdf
-set uab_project_compilation_file=1_Compilation_Baseline,2_Compilation_instance,3_Compilation_LOGIC,4_Compilation_OB
+set uab_project_compilation_files=1_Compilation_Baseline,2_Compilation_instance,3_Compilation_LOGIC,4_Compilation_OB
 
 ::----------------------------------------------------------------------
 :: SIEMENS configuration
@@ -138,7 +137,7 @@ goto :eof
 :: compiling sources
 
 @echo on
-%s7_cli_path% compileSources --project %siemens_project_name% --program %siemens_project_program_name% --sources %uab_project_compilation_file%
+%s7_cli_path% compileSources --project %siemens_project_name% --program %siemens_project_program_name% --sources %uab_project_compilation_files%
 @echo off
 goto :eof
 
