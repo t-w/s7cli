@@ -649,7 +649,10 @@ namespace S7_cli
         {
             string filename = System.IO.Path.GetFileName(filenameFullPath);
             string extension = System.IO.Path.GetExtension(filename);
-            if (extension.ToLower() == ".scl" || extension.ToLower() == ".awl" || extension.ToLower() == ".inp")
+            if (extension.ToLower() == ".scl" || 
+                extension.ToLower() == ".awl" || 
+                extension.ToLower() == ".inp" || 
+                extension.ToLower() == ".gr7")
             //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
                 return addSourceWithType(programName, S7SWObjType.S7Source, filenameFullPath, forceOverwrite);
             else {
@@ -669,7 +672,8 @@ namespace S7_cli
             try {
                 foreach (S7Source source in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
-                    source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
+                        Logger.log("Copying source: " + source.Name);
+                        source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
                 }
             } catch (SystemException exc) {
                 Console.WriteLine("Error: " + exc.Message + "\n");
@@ -689,7 +693,8 @@ namespace S7_cli
             try {
                 foreach (S7Block block in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
-                    block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
+                        Logger.log("Copying block: " + block.SymbolicName + " (" + block.Name + ")");
+                        block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
                 }
             } catch (SystemException exc) {
                 Console.WriteLine("Error: " + exc.Message + "\n");
