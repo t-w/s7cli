@@ -835,7 +835,9 @@ namespace S7_cli
          * 
          * return values:
          *    0 success
-         *   -1 error
+         *   <0 error
+         *   -1 source not found
+         *   -2 exception during compilation
          *    1 unknown
          */
         public int compileSource(string programName, string sourceName)
@@ -843,12 +845,11 @@ namespace S7_cli
             S7Source src = getS7SourceModule(programName, sourceName);
             if (src == null)
                 return -1;
-
             try {
                 IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
             } catch (System.Exception exc) {
-                System.Console.Write("\n** Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
-                return -1;
+                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                return -2;
             }
             //IntPtr ptr = new IntPtr((Void *) items. );
             /*Console.Write("\n" + items. ToString() + "\n" + items.Count + "\n");

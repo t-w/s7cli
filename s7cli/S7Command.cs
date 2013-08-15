@@ -433,9 +433,17 @@ namespace S7_cli
             Logger.log("\nBuilding source(s) in program: " + programName + "\n\n");
             foreach (string src in sources)  {
                 Logger.log("\nCompiling source: " + src);
-                s7project.compileSource(programName, src);
+                int result = s7project.compileSource(programName, src);
+                if (result == -1) {
+                    Logger.log("Source '" + src + "' not found in program '" + programName + "' !");
+                    S7Status.set_status(S7Status.failure);
+                } else if (result == -2) {
+                    //Logger.log("Exception compiling " + src + "!");
+                    S7Status.set_status(S7Status.failure);
+                }
             }
-            S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
+            if (! S7Status.status_set() )
+                S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
         }
 
 
