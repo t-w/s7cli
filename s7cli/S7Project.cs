@@ -9,6 +9,92 @@ using S7HCOM_XLib;
 
 namespace S7_cli
 {
+    /// class SimaticAPI
+    /// <summary>
+    /// main interface for accessing Simatic Step7 environment
+    /// </summary>
+    ///
+    public class SimaticAPI
+    {
+        private static Simatic simatic = null;
+
+        /*
+         * Constructor
+         */
+        public SimaticAPI()
+        {
+            simatic = new Simatic();
+
+            if (simatic == null)  {
+                Logger.log_error("SimaticAPI(): cannot initialize Simatic");
+            } 
+
+            Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
+
+            // force server mode
+            enableUnattendedServerMode();
+        }
+
+
+        public void enableUnattendedServerMode()
+        {
+            if (simatic != null) {
+                simatic.UnattendedServerMode = true;
+                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+            } else {
+                Logger.log_error("Cannot set \"UnattendedServerMode\" to true! Simatic variable is null!");
+            }
+        }
+
+        public void disableUnattendedServerMode()
+        {
+            if (simatic != null) {
+                simatic.UnattendedServerMode = false;
+                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+            } else {
+                Logger.log_error("Cannot set \"UnattendedServerMode\" to false! Simatic variable is null!");
+            }
+        }
+
+        public string getListOfAvailableProjects()
+        {
+            string availableProjects = "";
+            foreach (IS7Project project in simatic.Projects)  {
+                availableProjects += ("- " + project.Name + ", " + project.LogPath + "\n");
+            }
+            return availableProjects;
+        }
+
+        public Simatic getSimatic()
+        {
+            return simatic;
+        }
+
+
+        /*
+         * Destructor
+         */
+        ~SimaticAPI()
+        {
+            //Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
+            //Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
+
+            // make sure of saving all changes
+            if (simatic != null){
+                Logger.log_debug("Saving changes.");
+                simatic.Save();
+            }
+        }
+    
+    }
+
+
+
+    /// class S7ProjectNotOpenException
+    /// <summary>
+    /// S7 project not open excetion
+    /// </summary>
+    ///
     public class S7ProjectNotOpenException : System.ApplicationException
     {
         public S7ProjectNotOpenException() { }
@@ -21,72 +107,27 @@ namespace S7_cli
             System.Runtime.Serialization.StreamingContext context) { }
     }
 
+    /// class S7Project
+    /// <summary>
+    /// open and work with a single S7 project
+    /// </summary>
+    ///
     public class S7Project
     {
-        private static Simatic simatic = null;
+        
+        private SimaticAPI simaticapi = null;
         private IS7Project simaticProject = null;
 
-        /*
-         * Class methods
-         */
-
-        private static Simatic openSimatic(){
-            if (simatic == null) {
-                simatic = new Simatic();
-
-                Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
-
-                // force server mode
-                enableUnattendedServerMode();
-            }
-            return simatic;
-        }
-
-        private static void enableUnattendedServerMode()
-        {
-            if (simatic != null)
-            {
-                simatic.UnattendedServerMode = true;
-                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
-            }
-            else
-            {
-                Logger.log_error("Cannot set \"UnattendedServerMode\" to true! Simatic variable is null!");
-            }
-        }
-
-        private static void disableUnattendedServerMode()
-        {
-            if (simatic != null)
-            {
-                simatic.UnattendedServerMode = false;
-                Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
-            }
-            else
-            {
-                Logger.log_error("Cannot set \"UnattendedServerMode\" to false! Simatic variable is null!");
-            }
-        }
-
-        public static string getListOfAvailableProjects()
-        {
-            S7Project.openSimatic();
-            string availableProjects = "";
-            foreach (IS7Project project in simatic.Projects)  {
-                availableProjects += ("- " + project.Name + ", " + project.LogPath + "\n");
-            }
-            return availableProjects;
-        }
 
         /*
          * Constructors
          */
 
-
         //public plcProject(string Name)
         public S7Project(string pathOrName)
         {
-            S7Project.openSimatic();
+            simaticapi = new SimaticAPI();
+            Simatic simatic = simaticapi.getSimatic();
 
             foreach (IS7Project project in simatic.Projects)  {
                 //System.Console.Write("Project creator: \n" + project.Creator simatic.Projects.Count + "\n");
@@ -112,14 +153,15 @@ namespace S7_cli
             if (simaticProject == null) {
                 Logger.log_error("Project with path or name: " + pathOrName + 
                     " not found on list of available project!!!\n\nAvailable projects:\n");
-                Logger.log_error(getListOfAvailableProjects());
+                Logger.log_error(simaticapi.getListOfAvailableProjects());
             }
         }
 
 
         public S7Project(string projectName, string projectDirPath)
         {
-            S7Project.openSimatic();
+            simaticapi = new SimaticAPI();
+            Simatic simatic = simaticapi.getSimatic();
 
             // checking if the project dir path ends with "\"
             if (!projectDirPath.EndsWith("\\"))  {
@@ -149,21 +191,6 @@ namespace S7_cli
             }
         }
 
-
-        /*
-         * Destructor
-         */
-        ~S7Project()
-        {
-            //Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
-            //Logger.log_debug("UnattendedServerMode: " + simatic.UnattendedServerMode.ToString());
-
-            // make sure of saving all changes
-            if (simatic != null){
-                Logger.log_debug("Saving changes.");
-                simatic.Save();
-            }
-        }
 
 
         /*
@@ -307,7 +334,7 @@ namespace S7_cli
             {
                 if (force)
                 {
-                    enableUnattendedServerMode();
+                    simaticapi.enableUnattendedServerMode();
 
                     foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                     {
@@ -326,7 +353,7 @@ namespace S7_cli
                 }
                 else
                 {
-                    disableUnattendedServerMode();
+                    simaticapi.disableUnattendedServerMode();
 
                     foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                     {
@@ -366,7 +393,7 @@ namespace S7_cli
             {
                 if (force)
                 {
-                    enableUnattendedServerMode();
+                    simaticapi.enableUnattendedServerMode();
 
                     foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                     {
@@ -384,7 +411,7 @@ namespace S7_cli
                 }
                 else
                 {
-                    disableUnattendedServerMode();
+                    simaticapi.disableUnattendedServerMode();
 
                     foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                     {
@@ -663,12 +690,16 @@ namespace S7_cli
 
         public bool importLibSources(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
         {
+            /*
             if (simaticProject == null) {
                 Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
                 return false;
-            } 
-            Simatic libSimatic = new Simatic();
+            } */
+            //Simatic libSimatic = new Simatic();
+            Simatic libSimatic = simaticapi.getSimatic();
 
+            Logger.log("Copying sources from: " + libProjectName + " / " + libProjectProgramName +
+                     "\n                  to: " + getS7ProjectName() + " / " + destinationProjectProgramName);
             try {
                 foreach (S7Source source in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
@@ -679,21 +710,33 @@ namespace S7_cli
                 Console.WriteLine("Error: " + exc.Message + "\n");
                 return false;
             }
+
             return true;
         }
 
         public bool importLibBlocks(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
         {
+            /*
             if (simaticProject == null) {
                 Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
                 return false;
-            }
-            Simatic libSimatic = new Simatic();
+            } */
+            //Simatic libSimatic = new Simatic();
+            Simatic libSimatic = simaticapi.getSimatic();
 
+            Logger.log("Copying blocks from: " + libProjectName + " / " + libProjectProgramName +
+                     "\n                 to: " + getS7ProjectName() + " / " + destinationProjectProgramName);
             try {
                 foreach (S7Block block in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
+                        if (block.Name == "System data") {
+                            // Note: 'System Data' block do not have '.SymbolicName'!
+                            Logger.log("   Skipping 'System data'!");
+                            continue;
+                        }
+
                         Logger.log("Copying block: " + block.SymbolicName + " (" + block.Name + ")");
+                        //Logger.log("Copying block: " + block.Name);      // Note: 'System Data' block do not have '.SymbolicName'!
                         block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
                 }
             } catch (SystemException exc) {

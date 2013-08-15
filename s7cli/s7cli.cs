@@ -100,7 +100,7 @@ namespace S7_cli
             _|_|      _|      _|        _|  _|
         _|_|_|      _|          _|_|_|  _|  _|
 
-        Simatic Step7 command-line interface, v0.1
+        Simatic Step7 command-line interface, v0.2
         (C) 2013 CERN, TE-CRG-CE Controls
 
         Authors: Michal Dudek, Tomasz Wolak
