@@ -379,11 +379,11 @@ namespace S7_cli
         }
 
         public void importLibSources(string projectPathOrName, string libProjectName,
-                                     string libProjectProgramName, string destinationProjectProgramName)
+                                     string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
         {
             this.openProject(projectPathOrName);
-            if (s7project.importLibSources(libProjectName, libProjectProgramName, 
-                    destinationProjectProgramName))
+            if (s7project.importLibSources(libProjectName, libProjectProgramName,
+                    destinationProjectProgramName, forceOverwrite))
                 S7Status.set_status(S7Status.success);
             else
                 S7Status.set_status(S7Status.failure);
@@ -391,11 +391,11 @@ namespace S7_cli
         }
 
         public void importLibBlocks(string projectPathOrName, string libProjectName,
-                                    string libProjectProgramName, string destinationProjectProgramName)
+                                    string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
         {
             this.openProject(projectPathOrName);
-            if (s7project.importLibBlocks(libProjectName, libProjectProgramName, 
-                    destinationProjectProgramName))
+            if (s7project.importLibBlocks(libProjectName, libProjectProgramName,
+                    destinationProjectProgramName, forceOverwrite))
                 S7Status.set_status(S7Status.success);
             else
                 S7Status.set_status(S7Status.failure);

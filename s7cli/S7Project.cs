@@ -688,7 +688,19 @@ namespace S7_cli
             }
         }
 
-        public bool importLibSources(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+        public void removeSource (string programName, string sourceName){
+            IS7SWItem src = getSourceModule(programName, sourceName);
+            try {
+                src.Remove();
+            } catch (SystemException exc) {
+                Console.WriteLine("Error: removeBlock()" + exc.Message + "\n");
+                //return false;
+            }
+        }
+
+
+        public bool importLibSources(string libProjectName, string libProjectProgramName, 
+                                     string destinationProjectProgramName, bool forceOverwrite = false)
         {
             /*
             if (simaticProject == null) {
@@ -696,14 +708,27 @@ namespace S7_cli
                 return false;
             } */
             //Simatic libSimatic = new Simatic();
-            Simatic libSimatic = simaticapi.getSimatic();
+            Simatic libSimatic = this.simaticapi.getSimatic();
 
-            Logger.log("Copying sources from: " + libProjectName + " / " + libProjectProgramName +
-                     "\n                  to: " + getS7ProjectName() + " / " + destinationProjectProgramName);
+            Logger.log("\nCopying sources from: " + libProjectName + " / " + libProjectProgramName +
+                     "\n                  to: " + this.getS7ProjectName() + " / " + destinationProjectProgramName);
             try {
                 foreach (S7Source source in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
-                        Logger.log("Copying source: " + source.Name);
+                        Logger.log("\nCopying source: " + source.Name);
+                        if (this.sourceExists(destinationProjectProgramName, source.Name)) {
+                            Logger.log("This source already exists in " + this.getS7ProjectName() + 
+                                       " / " + destinationProjectProgramName);
+
+                            if (forceOverwrite) {
+                                Logger.log("Overwrite forced! (removing and copying the source)");
+                                //continue;
+                                this.removeSource(destinationProjectProgramName, source.Name);
+                            } else {
+                                Logger.log("Skipping the block!");
+                                continue;
+                            }
+                        }
                         source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
                 }
             } catch (SystemException exc) {
@@ -714,7 +739,41 @@ namespace S7_cli
             return true;
         }
 
-        public bool importLibBlocks(string libProjectName, string libProjectProgramName, string destinationProjectProgramName)
+
+        public S7Block getBlock(string ProgramName, string blockName){
+            foreach (S7Block block in simaticProject.Programs[ProgramName].Next["Blocks"].Next) {
+                if (block.Name == blockName) {
+                    Logger.log_debug("getBlock(): found block: " + blockName);
+                    return block;
+                }
+            }
+            Logger.log_debug("getBlock(): block " + blockName + " not found" );
+            return null;
+        }
+
+        public bool blockExists(string ProgramName, string blockName)
+        {
+            if (this.getBlock(ProgramName, blockName) != null) {
+                Logger.log_debug("blockExists(): found block: " + blockName);
+                return true;
+            }
+
+            Logger.log_debug("blockExists(): block " + blockName + " not found" );
+            return false;
+        }
+
+        public void removeBlock(string ProgramName, string blockName){
+            S7Block block = this.getBlock(ProgramName, blockName);
+            try {
+                block.Remove();
+            } catch (SystemException exc) {
+                Console.WriteLine("Error: removeBlock()" + exc.Message + "\n");
+                //return false;
+            }
+        }
+
+        public bool importLibBlocks(string libProjectName, string libProjectProgramName,
+                                    string destinationProjectProgramName, bool forceOverwrite = false)
         {
             /*
             if (simaticProject == null) {
@@ -722,22 +781,34 @@ namespace S7_cli
                 return false;
             } */
             //Simatic libSimatic = new Simatic();
-            Simatic libSimatic = simaticapi.getSimatic();
+            Simatic libSimatic = this.simaticapi.getSimatic();
 
-            Logger.log("Copying blocks from: " + libProjectName + " / " + libProjectProgramName +
-                     "\n                 to: " + getS7ProjectName() + " / " + destinationProjectProgramName);
+            Logger.log("\nCopying blocks from: " + libProjectName + " / " + libProjectProgramName +
+                     "\n                 to: " + this.getS7ProjectName() + " / " + destinationProjectProgramName);
             try {
                 foreach (S7Block block in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Blocks"].Next) {
                         if (block.Name == "System data") {
-                            // Note: 'System Data' block do not have '.SymbolicName'!
-                            Logger.log("   Skipping 'System data'!");
+                            // cannot copy system data!!!
+                            // (Note: 'System Data' block do not have '.SymbolicName'! )
+                            Logger.log("\nCannot copy 'System data' - skipping it!");
                             continue;
                         }
+                        Logger.log("\nCopying block: " + block.SymbolicName + " (" + block.Name + ")");
 
-                        Logger.log("Copying block: " + block.SymbolicName + " (" + block.Name + ")");
-                        //Logger.log("Copying block: " + block.Name);      // Note: 'System Data' block do not have '.SymbolicName'!
-                        block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);
+                        if (this.blockExists(destinationProjectProgramName, block.Name)) {
+                            Logger.log("Block " + block.Name + " already exists in " + this.getS7ProjectName() + " / " + destinationProjectProgramName);
+                            if (forceOverwrite) {
+                                Logger.log("Overwrite forced! (removing and copying the block)");
+                                //continue;
+                                this.removeBlock(destinationProjectProgramName, block.Name);
+                            } else {
+                                Logger.log("Skipping the block!");
+                                continue;
+                            }
+                        }
+
+                        block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);                        
                 }
             } catch (SystemException exc) {
                 Console.WriteLine("Error: " + exc.Message + "\n");

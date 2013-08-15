@@ -100,7 +100,7 @@ namespace S7_cli
             _|_|      _|      _|        _|  _|
         _|_|_|      _|          _|_|_|  _|  _|
 
-        Simatic Step7 command-line interface, v0.2
+        Simatic Step7 command-line interface, v0.3
         (C) 2013 CERN, TE-CRG-CE Controls
 
         Authors: Michal Dudek, Tomasz Wolak
@@ -214,17 +214,33 @@ namespace S7_cli
                     s7command.listBlocks(options.getOption("--project"),
                                          options.getOption("--program"));
 
-                else if (command == "importLibSources")
-                    s7command.importLibSources(options.getOption("--project"),
-                                               options.getOption("--library"),
-                                               options.getOption("--libprg"),
-                                               options.getOption("--program"));
+                else if (command == "importLibSources") {
+                    if (options.optionSet("--force"))
+                        s7command.importLibSources(options.getOption("--project"),
+                                                   options.getOption("--library"),
+                                                   options.getOption("--libprg"),
+                                                   options.getOption("--program"),
+                                                   options.getOption("--force") == "y");
+                    else
+                        s7command.importLibSources(options.getOption("--project"),
+                                                   options.getOption("--library"),
+                                                   options.getOption("--libprg"),
+                                                   options.getOption("--program"));
+                }
 
-                else if (command == "importLibBlocks")
-                    s7command.importLibBlocks(options.getOption("--project"),
-                                               options.getOption("--library"),
-                                               options.getOption("--libprg"),
-                                               options.getOption("--program"));
+                else if (command == "importLibBlocks") {
+                    if (options.optionSet("--force"))
+                        s7command.importLibBlocks(options.getOption("--project"),
+                                                  options.getOption("--library"),
+                                                  options.getOption("--libprg"),
+                                                  options.getOption("--program"),
+                                                  options.getOption("--force") == "y");
+                    else
+                        s7command.importLibBlocks(options.getOption("--project"),
+                                                  options.getOption("--library"),
+                                                  options.getOption("--libprg"),
+                                                  options.getOption("--program"));
+                }
 
                 else if (command == "importSources") {
                     if (options.optionSet("--force"))
@@ -238,8 +254,7 @@ namespace S7_cli
                                                 options.getOption("--sources").Split(','));
                 }
 
-                else if (command == "importSourcesDir")
-                {
+                else if (command == "importSourcesDir") {
                     string srcdir = options.getOption("--srcdir");
                     /*Logger.log_debug("\nImporting source files\n\n");
                     Logger.log_debug("\nProject: " + projectDir + "\n");
@@ -247,7 +262,7 @@ namespace S7_cli
                     Logger.log_debug("\ndirectory with sources to import: " + srcdir + "\n"); */
                     List<string> srcfileslist = new List<string>();
                     srcfileslist = new List<string>();
-                    string[] ext2import = { "*.SCL", "*.AWL", "*.INP" };
+                    string[] ext2import = { "*.SCL", "*.AWL", "*.INP", "*.GR7" };
                     foreach (string ext in ext2import)
                         srcfileslist.AddRange(
                             System.IO.Directory.GetFiles(srcdir, ext,
@@ -264,6 +279,7 @@ namespace S7_cli
                                                 srcfiles);
 
                 }
+
                 else if (command == "compileSources")
                     s7command.compileSources(options.getOption("--project"),
                                              options.getOption("--program"),
@@ -289,7 +305,7 @@ namespace S7_cli
                     s7command.compileStation(options.getOption("--project"),
                                              options.getOption("--station"));
 
-                else if (command == "downloadSystemData")
+                else if (command == "downloadSystemData") {
                     if (options.optionSet("--force"))
                         s7command.downloadSystemData(options.getOption("--project"),
                                                      options.getOption("--program"),
@@ -297,8 +313,9 @@ namespace S7_cli
                     else
                         s7command.downloadSystemData(options.getOption("--project"),
                                                      options.getOption("--program"));
+                }
 
-                else if (command == "downloadAllBlocks")
+                else if (command == "downloadAllBlocks") {
                     if (options.optionSet("--force"))
                         s7command.downloadAllBlocks(options.getOption("--project"),
                                                     options.getOption("--program"),
@@ -306,17 +323,17 @@ namespace S7_cli
                     else
                         s7command.downloadAllBlocks(options.getOption("--project"),
                                                     options.getOption("--program"));
-                
+                }
+
                 else if (command == "startCPU")
                     s7command.startCPU(options.getOption("--project"),
                                        options.getOption("--program"));
-                
+
                 else if (command == "stopCPU")
                     s7command.stopCPU(options.getOption("--project"),
                                       options.getOption("--program"));
 
-                else
-                {
+                else  {
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();
