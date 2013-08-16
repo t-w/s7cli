@@ -1,0 +1,13 @@
+
+Known problems/bugs in s7cli                                     -*- text -*-
+----------------------------
+
+* importation and copying (block and sources) seems much slower than 
+using GUI; not critical as machines are wasting time not us, but it
+could be fixed (if possible - for the moment reason unknown...)
+
+* program _is not_ prepared for any possible input arguments that
+can be provided, please do not expect useful error information for 
+any possible case (it has improved but for the moment no time to do 
+more)
+

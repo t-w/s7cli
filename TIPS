@@ -1,0 +1,9 @@
+
+TIPS concerning usage of s7cli                                   -*- text -*-
+------------------------------
+
+* name programs inside single project (esp. with several PLC inside) 
+in a way they can be _easily_ identified, ie. give unique name for 
+each program within a single Step7 project (at least do it for each 
+program which you need to use with the tool) 
+
