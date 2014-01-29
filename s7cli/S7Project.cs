@@ -526,7 +526,9 @@ namespace S7_cli
                 int nrOfSymbols = 0;
 
                 try {
-                    nrOfSymbols = simaticProject.Programs[programName].SymbolTable.Import(symbolsPath);
+                    S7SymbolTable symbolTable = (S7SymbolTable)simaticProject.Programs[programName].SymbolTable;
+                    
+                    nrOfSymbols = symbolTable.Import(symbolsPath);
                 } catch (SystemException exc) {
                     System.Console.Write("Error: " + exc.Message + "\n");
                 }
@@ -824,11 +826,15 @@ namespace S7_cli
             //S7Source source = (S7Source) item.Program.;
 
             //IS7Source src = getSources("ARC56_program").get_Child("test11"); //get_Collection("test11");
+            S7Source src;
+            try {
+                src = (S7Source) simaticProject.Programs[programName].Next["Sources"].Next[moduleName];
+            } catch (Exception exc) {
+                Console.WriteLine("Warning: " + exc.Message + "\n");
+                src = null;
+            }
 
-            foreach (S7Source src in simaticProject.Programs[programName].Next["Sources"].Next)
-                if (src.Name == moduleName)
-                    return src;
-            return null;
+            return src;
         }
 
         /* compileSource()

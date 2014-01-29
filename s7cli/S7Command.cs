@@ -138,6 +138,8 @@ namespace S7_cli
         public bool exportConfig(string projectPathOrName, string stationName, string projectConfigPath)
         {
             this.openProject(projectPathOrName);
+
+            Logger.log("\n\nExporting hardware config of " + stationName + " to " + projectConfigPath + "\n");
             bool cmd_status_ok = s7project.exportConfig(stationName, projectConfigPath);
             if (cmd_status_ok)
                 S7Status.set_status(S7Status.success);
