@@ -11,3 +11,8 @@ can be provided, please do not expect useful error information for
 any possible case (it has improved but for the moment no time to do 
 more)
 
+* importation of hardware configuration (importConfig) _always_ creates
+a new station; moreover - it does not accept all types of configuration file
+(as does the same function selected from SIMATIC's menu), 
+i.e. FILEVERSION "3.2" does not seem supported by the library
+
