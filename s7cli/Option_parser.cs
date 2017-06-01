@@ -12,7 +12,7 @@ namespace S7_cli
         public static readonly string[] commands = { 
             "createProject", "listProjects", "listPrograms", "importConfig", "exportConfig", 
             "importSymbols", "exportSymbols",
-            "listSources", "listBlocks", "importLibSources", "importLibBlocks", "importSources", 
+            "listSources", "listBlocks", "importLib", "importLibSources", "importLibBlocks", "importSources", 
             "importSourcesDir", "compileSources", "exportSources", 
             "exportAllSources", "exportProgramStructure",
             "compileStation", "downloadSystemData", "downloadAllBlocks",
@@ -45,6 +45,8 @@ namespace S7_cli
                     { "--srcdir",              new string[] { "",   "directory with source code files" }},
                     { "--library",             new string[] { "-l", "library name (do 'listProjects' if not sure)" }},
                     { "--libprg",              new string[] { "",   "program in library project" }},
+                    { "--libdir",              new string[] { "", "path to the library to import" }},
+                    { "--libname",             new string[] { "", "name of the imported library" }},
                     { "--dest-proj-prog-name", new string[] { "",   "name of the destination project program" }}, // -> to remove (?) -> use program option
 
                     { "--symbols",             new string[] { "-s", "path to file with symbols" }},
@@ -64,6 +66,7 @@ namespace S7_cli
                     { "listProjects",        "List available Simatic projects" },
                     { "listPrograms",        "List available programs in Simatic project/library" },
                     { "importConfig",        "Import station configuration from a file" },
+                    { "importLib",           "Import a library to Step-7"},
                     { "exportConfig",        "Export station configuration to a file" },
                     { "importSymbols",       "Import program symbols from a file" },
                     { "exportSymbols",       "Export program symbols to a file" },
@@ -90,6 +93,7 @@ namespace S7_cli
                     { "listProjects",           new string[] { "--debug", }},
                     { "listPrograms",           new string[] { "--debug", "--project" }},
                     { "importConfig",           new string[] { "--debug", "--project", "--config" }},
+                    { "importLib",              new string[] { "--debug", "--libdir", "--libname"}},
                     { "exportConfig",           new string[] { "--debug", "--project", "--config", "--station" }},
                     { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
                     { "exportSymbols",          new string[] { "--debug", "--project", "--program", "--output", "--force" }},
@@ -116,6 +120,7 @@ namespace S7_cli
                     { "listProjects",        new string[] { }},
                     { "listPrograms",        new string[] { "--project" }},
                     { "importConfig",        new string[] { "--project", "--config" }},
+                    { "importLib",           new string[] { "--libdir", "--libname"}},
                     { "exportConfig",        new string[] { "--project", "--config", "--station" }},
                     { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
                     { "exportSymbols",       new string[] { "--project", "--program", "--output" }},

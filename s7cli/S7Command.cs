@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SimaticLib;
+using S7HCOM_XLib;
+
 namespace S7_cli
 {
 
@@ -92,6 +95,22 @@ namespace S7_cli
             else
                 S7Status.set_status(S7Status.failure);
             return s7project.isProjectOpened();
+        }
+
+
+        public bool importLibrary(string path, string name)
+        {            
+            bool result = S7Project.importLibrary(path, name);
+            if (result)
+            {
+                S7Status.set_status(S7Status.success);
+            }
+            else
+            {
+                S7Status.set_status(S7Status.failure);
+            }
+
+            return result;
         }
 
 

@@ -164,30 +164,62 @@ namespace S7_cli
             Simatic simatic = simaticapi.getSimatic();
 
             // checking if the project dir path ends with "\"
-            if (!projectDirPath.EndsWith("\\"))  {
+            if (!projectDirPath.EndsWith("\\"))
+            {
                 projectDirPath = projectDirPath + "\\";
             }
 
             // concatenating real project dir path
             string projectPath;
 
-            if(projectName.Length > 8)  {
+            if (projectName.Length > 8)
+            {
                 projectPath = projectDirPath + projectName.Substring(0, 8);
-            } else  {
+            }
+            else
+            {
                 projectPath = projectDirPath + projectName;
             }
 
             // checking if directory path is not taken
-            if (Directory.Exists(projectPath))  {
+            if (Directory.Exists(projectPath))
+            {
                 System.Console.Write("Error: Cannot create project because folder " + projectPath + " already exists!\n");
                 System.Console.Write("Error: Project not created! Exiting program!\n");
                 Environment.Exit(1);
-            } else {
-                try {
+            }
+            else
+            {
+                try
+                {
                     simaticProject = simatic.Projects.Add(projectName, projectDirPath, S7ProjectType.S7Project);
-                }  catch (SystemException exc)  {
+                }
+                catch (SystemException exc)
+                {
                     System.Console.Write("Error in S7Project(): " + exc.Message + "\n");
                 }
+            }
+        }
+
+
+        public static Boolean importLibrary(string libPath, string libName)
+        {
+            if (!Directory.Exists(libPath))
+            {
+                System.Console.Write("Error: The library path does not exist: " + libPath + "\n");
+                Environment.Exit(1);
+            }
+            string projectDirPath = Directory.GetParent(libPath).FullName;            
+
+            try
+            {
+                new SimaticAPI().getSimatic().Projects.Add(libName, projectDirPath, S7ProjectType.S7Library);
+                return true;
+            }
+            catch (SystemException exc)
+            {
+                System.Console.Write("Error in S7Project(): " + exc.Message + "\n");
+                return false;
             }
         }
 

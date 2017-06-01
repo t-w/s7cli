@@ -181,6 +181,9 @@ namespace S7_cli
                     s7command.importConfig(options.getOption("--project"),
                                            options.getOption("--config"));
 
+                else if (command == "importLib")
+                    s7command.importLibrary(options.getOption("--libdir"), options.getOption("--libname"));
+
                 else if (command == "exportConfig")
                     s7command.exportConfig(options.getOption("--project"),
                                            options.getOption("--station"),
