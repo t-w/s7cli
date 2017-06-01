@@ -158,7 +158,7 @@ namespace S7_cli
         }
 
 
-        public S7Project(string projectName, string projectDirPath)
+        public S7Project(string projectName, string projectDirPath, S7ProjectType projectType)
         {
             simaticapi = new SimaticAPI();
             Simatic simatic = simaticapi.getSimatic();
@@ -192,7 +192,7 @@ namespace S7_cli
             {
                 try
                 {
-                    simaticProject = simatic.Projects.Add(projectName, projectDirPath, S7ProjectType.S7Project);
+                    simaticProject = simatic.Projects.Add(projectName, projectDirPath, projectType);
                 }
                 catch (SystemException exc)
                 {
@@ -200,29 +200,6 @@ namespace S7_cli
                 }
             }
         }
-
-
-        public static Boolean importLibrary(string libPath, string libName)
-        {
-            if (!Directory.Exists(libPath))
-            {
-                System.Console.Write("Error: The library path does not exist: " + libPath + "\n");
-                Environment.Exit(1);
-            }
-            string projectDirPath = Directory.GetParent(libPath).FullName;            
-
-            try
-            {
-                new SimaticAPI().getSimatic().Projects.Add(libName, projectDirPath, S7ProjectType.S7Library);
-                return true;
-            }
-            catch (SystemException exc)
-            {
-                System.Console.Write("Error in S7Project(): " + exc.Message + "\n");
-                return false;
-            }
-        }
-
 
 
         /*

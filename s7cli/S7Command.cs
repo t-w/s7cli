@@ -87,30 +87,15 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
-        public bool createProject(string projectName, string projectDirectory)
+
+        public bool createProject(string name, string dir, S7ProjectType type)
         {
-            s7project = new S7Project(projectName, projectDirectory);
+            s7project = new S7Project(name, dir, type);
             if (s7project.isProjectOpened())
                 S7Status.set_status(S7Status.success);
             else
                 S7Status.set_status(S7Status.failure);
             return s7project.isProjectOpened();
-        }
-
-
-        public bool importLibrary(string path, string name)
-        {            
-            bool result = S7Project.importLibrary(path, name);
-            if (result)
-            {
-                S7Status.set_status(S7Status.success);
-            }
-            else
-            {
-                S7Status.set_status(S7Status.failure);
-            }
-
-            return result;
         }
 
 

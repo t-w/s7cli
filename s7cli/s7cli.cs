@@ -175,14 +175,17 @@ namespace S7_cli
 
                 else if (command == "createProject")
                     s7command.createProject(options.getOption("--projname"),
-                                            options.getOption("--projdir"));
+                                            options.getOption("--projdir"),
+                                            S7ProjectType.S7Project);
 
                 else if (command == "importConfig")
                     s7command.importConfig(options.getOption("--project"),
                                            options.getOption("--config"));
 
-                else if (command == "importLib")
-                    s7command.importLibrary(options.getOption("--libdir"), options.getOption("--libname"));
+                else if (command == "createLib")
+                    s7command.createProject(options.getOption("--libname"),
+                                            options.getOption("--libdir"),
+                                            S7ProjectType.S7Library);
 
                 else if (command == "exportConfig")
                     s7command.exportConfig(options.getOption("--project"),
