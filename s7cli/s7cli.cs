@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 //using System.Runtime.InteropServices;
+using System.Reflection;
 
 using SimaticLib;
 
@@ -92,20 +93,31 @@ namespace S7_cli
 
     class s7cli
     {
-        static readonly string logo = @"
+        static Option_parser options;
+
+        static public string get_version()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
+                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
+        }
+
+        static public void show_logo()
+        {
+            string logo = @"
                                       
                   _|_|_|_|_|            _|  _|
           _|_|_|          _|    _|_|_|  _|    
         _|_|            _|    _|        _|  _|
             _|_|      _|      _|        _|  _|
-        _|_|_|      _|          _|_|_|  _|  _|   v0.5
+        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
 
         Command-line interface for Siemens SIMATIC Step7(tm)
-        (C) 2013 CERN, TE-CRG-CE
+        (C) 2013-2017 CERN, TE-CRG-CE
 
         Authors: Michal Dudek, Tomasz Wolak
 ";
-        static Option_parser options;
+            Console.Write(logo);
+        }
 
         static public void show_available_commands()
         {
@@ -123,8 +135,7 @@ namespace S7_cli
         static void Main(string[] args)
         {
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
-
-            Console.Write(logo);
+            show_logo();
 
             options = new Option_parser(args);
 
