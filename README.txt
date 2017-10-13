@@ -77,7 +77,8 @@ Available commands:
       - Import specified source code files
 
   importSourcesDir
-      - Import all source code files from specified directory (only valid ones: .SCL, .AWL, .INP, .GR7)
+      - Import all source code files from specified directory
+        (only valid ones: .SCL, .AWL, .INP, .GR7)
 
   compileSources
       - Compile specified source code module(s)
@@ -89,10 +90,11 @@ Available commands:
       - Export all source code module(s) from a program
 
   exportProgramStructure
-      - Exports the block calling structure into a DIF-File (experimental, not tested!!!)
+      - Exports the block calling structure into a DIF-File
+        (experimental, not tested!!!)
 
   compileStation
-      - Compiles station hardware and connections (experimental, don't use it!!!)
+      - Compiles station hardware and connections (experimental, don't use it!)
 
   downloadSystemData
       - Downloads "System data" to the PLC
