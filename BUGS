@@ -16,3 +16,7 @@ a new station; moreover - it does not accept all types of configuration file
 (as does the same function selected from SIMATIC's menu), 
 i.e. FILEVERSION "3.2" does not seem supported by the library
 
+* Projects / libraries can be specified using their name or path.
+  The same project opened from different directories  may exist
+  under the same name(!) on SIMATIC list of projects. s7cli
+  will open the first available on the list (a warning to implement...).
