@@ -1,0 +1,30 @@
+Installation Instructions
+*************************
+
+Copyright (C) 1994-1996, 1999-2002, 2004-2012 Free Software Foundation,
+Inc.
+
+   Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without warranty of any kind.
+
+Basic Installation
+==================
+
+   The pre-compiled binary in bin/ directory can be used just used as-is, 
+executed from any place. It can be put to some directory in Windows 
+system PATH for easy access.
+
+   For use the s7cli (obviously) requires the Siemens SIMATIC Step 7 installed.
+
+   The program was built using Microsoft Visual Studio 2010 as 32bit Windows
+executable, was tested and used on 64bit versions of Windows 7 and 
+Windows Server 2008 with:
+  - Siemens SIMATIC STEP 7 Professional SR4, V5.5 + SP4
+  - S7-SCL Professional 2010 SR4, V5.3 + SP6 + Upd2
+
+   Building from sources - may require similar environment as described
+above (ie. Microsoft Visual Studio, probably at least the same version).
+Building the project does not require any special configurations, should
+be straightforward.

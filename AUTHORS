@@ -1,0 +1,21 @@
+The authors of s7cli.
+
+  Copyright (C) 1999, 2005, 2006 Free Software Foundation, Inc.
+
+  Copying and distribution of this file, with or without modification,
+  are permitted in any medium without royalty provided the copyright
+  notice and this notice are preserved.
+
+The following contributions warranted legal paper exchanges with the
+Free Software Foundation.  See also the ChangeLog and THANKS files.
+
+Tomasz Wolak <tomas.wolak@gmail.com>
+  General concept, main interface to SIMATIC, the code for managing software
+  development part of the SIMATIC project (SCL, AWL, GRF: import, export,
+  compile; symbols export and import; blocks: copy from a library or another
+  project), option parser, logo ;-)
+
+Michal Dudek <michal.dudek@cern.ch>
+  The code managing hardware part of the SIMATIC PLC project:
+  hardware / network configuration import / export / compilation,
+  PLC operations: download to PLC (configuration, program), CPU Start/Stop.
