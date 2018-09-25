@@ -515,9 +515,11 @@ namespace S7_cli
         public IS7Program getProgram(string Name)
         {
             /*
-             *  Notice: Name has to be UNIQUE for each application, for each module.
-             *          safest way is to make names completely unique like "ARC56_program"
+             *  Notice: The name has to be UNIQUE for each application, and also for each PLC(!).
+             *          the safest way is to make the names completely unique like "S7_program_ARC56"
              */
+
+            /* << old, slow solution >>
             foreach (IS7Program program in simaticProject.Programs) {
                 //System.Console.Write("Program name: " + program.Name + "\n");
                 //System.Console.Write("Program LogPath: " + program.LogPath + "\n");
@@ -526,8 +528,18 @@ namespace S7_cli
                     //System.Console.Write("Program OK: " + program.Name + "\n");
                     return program;
                 }
+            }*/
+
+            IS7Program program;
+            try
+            {
+                program = this.simaticProject.Programs[Name];
+            } catch (System.Exception exc) {
+                System.Console.Write("\n** getProgram(): Error accessing program: '" +
+                                     Name + "':\n" + exc.Message + "\n");
+                return null;
             }
-            return null;
+            return program;
         }
 
 
