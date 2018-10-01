@@ -364,47 +364,31 @@ namespace S7_cli
             }
 
             List<string> blocks = new List<string>();
-
             try
             {
                 if (force)
                 {
                     simaticapi.enableUnattendedServerMode();
-
-                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
-                    {
-                        if (block.Name == "System data")
-                        {
-                            Logger.log_debug("Downloading the block: " + block.Name);
-                            block.Download(S7OverwriteFlags.S7OverwriteAll);
-                            blocks.Add(block.Name);
-                            break;
-                        }
-                        else
-                        {
-                            Logger.log_debug("Omitting the block: " + block.Name);
-                        }
-                    }
                 }
                 else
                 {
                     simaticapi.disableUnattendedServerMode();
-
-                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
-                    {
-                        if (block.Name == "System data")
-                        {
-                            Logger.log_debug("Downloading the block: " + block.Name);
-                            block.Download(S7OverwriteFlags.S7OverwriteAsk);
-                            blocks.Add(block.Name);
-                            break;
-                        }
-                        else
-                        {
-                            Logger.log_debug("Omitting the block: " + block.Name);
-                        }
-                    }
                 }
+
+                foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                {
+                    if (block.Name == "System data")
+                    {
+                        Logger.log_debug("Downloading the block: " + block.Name);
+                        block.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
+                        blocks.Add(block.Name);
+                        break;
+                    }
+                    else
+                    {
+                        Logger.log_debug("Omitting the block: " + block.Name);
+                    }
+                } 
             }
             catch (SystemException exc)
             {
@@ -429,37 +413,23 @@ namespace S7_cli
                 if (force)
                 {
                     simaticapi.enableUnattendedServerMode();
-
-                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
-                    {
-                        if (block.Name != "System data")
-                        {
-                            Logger.log_debug("Downloading the block: " + block.Name);
-                            block.Download(S7OverwriteFlags.S7OverwriteAll);
-                            blocks.Add(block.Name);
-                        }
-                        else
-                        {
-                            Logger.log_debug("Omitting the block: " + block.Name);
-                        }
-                    }
                 }
                 else
                 {
                     simaticapi.disableUnattendedServerMode();
+                }
 
-                    foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
+                {
+                    if (block.Name != "System data")
                     {
-                        if (block.Name != "System data")
-                        {
-                            Logger.log_debug("Downloading the block: " + block.Name);
-                            block.Download(S7OverwriteFlags.S7OverwriteAsk);
-                            blocks.Add(block.Name);
-                        }
-                        else
-                        {
-                            Logger.log_debug("Omitting the block: " + block.Name);
-                        }
+                        Logger.log_debug("Downloading the block: " + block.Name);
+                        block.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
+                        blocks.Add(block.Name);
+                    }
+                    else
+                    {
+                        Logger.log_debug("Omitting the block: " + block.Name);
                     }
                 }
             }
