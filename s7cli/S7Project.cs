@@ -203,8 +203,8 @@ namespace S7_cli
             // checking if directory path is not taken
             if (Directory.Exists(projectPath))
             {
-                System.Console.Write("Error: Cannot create the project because the folder " + projectPath + " already exists!\n");
-                System.Console.Write("Error: The project not created! Exiting program!\n");
+                Logger.log_error("Error: Cannot create the project because the folder " + projectPath + " already exists!\n");
+                Logger.log_error("Error: The project not created! Exiting program!\n");
                 Environment.Exit(1);
             }
             else
@@ -215,7 +215,7 @@ namespace S7_cli
                 }
                 catch (SystemException exc)
                 {
-                    System.Console.Write("Error in S7Project(): " + exc.Message + "\n");
+                    Logger.log_error("Error in S7Project(): " + exc.Message + "\n");
                 }
             }
         }
@@ -237,7 +237,7 @@ namespace S7_cli
         {
             if (!this.isProjectOpened())
             {
-                System.Console.Write("Error: Project variable \"simaticProject\" not initialized!\n");
+                Logger.log_error("Error: Project variable \"simaticProject\" not initialized!\n");
                 return false;
             }
             return true;
@@ -273,13 +273,13 @@ namespace S7_cli
         public bool importConfig(string projectConfigPath)
         {
             if ( ! checkProjectOpened() )  {
-                System.Console.Write("Error: Project not opened - aborting import!\n");
+                Logger.log_error("Error: Project not opened - aborting import!\n");
                 return false;
             }
             try  {
                 simaticProject.Stations.Import(projectConfigPath);
             } catch (SystemException exc) {
-                System.Console.Write("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return false;
             }
             return true;
@@ -289,7 +289,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting export!\n");
+                Logger.log_error("Error: Project not opened - aborting export!\n");
                 return false;
             }
 
@@ -300,7 +300,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                System.Console.Write("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return false;
             }
 
@@ -311,7 +311,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting station compilation!\n");
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
                 return false;
             }
 
@@ -322,7 +322,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                System.Console.Write("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return false;
             }
 
@@ -333,7 +333,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting!\n");
+                Logger.log_error("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -349,7 +349,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                Console.WriteLine("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return null;
             }
             return blocks.ToArray();
@@ -359,7 +359,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting!\n");
+                Logger.log_error("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -408,7 +408,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                Console.WriteLine("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return null;
             }
             return blocks.ToArray();
@@ -418,7 +418,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting!\n");
+                Logger.log_error("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -465,7 +465,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                Console.WriteLine("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return null;
             }
             return blocks.ToArray();
@@ -475,7 +475,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting!\n");
+                Logger.log_error("Error: Project not opened - aborting!\n");
                 return false;
             }
             try
@@ -494,7 +494,7 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting!\n");
+                Logger.log_error("Error: Project not opened - aborting!\n");
                 return false;
             }
             try
@@ -542,8 +542,8 @@ namespace S7_cli
             {
                 program = this.simaticProject.Programs[Name];
             } catch (System.Exception exc) {
-                System.Console.Write("\n** getProgram(): Error accessing the program: '" +
-                                     Name + "':\n" + exc.Message + "\n");
+                Logger.log_error("\n** getProgram(): Error accessing the program: '" +
+                                 Name + "':\n" + exc.Message + "\n");
                 return null;
             }
             return program;
@@ -555,8 +555,8 @@ namespace S7_cli
             try {
                 return this.simaticProject.Programs[programName].SymbolTable;
             } catch (System.Exception exc) {
-                System.Console.Write("\n** getSymbolTable(): Error accessing the symbol table for the program: '" +
-                                     programName + "':\n" + exc.Message + "\n");
+                Logger.log_error("\n** getSymbolTable(): Error accessing the symbol table for the program: '" +
+                                 programName + "':\n" + exc.Message + "\n");
                 return null;
             }
         }
@@ -565,10 +565,10 @@ namespace S7_cli
         {
             if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project not opened - aborting import!\n");
+                Logger.log_error("Error: Project not opened - aborting import!\n");
                 return 0;
             } else if (!File.Exists(symbolsPath))  {
-                System.Console.Write("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
+                Logger.log_error("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
                 return 0;
             } else {
                 int nrOfSymbols = 0;
@@ -578,7 +578,7 @@ namespace S7_cli
                     
                     nrOfSymbols = symbolTable.Import(symbolsPath);
                 } catch (SystemException exc) {
-                    System.Console.Write("Error: " + exc.Message + "\n");
+                    Logger.log_error("Error: " + exc.Message + "\n");
                 }
 
                 return nrOfSymbols;
@@ -743,7 +743,7 @@ namespace S7_cli
             try {
                 src.Remove();
             } catch (SystemException exc) {
-                Console.WriteLine("Error: removeBlock()" + exc.Message + "\n");
+                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
                 //return false;
             }
         }
@@ -782,7 +782,7 @@ namespace S7_cli
                         source.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Sources"]);
                 }
             } catch (SystemException exc) {
-                Console.WriteLine("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return false;
             }
 
@@ -817,7 +817,7 @@ namespace S7_cli
             try {
                 block.Remove();
             } catch (SystemException exc) {
-                Console.WriteLine("Error: removeBlock()" + exc.Message + "\n");
+                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
                 //return false;
             }
         }
@@ -861,7 +861,7 @@ namespace S7_cli
                         block.Copy(simaticProject.Programs[destinationProjectProgramName].Next["Blocks"]);                        
                 }
             } catch (SystemException exc) {
-                Console.WriteLine("Error: " + exc.Message + "\n");
+                Logger.log_error("Error: " + exc.Message + "\n");
                 return false;
             }
             return true;
@@ -878,7 +878,7 @@ namespace S7_cli
             try {
                 src = (S7Source) simaticProject.Programs[programName].Next["Sources"].Next[moduleName];
             } catch (Exception exc) {
-                Console.WriteLine("Warning: " + exc.Message + "\n");
+                Logger.log_error("Warning: " + exc.Message + "\n");
                 src = null;
             }
 
