@@ -233,6 +233,16 @@ namespace S7_cli
                 return false;
         }
 
+        public bool checkProjectOpened()
+        {
+            if (!this.isProjectOpened())
+            {
+                System.Console.Write("Error: Project variable \"simaticProject\" not initialized!\n");
+                return false;
+            }
+            return true;
+        }
+
         /*
         private void addProject(string Name, string Path)
         {
@@ -262,71 +272,68 @@ namespace S7_cli
 
         public bool importConfig(string projectConfigPath)
         {
-            if (simaticProject == null)  {
-                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+            if ( ! checkProjectOpened() )  {
+                System.Console.Write("Error: Project not opened - aborting import!\n");
                 return false;
-            } else  {
-                try  {
-                    simaticProject.Stations.Import(projectConfigPath);
-                } catch (SystemException exc) {
-                    System.Console.Write("Error: " + exc.Message + "\n");
-                    return false;
-                }
+            }
+            try  {
+                simaticProject.Stations.Import(projectConfigPath);
+            } catch (SystemException exc) {
+                System.Console.Write("Error: " + exc.Message + "\n");
+                return false;
             }
             return true;
         }
 
         public bool exportConfig(string stationName, string projectConfigPath)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting export!\n");
+                System.Console.Write("Error: Project not opened - aborting export!\n");
                 return false;
             }
-            else
+
+            try
             {
-                try
-                {
-                    S7Station station = simaticProject.Stations[stationName];
-                    station.Export(projectConfigPath);
-                }
-                catch (SystemException exc)
-                {
-                    System.Console.Write("Error: " + exc.Message + "\n");
-                    return false;
-                }
+                S7Station station = simaticProject.Stations[stationName];
+                station.Export(projectConfigPath);
             }
+            catch (SystemException exc)
+            {
+                System.Console.Write("Error: " + exc.Message + "\n");
+                return false;
+            }
+
             return true;
         }
 
         public bool compileStation(string stationName)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                System.Console.Write("Error: Project variable \"simaticProject\" not initialized! Aborting export!\n");
+                System.Console.Write("Error: Project not opened - aborting station compilation!\n");
                 return false;
             }
-            else
+
+            try
             {
-                try
-                {
-                    S7Station station = simaticProject.Stations[stationName];
-                    station.Compile();
-                }
-                catch (SystemException exc)
-                {
-                    System.Console.Write("Error: " + exc.Message + "\n");
-                    return false;
-                }
+                S7Station station = simaticProject.Stations[stationName];
+                station.Compile();
             }
+            catch (SystemException exc)
+            {
+                System.Console.Write("Error: " + exc.Message + "\n");
+                return false;
+            }
+
             return true;
         }
 
         public string[] getBlocksList(string projectProgramName)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                System.Console.Write("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -350,9 +357,9 @@ namespace S7_cli
 
         public string[] downloadSystemData(string projectProgramName, bool force = false)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                System.Console.Write("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -409,9 +416,9 @@ namespace S7_cli
 
         public string[] downloadAllBlocks(string projectProgramName, bool force = false)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                System.Console.Write("Error: Project not opened - aborting!\n");
                 return null;
             }
 
@@ -466,9 +473,9 @@ namespace S7_cli
 
         public bool startCPU(string projectProgramName)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                System.Console.Write("Error: Project not opened - aborting!\n");
                 return false;
             }
             try
@@ -485,9 +492,9 @@ namespace S7_cli
 
         public bool stopCPU(string projectProgramName)
         {
-            if (simaticProject == null)
+            if (!checkProjectOpened())
             {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting!\n");
+                System.Console.Write("Error: Project not opened - aborting!\n");
                 return false;
             }
             try
@@ -556,8 +563,9 @@ namespace S7_cli
 
         public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
         {
-            if (simaticProject == null)  {
-                Logger.log_debug("Error: Project variable \"simaticProject\" not initialized! Aborting import!\n");
+            if (!checkProjectOpened())
+            {
+                System.Console.Write("Error: Project not opened - aborting import!\n");
                 return 0;
             } else if (!File.Exists(symbolsPath))  {
                 System.Console.Write("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
