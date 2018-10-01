@@ -170,8 +170,8 @@ namespace S7_cli
             }
 
             if (simaticProject == null) {
-                Logger.log_error("Project with path or name: " + pathOrName + 
-                    " not found on list of available project!!!\n\nAvailable projects:\n");
+                Logger.log_error("Project with the path or name: " + pathOrName +
+                    " not found on the list of available projects!!!\n\nAvailable projects:\n");
                 Logger.log_error(simaticapi.getListOfAvailableProjects());
             }
         }
@@ -203,8 +203,8 @@ namespace S7_cli
             // checking if directory path is not taken
             if (Directory.Exists(projectPath))
             {
-                System.Console.Write("Error: Cannot create project because folder " + projectPath + " already exists!\n");
-                System.Console.Write("Error: Project not created! Exiting program!\n");
+                System.Console.Write("Error: Cannot create the project because the folder " + projectPath + " already exists!\n");
+                System.Console.Write("Error: The project not created! Exiting program!\n");
                 Environment.Exit(1);
             }
             else
@@ -368,14 +368,14 @@ namespace S7_cli
                     {
                         if (block.Name == "System data")
                         {
-                            Logger.log_debug("Downloading block: " + block.Name);
+                            Logger.log_debug("Downloading the block: " + block.Name);
                             block.Download(S7OverwriteFlags.S7OverwriteAll);
                             blocks.Add(block.Name);
                             break;
                         }
                         else
                         {
-                            Logger.log_debug("Omitting block: " + block.Name);
+                            Logger.log_debug("Omitting the block: " + block.Name);
                         }
                     }
                 }
@@ -387,14 +387,14 @@ namespace S7_cli
                     {
                         if (block.Name == "System data")
                         {
-                            Logger.log_debug("Downloading block: " + block.Name);
+                            Logger.log_debug("Downloading the block: " + block.Name);
                             block.Download(S7OverwriteFlags.S7OverwriteAsk);
                             blocks.Add(block.Name);
                             break;
                         }
                         else
                         {
-                            Logger.log_debug("Omitting block: " + block.Name);
+                            Logger.log_debug("Omitting the block: " + block.Name);
                         }
                     }
                 }
@@ -427,13 +427,13 @@ namespace S7_cli
                     {
                         if (block.Name != "System data")
                         {
-                            Logger.log_debug("Downloading block: " + block.Name);
+                            Logger.log_debug("Downloading the block: " + block.Name);
                             block.Download(S7OverwriteFlags.S7OverwriteAll);
                             blocks.Add(block.Name);
                         }
                         else
                         {
-                            Logger.log_debug("Omitting block: " + block.Name);
+                            Logger.log_debug("Omitting the block: " + block.Name);
                         }
                     }
                 }
@@ -445,13 +445,13 @@ namespace S7_cli
                     {
                         if (block.Name != "System data")
                         {
-                            Logger.log_debug("Downloading block: " + block.Name);
+                            Logger.log_debug("Downloading the block: " + block.Name);
                             block.Download(S7OverwriteFlags.S7OverwriteAsk);
                             blocks.Add(block.Name);
                         }
                         else
                         {
-                            Logger.log_debug("Omitting block: " + block.Name);
+                            Logger.log_debug("Omitting the block: " + block.Name);
                         }
                     }
                 }
@@ -535,7 +535,7 @@ namespace S7_cli
             {
                 program = this.simaticProject.Programs[Name];
             } catch (System.Exception exc) {
-                System.Console.Write("\n** getProgram(): Error accessing program: '" +
+                System.Console.Write("\n** getProgram(): Error accessing the program: '" +
                                      Name + "':\n" + exc.Message + "\n");
                 return null;
             }
@@ -548,7 +548,7 @@ namespace S7_cli
             try {
                 return this.simaticProject.Programs[programName].SymbolTable;
             } catch (System.Exception exc) {
-                System.Console.Write("\n** getSymbolTable(): Error accessing symbol table for program: '" +
+                System.Console.Write("\n** getSymbolTable(): Error accessing the symbol table for the program: '" +
                                      programName + "':\n" + exc.Message + "\n");
                 return null;
             }
@@ -585,7 +585,7 @@ namespace S7_cli
         public int exportSymbols(string symbolsOutputFile, string programName = "S7 Program(1)")
         {
             if (!isProjectOpened()) {
-                Logger.log_debug("Error: exportSymbols() called while project is not opened! Aborting export!\n");
+                Logger.log_debug("Error: exportSymbols() called while the project is not opened! Aborting export!\n");
                 return -1;
             }
 
@@ -595,7 +595,7 @@ namespace S7_cli
             try  {
                 symbol_table.Export(symbolsOutputFile);
             } catch (SystemException e) {
-                Logger.log_debug("\n** exportSymbols(): Error exporting symbol table for program: '" +
+                Logger.log_debug("\n** exportSymbols(): Error exporting the symbol table for the program: '" +
                      programName + "':\n" + e.Message + "\n");
                 return -1;
             }
@@ -679,7 +679,7 @@ namespace S7_cli
                 IS7SWItem src_module = getSourceModules(programName)[sourceName];
                 return src_module;
             } catch (System.Exception exc) {
-                Logger.log_debug("\n** getSourceModule(): Error getting source '" + sourceName + "':\n" + exc.Message + "\n");
+                Logger.log_debug("\n** getSourceModule(): Error getting the source '" + sourceName + "':\n" + exc.Message + "\n");
                 return null;
             }
         }
@@ -701,9 +701,9 @@ namespace S7_cli
             string sourceName = System.IO.Path.GetFileNameWithoutExtension(filename);
 
             if (forceOverwrite && this.sourceExists(programName, sourceName)){
-                Logger.log("Source '" + sourceName + "' already exists - removing it (overwriting forced!)...");
+                Logger.log("The source '" + sourceName + "' already exists - removing it (overwriting forced!)...");
                 src_modules.Remove(sourceName);
-                Logger.log("... and importing new one.");
+                Logger.log("... and importing the new one.");
             }
             try  { 
                 item = src_modules.Add(sourceName, sourceType, filename);
@@ -757,7 +757,7 @@ namespace S7_cli
             try {
                 foreach (S7Source source in
                     libSimatic.Projects[libProjectName].Programs[libProjectProgramName].Next["Sources"].Next) {
-                        Logger.log("\nCopying source: " + source.Name);
+                        Logger.log("\nCopying the source: " + source.Name);
                         if (this.sourceExists(destinationProjectProgramName, source.Name)) {
                             Logger.log("This source already exists in " + this.getS7ProjectName() + 
                                        " / " + destinationProjectProgramName);
@@ -767,7 +767,7 @@ namespace S7_cli
                                 //continue;
                                 this.removeSource(destinationProjectProgramName, source.Name);
                             } else {
-                                Logger.log("Skipping the block!");
+                                Logger.log("Skipping the source!");
                                 continue;
                             }
                         }
@@ -789,7 +789,7 @@ namespace S7_cli
                     return block;
                 }
             }
-            Logger.log_debug("getBlock(): block " + blockName + " not found" );
+            Logger.log_debug("getBlock(): the block " + blockName + " not found" );
             return null;
         }
 
@@ -800,7 +800,7 @@ namespace S7_cli
                 return true;
             }
 
-            Logger.log_debug("blockExists(): block " + blockName + " not found" );
+            Logger.log_debug("blockExists(): the block " + blockName + " not found" );
             return false;
         }
 
@@ -836,10 +836,10 @@ namespace S7_cli
                             Logger.log("\nCannot copy 'System data' - skipping it!");
                             continue;
                         }
-                        Logger.log("\nCopying block: " + block.SymbolicName + " (" + block.Name + ")");
+                        Logger.log("\nCopying the block: " + block.SymbolicName + " (" + block.Name + ")");
 
                         if (this.blockExists(destinationProjectProgramName, block.Name)) {
-                            Logger.log("Block " + block.Name + " already exists in " + this.getS7ProjectName() + " / " + destinationProjectProgramName);
+                            Logger.log("The block " + block.Name + " already exists in " + this.getS7ProjectName() + " / " + destinationProjectProgramName);
                             if (forceOverwrite) {
                                 Logger.log("Overwrite forced! (removing and copying the block)");
                                 //continue;
@@ -987,8 +987,8 @@ namespace S7_cli
             if (src == null)
                 return -1;
             try  {
-                Logger.log_debug("Nous sommes la");
-               src.Export(ExportFileName);
+                //Logger.log_debug("Nous sommes la");
+                src.Export(ExportFileName);
             } catch (System.Exception exc) {
                 Logger.log("\n** Error exporting '" + sourceName + "':\n" + exc.Message + "\n");
                 return -1;
@@ -996,16 +996,13 @@ namespace S7_cli
             return 0;
         }
 
-
-
-
         public int exportProgramStructure(
             string programName, string ExportFileName, 
             bool ExportDuplicateCalls = true, int ColumnFlags = 0)
         {            // ExportProgramStructure(ByVal ExportFileName As String, ByVal ExportDuplicateCalls As Boolean, ByVal ColumnFlags As Long)
             if (simaticProject == null)
             {
-                Logger.log_debug("exportProgramStructure(): Error: Project not opened! Aborting operation!\n");
+                Logger.log_debug("exportProgramStructure(): Error: The project is not opened! Aborting operation!\n");
                 return 1;
             }
 
@@ -1013,7 +1010,6 @@ namespace S7_cli
             S7Program program = (S7Program) simaticProject.Programs[programName];
             program.ExportProgramStructure(ExportFileName, ExportDuplicateCalls, ColumnFlags);
             return 0;
-
         }
     }
 }
