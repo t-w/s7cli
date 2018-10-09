@@ -117,7 +117,9 @@ namespace S7_cli
         static public string get_version()
         {
             return Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
-                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
+                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString() + "." +
+                   //Assembly.GetExecutingAssembly().GetName().Version.MajorRevision.ToString() + "." +
+                   Assembly.GetExecutingAssembly().GetName().Version.MinorRevision.ToString();
         }
 
         static public void show_logo()
