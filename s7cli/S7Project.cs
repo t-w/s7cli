@@ -126,6 +126,455 @@ namespace S7_cli
             System.Runtime.Serialization.StreamingContext context) { }
     }
 
+
+    public class SimaticProgram
+    {
+        private string name;
+        private S7Program s7program;
+
+        public SimaticProgram(string programName, S7Program program)
+        {
+            name = programName;
+            s7program = program;
+        }
+
+        public string getName()
+        {
+            return this.name;
+        }
+
+        public IS7Program getProgram()
+        {
+            return this.s7program;
+        }
+
+
+        public IS7SymbolTable getSymbolTable()
+        {
+            try
+            {
+                return this.s7program.SymbolTable;
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log_error("\n** getSymbolTable(): Error accessing the symbol table for the program: '" +
+                                 name + "':\n" + exc.Message + "\n");
+                return null;
+            }
+        }
+
+        public int importSymbols(string symbolsPath)
+        {
+            if (!File.Exists(symbolsPath))
+            {
+                Logger.log_error("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
+                return 0;
+            }
+
+            int nrOfSymbols = 0;
+
+            try
+            {
+                S7SymbolTable symbolTable = (S7SymbolTable)getSymbolTable();
+                nrOfSymbols = symbolTable.Import(symbolsPath);
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error("Error: " + exc.Message + "\n");
+                // return -1; / return error here???
+            }
+            return nrOfSymbols;
+        }
+
+        /* returned value
+         * 0    - success
+         * != 0 - failure
+         */
+        public int exportSymbols(string symbolsOutputFile)
+        {
+            IS7SymbolTable symbol_table = this.getSymbolTable();
+            if (symbol_table == null)
+                return -1;
+            try
+            {
+                symbol_table.Export(symbolsOutputFile);
+            }
+            catch (SystemException e)
+            {
+                Logger.log_debug("\n** exportSymbols(): Error exporting the symbol table for the program: '" +
+                     this.name + "':\n" + e.Message + "\n");
+                return -1;
+            }
+            return 0;
+        }
+
+
+        public S7SWItem getSoftwareItem(string itemName)
+        {
+            S7SWItems items = this.s7program.Next;
+            //Logger.log_debug("\nSoftware items count: " + items.Count + "\n");
+            foreach (S7SWItem item in items)
+            {
+                //Logger.log_debug("\nitem: " + item.Name + "\n");
+                if (item.Name == itemName)
+                    return item;
+            }
+            /*
+            S7SWItem item;
+            try
+            {
+                item = items.Next[itemName];
+            }
+            catch (System.Exception exc)
+            {
+            }*/
+            return null;
+        }
+
+        public S7SWItem getSources()
+        {
+            return this.getSoftwareItem("Sources");
+        }
+
+        public S7SWItem getBlocks()
+        {
+            return this.getSoftwareItem("Blocks");
+        }
+
+        private S7SWItems getSourceModules()
+        {
+            S7SWItem sources = this.getSources();
+            //Logger.log_debug("\nsources LogPath: " + sources.LogPath + "\n");
+            if (sources == null)
+                return null;
+
+            S7SWItems src_modules = sources.Next;
+            /*Logger.log_debug("\nitems2 count: " + src_modules.Count + "\n");
+            foreach (S7SWItem src_module in src_modules)
+            {
+                Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
+            }*/
+            return src_modules;
+        }
+
+
+        public string[] getSourcesList()
+        {
+            List<string> srcs = new List<string>();
+            S7SWItems src_modules = this.getSourceModules();
+            if (src_modules == null)
+                return null;   // failure
+            foreach (S7SWItem src_module in src_modules)
+            {
+                //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
+                srcs.Add(src_module.Name);
+            }
+            return srcs.ToArray();
+        }
+
+
+        private IS7SWItem getSourceModule(string sourceName)
+        {
+            /*
+             foreach (S7SWItem src_module in getSourceModules(programName))   {
+                //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
+                if (src_module.Name == sourceName)
+                    return src_module;
+            }
+             return null;*/
+            try
+            {
+                IS7SWItem src_module = this.getSourceModules()[sourceName];
+                return src_module;
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log_debug("\n** getSourceModule(): Error getting the source '" + sourceName + "':\n" + exc.Message + "\n");
+                return null;
+            }
+        }
+
+
+        public bool sourceExists(string sourceName)
+        {
+            if (this.getSourceModule(sourceName) != null)
+                return true;
+            else
+                return false;
+        }
+
+
+        private IS7SWItem addSourceWithType(S7SWObjType sourceType, string filename, bool forceOverwrite = false)
+        {
+            S7SWItems src_modules = this.getSourceModules();
+            IS7SWItem item;
+
+            string sourceName = System.IO.Path.GetFileNameWithoutExtension(filename);
+
+            if (forceOverwrite && this.sourceExists(sourceName))
+            {
+                Logger.log("The source '" + sourceName + "' already exists - removing it (overwriting forced!)...");
+                src_modules.Remove(sourceName);
+                Logger.log("... and importing the new one.");
+            }
+            try
+            {
+                item = src_modules.Add(sourceName, sourceType, filename);
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log("\n** Error importing '" + filename + "':\n" + exc.Message + "\n");
+                item = null;
+            }
+            return item;
+        }
+
+
+        public IS7SWItem addSource(string filenameFullPath, bool forceOverwrite = false)
+        {
+            string filename = System.IO.Path.GetFileName(filenameFullPath);
+            string extension = System.IO.Path.GetExtension(filename);
+            if (extension.ToLower() == ".scl" ||
+                extension.ToLower() == ".awl" ||
+                extension.ToLower() == ".inp" ||
+                extension.ToLower() == ".gr7")
+            //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
+                return this.addSourceWithType(S7SWObjType.S7Source, filenameFullPath, forceOverwrite);
+            else {
+                Logger.log("addSource(): Error - unknown source extension '" + extension + "' (file: " + filename + ")\n");
+                return null;
+            }
+        }
+
+
+        public void removeSource(string sourceName)
+        {
+            IS7SWItem src = this.getSourceModule(sourceName);
+            try
+            {
+                src.Remove();
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
+                //return false;
+            }
+        }
+
+
+
+
+        public S7Block getBlock(string blockName)
+        {
+            foreach (S7Block block in s7program.Next["Blocks"].Next)
+            {
+                if (block.Name == blockName)
+                {
+                    Logger.log_debug("getBlock(): found block: " + blockName);
+                    return block;
+                }
+            }
+            Logger.log_debug("getBlock(): the block " + blockName + " not found");
+            return null;
+        }
+
+        public bool blockExists(string blockName)
+        {
+            if (this.getBlock(blockName) != null)
+            {
+                Logger.log_debug("blockExists(): found block: " + blockName);
+                return true;
+            }
+
+            Logger.log_debug("blockExists(): the block " + blockName + " not found");
+            return false;
+        }
+
+        public void removeBlock(string blockName)
+        {
+            S7Block block = this.getBlock(blockName);
+            try
+            {
+                block.Remove();
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
+                //return false;
+            }
+        }
+
+
+
+
+        public S7Source getS7SourceModule(string moduleName)
+        {
+            //S7SWItem item = getSourceModule(programName, moduleName);
+            //S7Source source = (S7Source) item.Program.;
+
+            //IS7Source src = getSources("ARC56_program").get_Child("test11"); //get_Collection("test11");
+            S7Source src;
+            try
+            {
+                src = (S7Source) this.s7program.Next["Sources"].Next[moduleName];
+            }
+            catch (Exception exc)
+            {
+                Logger.log_error("Warning: " + exc.Message + "\n");
+                src = null;
+            }
+
+            return src;
+        }
+
+        /* compileSource()
+         * 
+         * return values:
+         *    0 success
+         *   <0 error
+         *   -1 source not found
+         *   -2 exception during compilation
+         *    1 unknown
+         */
+        public int compileSource(string sourceName)
+        {
+            S7Source src = getS7SourceModule(sourceName);
+            if (src == null)
+                return -1;
+            try
+            {
+                IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                return -2;
+            }
+            //IntPtr ptr = new IntPtr((Void *) items. );
+            /*Console.Write("\n" + items. ToString() + "\n" + items.Count + "\n");
+            Type itype = items.GetType();
+            Console.Write("\n" + itype + "\n");
+            
+            int i=0;
+            foreach (S7SWItem item in items)
+            {
+                i++;
+            }
+            Console.Write("\ni = " + i + "\n");
+
+            int a = src.AppWindowHandle; */
+            //Console.Write("\n" + src.AppWindowHandle + "\n");
+            //src.AppWindowHandle
+            //src.AppWindowHandle
+            //try{
+            //  AutomationElement s7scl = AutomationElement.FromHandle(new IntPtr(src.AppWindowHandle));
+            //}
+            //catch (System.Exception e)
+            //{
+            //    e.HResult.get();
+            //}
+            //System.HR
+            //s7scl.SetFocus();
+            return 1;
+        }
+
+        private S7SourceType getSourceType(string sourceName)
+        {
+            S7Source src = getS7SourceModule(sourceName);
+            Logger.log_debug("getSourceType(" + this.name + ", " + sourceName + ")\n\n");
+            Logger.log_debug("returns: " + src.ConcreteType.GetType() + "\n\n");
+            Logger.log_debug("returns: " + src.ConcreteType + "\n\n");
+            return //(S7SourceType)
+                src.ConcreteType;
+        }
+
+        public string getSourceTypeString(string sourceName)
+        {
+            /*S7SourceType srcType = this.getSourceType(programName, sourceName);
+            if      (srcType == S7SourceType.S7AWL)     return "S7AWL";
+            else if (srcType == S7SourceType.S7GG)      return "S7GG";
+            else if (srcType == S7SourceType.S7GR7)     return "S7GR7";
+            else if (srcType == S7SourceType.S7NET)     return "S7NET";
+            else if (srcType == S7SourceType.S7SCL)     return "S7SCL";
+            else if (srcType == S7SourceType.S7SCLMake) return "S7SCLMake";
+            else if (srcType == S7SourceType.S7ZG)      return "S7ZG";
+            else                                        return "Unknown"; */
+            S7Source src = getS7SourceModule(sourceName);
+            Logger.log_debug("getSourceType(" + this.name + ", " + sourceName + ")\n\n");
+            if (src != null)
+            {
+                Logger.log_debug("returned: " + src.ConcreteType.GetType() + "\n\n");
+                Logger.log_debug("returned: " + src.ConcreteType + "\n\n");
+                return //(S7SourceType)
+                    src.ConcreteType.ToString();
+            }
+            else
+            {
+                Logger.log_debug("returned: null(!)\n\n");
+                return null;
+            }
+
+        }
+
+        //public string getSourceFileExtension(string programName, string sourceName)
+        //{
+        //S7SourceType srcType = this.getSourceType(programName, sourceName);
+        /*if (srcType == S7SourceType.S7AWL)          return ".AWL";
+        else if (srcType == S7SourceType.S7GG)      return ".S7GG";    // to check
+        else if (srcType == S7SourceType.S7GR7)     return ".S7GR7";   // to check
+        else if (srcType == S7SourceType.S7NET)     return ".S7NET";   // to check
+        //else if (srcType == S7SourceType.S7SCL)     return ".SCL";
+        else if ((string)srcType == "S7SCL") return ".SCL";
+        else if (srcType == S7SourceType.S7SCLMake) return ".INP";
+        else if (srcType == S7SourceType.S7ZG)      return ".S7ZG";    // to check
+        else return ".UnknownSourceType";*/
+        //    Logger.log_debug("getSourceFileExtension() returns: " + this.getSourceTypeString(programName, sourceName) + "\n\n");
+        //    return this.getSourceTypeString(programName, sourceName);
+        //}
+
+        /*
+         * returned value:
+         * 0 - success
+         * !0 - error
+         */
+        public int exportSource(string sourceName, string ExportFileName)
+        {
+            S7Source src = getS7SourceModule(sourceName);
+            if (src == null)
+                return -1;
+            try
+            {
+                //Logger.log_debug("Nous sommes la");
+                src.Export(ExportFileName);
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log("\n** Error exporting '" + sourceName + "':\n" + exc.Message + "\n");
+                return -1;
+            }
+            return 0;
+        }
+
+        public int exportProgramStructure( string ExportFileName,
+                                           bool   ExportDuplicateCalls = true,
+                                           int    ColumnFlags = 0)
+        {            // ExportProgramStructure(ByVal ExportFileName As String, ByVal ExportDuplicateCalls As Boolean, ByVal ColumnFlags As Long)
+            /*if (simaticProject == null)
+            {
+                Logger.log_debug("exportProgramStructure(): Error: The project is not opened! Aborting operation!\n");
+                return 1;
+            }*/
+
+            //S7Program program = (S7Program) this.getProgram(programName);
+            //S7Program program = (S7Program)simaticProject.Programs[programName];
+            this.s7program.ExportProgramStructure(ExportFileName, ExportDuplicateCalls, ColumnFlags);
+            return 0;
+        }
+
+    }
+
+
+
     /// class S7Project
     /// <summary>
     /// open and work with a single S7 project
@@ -137,6 +586,8 @@ namespace S7_cli
         private SimaticAPI simaticapi = null;
         private IS7Project simaticProject = null;
 
+        //private IDictionary<string, IS7Program> programs = null;
+        private IDictionary<string, SimaticProgram> programs = null;
 
         /*
          * Constructors
@@ -173,7 +624,10 @@ namespace S7_cli
                 Logger.log_error("Project with the path or name: " + pathOrName +
                     " not found on the list of available projects!!!\n\nAvailable projects:\n");
                 Logger.log_error(simaticapi.getListOfAvailableProjects());
+                return;
             }
+
+            this.updatePrograms();
         }
 
 
@@ -216,8 +670,12 @@ namespace S7_cli
                 catch (SystemException exc)
                 {
                     Logger.log_error("Error in S7Project(): " + exc.Message + "\n");
+                    // should we set simaticProject to null here?
+                    return;
                 }
             }
+
+            this.updatePrograms();
         }
 
 
@@ -355,6 +813,13 @@ namespace S7_cli
             return blocks.ToArray();
         }
 
+
+        private void downloadBlock(S7Block block, bool force)
+        {
+            Logger.log_debug("Downloading the block: " + block.Name);
+            block.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
+        }
+
         public string[] downloadSystemData(string projectProgramName, bool force = false)
         {
             if (!checkProjectOpened())
@@ -383,6 +848,7 @@ namespace S7_cli
                         block.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
                         blocks.Add(block.Name);
                         break;
+
                     }
                     else
                     {
@@ -479,57 +945,45 @@ namespace S7_cli
             return true;
         }
 
+        private void updatePrograms()
+        {
+            // assuming this is initialized constructing the objects
+            // and the list of programs in the project does not change while executing s7cli
+            if (this.programs != null)
+                return;
+
+            // create new dictionary with the list of programs indexed by name (to avoid accessing COM to retrieve it)
+            this.programs = new Dictionary<string, SimaticProgram>();
+            foreach (S7Program program in this.simaticProject.Programs)
+            {
+                if (program.Type != S7ProgramType.S7)
+                    continue;
+                Logger.log_debug("Found program: " + program.Name + " type: " + program.Type);
+                if ( this.programs.Keys.Contains( program.Name ) )
+                {
+                    Logger.log_error("Error: multiple programs named '" + program.Name + "' in the project - aborting...");
+                    Environment.Exit(1);
+                }
+                SimaticProgram prg = new SimaticProgram(program.Name, program);
+                this.programs.Add(program.Name, prg);
+            }
+        }
+
         public string [] getListOfAvailablePrograms()
         {
             //string [] availablePrograms;
             List<string> availablePrograms = new List<string>();
-            foreach (IS7Program program in this.simaticProject.Programs)     {
+/*            foreach (IS7Program program in this.simaticProject.Programs)     {
                 availablePrograms.Add (program.Name);
+            }
+ */
+            foreach (string programName in this.programs.Keys)
+            {
+                availablePrograms.Add (programName);
             }
             return availablePrograms.ToArray();
         }
 
-        public IS7Program getProgram(string Name)
-        {
-            /*
-             *  Notice: The name has to be UNIQUE for each application, and also for each PLC(!).
-             *          the safest way is to make the names completely unique like "S7_program_ARC56"
-             */
-
-            /* << old, slow solution >>
-            foreach (IS7Program program in simaticProject.Programs) {
-                //System.Console.Write("Program name: " + program.Name + "\n");
-                //System.Console.Write("Program LogPath: " + program.LogPath + "\n");
-                if (//program.Parent == sPr)
-                    program.Name == Name) {
-                    //System.Console.Write("Program OK: " + program.Name + "\n");
-                    return program;
-                }
-            }*/
-
-            IS7Program program;
-            try
-            {
-                program = this.simaticProject.Programs[Name];
-            } catch (System.Exception exc) {
-                Logger.log_error("\n** getProgram(): Error accessing the program: '" +
-                                 Name + "':\n" + exc.Message + "\n");
-                return null;
-            }
-            return program;
-        }
-
-
-        public IS7SymbolTable getSymbolTable(string programName)
-        {
-            try {
-                return this.simaticProject.Programs[programName].SymbolTable;
-            } catch (System.Exception exc) {
-                Logger.log_error("\n** getSymbolTable(): Error accessing the symbol table for the program: '" +
-                                 programName + "':\n" + exc.Message + "\n");
-                return null;
-            }
-        }
 
         public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
         {
@@ -537,22 +991,8 @@ namespace S7_cli
             {
                 Logger.log_error("Error: Project not opened - aborting import!\n");
                 return 0;
-            } else if (!File.Exists(symbolsPath))  {
-                Logger.log_error("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
-                return 0;
-            } else {
-                int nrOfSymbols = 0;
-
-                try {
-                    S7SymbolTable symbolTable = (S7SymbolTable)simaticProject.Programs[programName].SymbolTable;
-                    
-                    nrOfSymbols = symbolTable.Import(symbolsPath);
-                } catch (SystemException exc) {
-                    Logger.log_error("Error: " + exc.Message + "\n");
-                }
-
-                return nrOfSymbols;
             }
+            return this.programs[programName].importSymbols(symbolsPath);
         }
 
 
@@ -566,156 +1006,30 @@ namespace S7_cli
                 Logger.log_debug("Error: exportSymbols() called while the project is not opened! Aborting export!\n");
                 return -1;
             }
-
-            IS7SymbolTable symbol_table = this.getSymbolTable(programName);
-            if (symbol_table == null)
-                return -1;
-            try  {
-                symbol_table.Export(symbolsOutputFile);
-            } catch (SystemException e) {
-                Logger.log_debug("\n** exportSymbols(): Error exporting the symbol table for the program: '" +
-                     programName + "':\n" + e.Message + "\n");
-                return -1;
-            }
-            return 0;
+            return this.programs[programName].exportSymbols(symbolsOutputFile);
         }
 
-
-        public S7SWItem getSoftwareItem(string programName, string itemName)
-        {
-            IS7Program prg = getProgram(programName);
-
-            S7SWItems items = prg.Next;
-            //Logger.log_debug("\nSoftware items count: " + items.Count + "\n");
-            foreach (S7SWItem item in items)  {
-                //Logger.log_debug("\nitem: " + item.Name + "\n");
-                if (item.Name == itemName)
-                    return item;
-            }
-            /*
-            S7SWItem item;
-            try
-            {
-                item = items.Next[itemName];
-            }
-            catch (System.Exception exc)
-            {
-            }*/
-            return null;
-        }
-
-        public S7SWItem getSources(string programName)
-        {
-            return getSoftwareItem(programName, "Sources");
-        }
-
-        public S7SWItem getBlocks(string programName)
-        {
-            return getSoftwareItem(programName, "Blocks");
-        }
-
-
-        public S7SWItems getSourceModules(string programName)
-        {
-            S7SWItem sources = getSources(programName);
-            //Logger.log_debug("\nsources LogPath: " + sources.LogPath + "\n");
-            if (sources == null)
-                return null;
-
-            S7SWItems src_modules = sources.Next;
-            /*Logger.log_debug("\nitems2 count: " + src_modules.Count + "\n");
-            foreach (S7SWItem src_module in src_modules)
-            {
-                Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
-            }*/
-            return src_modules;
-        }
 
         public string[] getSourcesList(string programName)
         {
-            List<string> srcs = new List<string>();
-            S7SWItems src_modules = this.getSourceModules(programName);
-            if (src_modules == null)
-                return null;   // failure
-            foreach (S7SWItem src_module in getSourceModules(programName)) {
-                //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
-                srcs.Add(src_module.Name);
-            }
-            return srcs.ToArray();
+            return this.programs[programName].getSourcesList();
         }
 
-        public IS7SWItem getSourceModule(string programName, string sourceName)
-        {
-            /*
-             foreach (S7SWItem src_module in getSourceModules(programName))   {
-                //Logger.log_debug("\nsrc name: " + src_module.Name + "\n");
-                if (src_module.Name == sourceName)
-                    return src_module;
-            }
-             return null;*/
-            try {
-                IS7SWItem src_module = getSourceModules(programName)[sourceName];
-                return src_module;
-            } catch (System.Exception exc) {
-                Logger.log_debug("\n** getSourceModule(): Error getting the source '" + sourceName + "':\n" + exc.Message + "\n");
-                return null;
-            }
-        }
 
         private bool sourceExists(string programName, string sourceName)
         {
-            if (this.getSourceModule(programName, sourceName) != null)
-                return true;
-            else
-                return false;
+            return this.programs[programName].sourceExists(sourceName);
         }
 
-        private IS7SWItem addSourceWithType(string programName, S7SWObjType sourceType, 
-                                            string filename, bool forceOverwrite = false)
-        {
-            S7SWItems src_modules = getSourceModules(programName);
-            IS7SWItem item;
-
-            string sourceName = System.IO.Path.GetFileNameWithoutExtension(filename);
-
-            if (forceOverwrite && this.sourceExists(programName, sourceName)){
-                Logger.log("The source '" + sourceName + "' already exists - removing it (overwriting forced!)...");
-                src_modules.Remove(sourceName);
-                Logger.log("... and importing the new one.");
-            }
-            try  { 
-                item = src_modules.Add(sourceName, sourceType, filename);
-            } catch( System.Exception exc ) {
-                Logger.log("\n** Error importing '" + filename + "':\n" + exc.Message + "\n");
-                item = null;
-            }
-            return item;
-        }
 
         public IS7SWItem addSource(string programName, string filenameFullPath, bool forceOverwrite = false)
         {
-            string filename = System.IO.Path.GetFileName(filenameFullPath);
-            string extension = System.IO.Path.GetExtension(filename);
-            if (extension.ToLower() == ".scl" || 
-                extension.ToLower() == ".awl" || 
-                extension.ToLower() == ".inp" || 
-                extension.ToLower() == ".gr7")
-            //if (Array.IndexOf ( string [] Array = {".scl", ".awl"}, extension.ToLower() > -1 )
-                return addSourceWithType(programName, S7SWObjType.S7Source, filenameFullPath, forceOverwrite);
-            else {
-                Logger.log("addSource(): Error - unknown source extension '" + extension + "' (file: " + filename + ")\n");
-                return null;
-            }
+            return this.programs[programName].addSource(filenameFullPath, forceOverwrite);
         }
 
+
         public void removeSource (string programName, string sourceName){
-            IS7SWItem src = getSourceModule(programName, sourceName);
-            try {
-                src.Remove();
-            } catch (SystemException exc) {
-                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
-                //return false;
-            }
+            this.programs[programName].removeSource(sourceName);
         }
 
 
@@ -760,37 +1074,15 @@ namespace S7_cli
         }
 
 
-        public S7Block getBlock(string ProgramName, string blockName){
-            foreach (S7Block block in simaticProject.Programs[ProgramName].Next["Blocks"].Next) {
-                if (block.Name == blockName) {
-                    Logger.log_debug("getBlock(): found block: " + blockName);
-                    return block;
-                }
-            }
-            Logger.log_debug("getBlock(): the block " + blockName + " not found" );
-            return null;
-        }
-
-        public bool blockExists(string ProgramName, string blockName)
+        public bool blockExists(string programName, string blockName)
         {
-            if (this.getBlock(ProgramName, blockName) != null) {
-                Logger.log_debug("blockExists(): found block: " + blockName);
-                return true;
-            }
-
-            Logger.log_debug("blockExists(): the block " + blockName + " not found" );
-            return false;
+            return this.programs[programName].blockExists(blockName);
         }
 
-        public void removeBlock(string ProgramName, string blockName){
-            S7Block block = this.getBlock(ProgramName, blockName);
-            try {
-                block.Remove();
-            } catch (SystemException exc) {
-                Logger.log_error("Error: removeBlock()" + exc.Message + "\n");
-                //return false;
-            }
+        public void removeBlock(string programName, string blockName){
+            this.programs[programName].removeBlock(blockName);
         }
+
 
         public bool importLibBlocks(string libProjectName, string libProjectProgramName,
                                     string destinationProjectProgramName, bool forceOverwrite = false)
@@ -838,23 +1130,6 @@ namespace S7_cli
         }
 
 
-        public S7Source getS7SourceModule(string programName, string moduleName)
-        {
-            //S7SWItem item = getSourceModule(programName, moduleName);
-            //S7Source source = (S7Source) item.Program.;
-
-            //IS7Source src = getSources("ARC56_program").get_Child("test11"); //get_Collection("test11");
-            S7Source src;
-            try {
-                src = (S7Source) simaticProject.Programs[programName].Next["Sources"].Next[moduleName];
-            } catch (Exception exc) {
-                Logger.log_error("Warning: " + exc.Message + "\n");
-                src = null;
-            }
-
-            return src;
-        }
-
         /* compileSource()
          * 
          * return values:
@@ -866,93 +1141,13 @@ namespace S7_cli
          */
         public int compileSource(string programName, string sourceName)
         {
-            S7Source src = getS7SourceModule(programName, sourceName);
-            if (src == null)
-                return -1;
-            try {
-                IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
-            } catch (System.Exception exc) {
-                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
-                return -2;
-            }
-            //IntPtr ptr = new IntPtr((Void *) items. );
-            /*Console.Write("\n" + items. ToString() + "\n" + items.Count + "\n");
-            Type itype = items.GetType();
-            Console.Write("\n" + itype + "\n");
-            
-            int i=0;
-            foreach (S7SWItem item in items)
-            {
-                i++;
-            }
-            Console.Write("\ni = " + i + "\n");
-
-            int a = src.AppWindowHandle; */
-            //Console.Write("\n" + src.AppWindowHandle + "\n");
-            //src.AppWindowHandle
-            //src.AppWindowHandle
-            //try{
-              //  AutomationElement s7scl = AutomationElement.FromHandle(new IntPtr(src.AppWindowHandle));
-            //}
-            //catch (System.Exception e)
-            //{
-            //    e.HResult.get();
-            //}
-            //System.HR 
-            //s7scl.SetFocus();
-            return 1;
-        }
-
-        private S7SourceType getSourceType(string programName, string sourceName)
-        {
-            S7Source src = getS7SourceModule(programName, sourceName);
-            Logger.log_debug("getSourceType(" + programName + ", " + sourceName + ")\n\n");
-            Logger.log_debug("returns: " + src.ConcreteType.GetType() + "\n\n");
-            Logger.log_debug("returns: " + src.ConcreteType + "\n\n");
-            return //(S7SourceType) 
-                src.ConcreteType;
+            return this.programs[programName].compileSource(sourceName);
         }
 
         public string getSourceTypeString(string programName, string sourceName)
         {
-            /*S7SourceType srcType = this.getSourceType(programName, sourceName);
-            if      (srcType == S7SourceType.S7AWL)     return "S7AWL";
-            else if (srcType == S7SourceType.S7GG)      return "S7GG";
-            else if (srcType == S7SourceType.S7GR7)     return "S7GR7";
-            else if (srcType == S7SourceType.S7NET)     return "S7NET";
-            else if (srcType == S7SourceType.S7SCL)     return "S7SCL";
-            else if (srcType == S7SourceType.S7SCLMake) return "S7SCLMake";
-            else if (srcType == S7SourceType.S7ZG)      return "S7ZG";
-            else                                        return "Unknown"; */
-            S7Source src = getS7SourceModule(programName, sourceName);
-            Logger.log_debug("getSourceType(" + programName + ", " + sourceName + ")\n\n");
-            if (src != null)   {
-                Logger.log_debug("returned: " + src.ConcreteType.GetType() + "\n\n");
-                Logger.log_debug("returned: " + src.ConcreteType + "\n\n");
-                return //(S7SourceType) 
-                    src.ConcreteType.ToString();
-            } else {
-                Logger.log_debug("returned: null(!)\n\n");
-                return null;
-            }
-
+            return this.programs[programName].getSourceTypeString(sourceName);
         }
-
-        //public string getSourceFileExtension(string programName, string sourceName)
-        //{
-            //S7SourceType srcType = this.getSourceType(programName, sourceName);
-            /*if (srcType == S7SourceType.S7AWL)          return ".AWL";
-            else if (srcType == S7SourceType.S7GG)      return ".S7GG";    // to check
-            else if (srcType == S7SourceType.S7GR7)     return ".S7GR7";   // to check
-            else if (srcType == S7SourceType.S7NET)     return ".S7NET";   // to check
-            //else if (srcType == S7SourceType.S7SCL)     return ".SCL";
-            else if ((string)srcType == "S7SCL") return ".SCL";
-            else if (srcType == S7SourceType.S7SCLMake) return ".INP";
-            else if (srcType == S7SourceType.S7ZG)      return ".S7ZG";    // to check
-            else return ".UnknownSourceType";*/
-        //    Logger.log_debug("getSourceFileExtension() returns: " + this.getSourceTypeString(programName, sourceName) + "\n\n");
-        //    return this.getSourceTypeString(programName, sourceName);
-        //}
 
         /*
          * returned value:
@@ -961,17 +1156,7 @@ namespace S7_cli
          */
         public int exportSource(string programName, string sourceName, string ExportFileName)
         {
-            S7Source src = getS7SourceModule(programName, sourceName);
-            if (src == null)
-                return -1;
-            try  {
-                //Logger.log_debug("Nous sommes la");
-                src.Export(ExportFileName);
-            } catch (System.Exception exc) {
-                Logger.log("\n** Error exporting '" + sourceName + "':\n" + exc.Message + "\n");
-                return -1;
-            }
-            return 0;
+            return this.programs[programName].exportSource( sourceName, ExportFileName );
         }
 
         public int exportProgramStructure(
@@ -984,10 +1169,7 @@ namespace S7_cli
                 return 1;
             }
 
-            //S7Program program = (S7Program) this.getProgram(programName);
-            S7Program program = (S7Program) simaticProject.Programs[programName];
-            program.ExportProgramStructure(ExportFileName, ExportDuplicateCalls, ColumnFlags);
-            return 0;
+            return this.programs[programName].exportProgramStructure(ExportFileName, ExportDuplicateCalls , ColumnFlags );
         }
     }
 }
