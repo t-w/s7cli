@@ -72,7 +72,6 @@
   <ItemGroup>
     <Compile Include="Option_parser.cs" />
     <Compile Include="S7Command.cs" />
-    <Compile Include="WinAPI.cs" />
     <Compile Include="s7cli.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S7Project.cs" />
@@ -143,7 +142,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
