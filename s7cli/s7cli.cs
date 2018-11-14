@@ -117,9 +117,10 @@ namespace S7_cli
         static public string get_version()
         {
             return Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
-                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString() + "." +
+                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString() + 
                    //Assembly.GetExecutingAssembly().GetName().Version.MajorRevision.ToString() + "." +
-                   Assembly.GetExecutingAssembly().GetName().Version.MinorRevision.ToString();
+                   ( Assembly.GetExecutingAssembly().GetName().Version.MinorRevision > 0 ? "." +
+                     Assembly.GetExecutingAssembly().GetName().Version.MinorRevision.ToString() : "" );
         }
 
         static public void show_logo()
@@ -130,7 +131,7 @@ namespace S7_cli
           _|_|_|          _|    _|_|_|  _|    
         _|_|            _|    _|        _|  _|
             _|_|      _|      _|        _|  _|
-        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"rc6
+        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
 
         Command-line interface for Siemens SIMATIC Step7(tm)
         (C) 2013-2018 CERN, TE-CRG-CE

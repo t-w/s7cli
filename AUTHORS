@@ -9,7 +9,7 @@ The authors of s7cli.
 The following contributions warranted legal paper exchanges with the
 Free Software Foundation.  See also the ChangeLog and THANKS files.
 
-Tomasz Wolak <tomas.wolak@gmail.com>
+Tomasz Wolak <tomasz.wolak@cern.ch>
   General concept, main interface to SIMATIC, the code for managing software
   development part of the SIMATIC project (SCL, AWL, GRF: import, export,
   compile; symbols export and import; blocks: copy from a library or another
