@@ -130,7 +130,7 @@ namespace S7_cli
           _|_|_|          _|    _|_|_|  _|    
         _|_|            _|    _|        _|  _|
             _|_|      _|      _|        _|  _|
-        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
+        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"rc6
 
         Command-line interface for Siemens SIMATIC Step7(tm)
         (C) 2013-2018 CERN, TE-CRG-CE

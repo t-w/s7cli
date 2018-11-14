@@ -442,7 +442,7 @@ namespace S7_cli
                     continue;
                 }
 
-                if (s7project.addSource(program, srcfile, forceOverwrite) == null)
+                if (s7project.importSource(program, srcfile, forceOverwrite) == null)
                     failure = true;
             }
             if (!failure)
