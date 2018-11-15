@@ -16,8 +16,8 @@ s7cli is a simple command line interface to Siemens SIMATIC Step7(r)
 (programming environment for Siemens Programmable Logic Controllers, PLCs).
 
 It was created to fill the gap in tools for automation scripting that would
-allow to build SIMATIC projects in an automated way (without human interaction,
-ie. without using graphical interface).
+allow to manage (in particular - build) SIMATIC projects in an automated way
+(without human interaction, ie. without using graphical interface).
 
 See 'Usage' below as a summary of available functionality.
 
@@ -25,6 +25,7 @@ See 'Usage' below as a summary of available functionality.
 Installation
 ============
 It is a stand-alone executable. Just copy it where it is convenient to start it from.
+See also the INSTALL file.
 
 
 Usage

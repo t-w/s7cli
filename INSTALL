@@ -9,22 +9,30 @@ are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.  This file is offered as-is,
 without warranty of any kind.
 
-Basic Installation
-==================
+Installation
+============
 
-   The pre-compiled binary in bin/ directory can be used just used as-is, 
-executed from any place. It can be put to some directory in Windows 
-system PATH for easy access.
+   The compiled binary bin/s7cli.exe is a standalone program, it can be 
+executed from any place. For easy access, it can be placed eg. in one of the
+directories included in the Windows system PATH.
 
-   For use the s7cli (obviously) requires the Siemens SIMATIC Step 7 installed.
+   The s7cli (obviously) requires the Siemens SIMATIC Step 7 installed.
 
-   The program was built using Microsoft Visual Studio 2010 as 32bit Windows
-executable, was tested and used on 64bit versions of Windows 7 and 
+   The program was built using Microsoft Visual Studio 2013 as a 32bit Windows
+executable. It was tested and used on 64bit versions of Windows 7 and 
 Windows Server 2008 with:
-  - Siemens SIMATIC STEP 7 Professional SR4, V5.5 + SP4
-  - S7-SCL Professional 2010 SR4, V5.3 + SP6 + Upd2
+  - STEP 7 Professional SR4, V5.5 + SP4
+  - SIMATIC S7-SCL Professional 2010 SR4, V5.3 + SP6 + Upd2
 
-   Building from sources - may require similar environment as described
-above (ie. Microsoft Visual Studio, probably at least the same version).
-Building the project does not require any special configurations, should
-be straightforward.
+It was briefly tested (importing sources and compiling) using a newer version: 
+  - Step7 Professional 2017 V5.6 + HF1
+  - SIMATIC S7-SCL Professional 2017 V5.6 + HF1
+
+
+Building from sources
+=====================
+   Compiling the program from sources may require similar environment
+as described above (ie. Microsoft Visual Studio, probably at least the same
+version). The project does not require any special configurations, rebuilding
+it should be straightforward.
+
