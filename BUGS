@@ -20,3 +20,8 @@ i.e. FILEVERSION "3.2" does not seem supported by the library
   The same project opened from different directories  may exist
   under the same name(!) on SIMATIC list of projects. s7cli
   will open the first available on the list (a warning to implement...).
+
+* There is a problem with importing single source files having with long
+  file names (longer that the old 8.3 standard, still alive apparently...).
+  It occures when importing single source files, ie. it concerns the command
+  "importSources". The command importSourcesDir is free from this problem.
