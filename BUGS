@@ -21,7 +21,8 @@ i.e. FILEVERSION "3.2" does not seem supported by the library
   under the same name(!) on SIMATIC list of projects. s7cli
   will open the first available on the list (a warning to implement...).
 
-* There is a problem with importing single source files having with long
-  file names (longer that the old 8.3 standard, still alive apparently...).
-  It occures when importing single source files, ie. it concerns the command
-  "importSources". The command importSourcesDir is free from this problem.
+* The importLibBlocks command may copy blocks from an incorrect S7 program(!)
+  when using the Step7 libraries with multiple S7 programs.
+  For the moment the only 100% sure override is using libraries with only
+  one S7 program inside (what usually is the case anyway, but be aware...).
+
