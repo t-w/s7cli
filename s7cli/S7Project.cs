@@ -71,7 +71,7 @@ namespace S7_cli
         //public plcProject(string Name)
         public S7Project(string pathOrName)
         {
-            simaticapi = new SimaticAPI();
+            simaticapi = SimaticAPI.Instance;
             Simatic simatic = simaticapi.getSimatic();
 
             foreach (IS7Project project in simatic.Projects)  {
@@ -108,7 +108,7 @@ namespace S7_cli
 
         public S7Project(string projectName, string projectDirPath, S7ProjectType projectType)
         {
-            simaticapi = new SimaticAPI();
+            simaticapi = SimaticAPI.Instance;
             Simatic simatic = simaticapi.getSimatic();
 
             // checking if the project dir path ends with "\"

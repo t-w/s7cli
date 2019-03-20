@@ -99,7 +99,7 @@ namespace S7_cli
 
         public void getListOfProjects()
         {
-            SimaticAPI simatic = new SimaticAPI();
+            SimaticAPI simatic = SimaticAPI.Instance;
             Logger.log("List of available projects / standard libraries:\n");
             //Logger.log(S7Project.getListOfAvailableProjects());
             Logger.log(simatic.getListOfAvailableProjects());

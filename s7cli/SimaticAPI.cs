@@ -35,8 +35,14 @@ namespace S7_cli
     /// main interface for accessing Simatic Step7 environment
     /// </summary>
     ///
-    public class SimaticAPI
+    /// singleton based on:
+    ///  https://csharpindepth.com/Articles/Singleton
+    ///
+    public sealed class SimaticAPI
     {
+        private static SimaticAPI instance = null;
+        private static readonly object padlock = new object();
+
         private static Simatic simatic = null;
 
         /*
@@ -71,6 +77,7 @@ namespace S7_cli
             }
         }
 
+
         public void disableUnattendedServerMode()
         {
             if (simatic != null)
@@ -84,6 +91,23 @@ namespace S7_cli
             }
         }
 
+
+        public static SimaticAPI Instance
+        {
+            get
+            {
+                lock (padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SimaticAPI();
+                    }
+                    return instance;
+                }
+            }
+        }
+
+
         public string getListOfAvailableProjects()
         {
             string availableProjects = "";
@@ -94,6 +118,8 @@ namespace S7_cli
             return availableProjects;
         }
 
+
+        // return the only existing instance (singleton)
         public Simatic getSimatic()
         {
             return simatic;
