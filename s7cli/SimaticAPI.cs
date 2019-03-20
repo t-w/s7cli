@@ -37,7 +37,7 @@ namespace S7_cli
     ///
     /// singleton based on:
     ///  https://csharpindepth.com/Articles/Singleton
-    ///
+    ///  
     public sealed class SimaticAPI
     {
         private static SimaticAPI instance = null;
@@ -95,7 +95,7 @@ namespace S7_cli
         public static SimaticAPI Instance
         {
             get
-            {
+            { 
                 lock (padlock)
                 {
                     if (instance == null)
@@ -142,5 +142,31 @@ namespace S7_cli
             }
         }
 
+
+        /*
+         * for STL (AWL) compilation result, see documentation for API
+         * 
+         * notes:
+         * - file directory for the file must exist (otherwise no log file appears)
+         * - the Compile() method called on an STL source is appending the results 
+         *   (status buffer) to the log file
+         */
+        public void setCompilationLogfile(string filePath)
+        {
+            simatic.VerbLogFile = filePath;
+        }
+
+
+        public void setCompilationLogfile()
+        {
+            //setCompilationLogfile("C:\\Temp\\STL_compilation_log.txt");
+            setCompilationLogfile( System.IO.Path.GetTempFileName() );
+        }
+
+
+        public string getCompilationLogfile()
+        {
+            return simatic.VerbLogFile;
+        }
     }
 }

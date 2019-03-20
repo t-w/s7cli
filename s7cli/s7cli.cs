@@ -134,7 +134,7 @@ namespace S7_cli
         _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
 
         Command-line interface for Siemens SIMATIC Step7(tm)
-        (C) 2013-2018 CERN, TE-CRG-CE
+        (C) 2013-2019 CERN, TE-CRG-CE
 
         Authors: Michal Dudek, Tomasz Wolak
 ";

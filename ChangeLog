@@ -1,3 +1,8 @@
+2019-03-21, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.2
+	- added getting compilation results for STL (AWL) sources
+
+
 2019-03-20, Tomasz Wolak <tomasz.wolak@cern.ch>
 	* 0.8.1
 	- added getting compilation results for SCL sources

@@ -1,5 +1,5 @@
 ﻿/************************************************************************
- * S7CompilerSCLs.cs - S7ProgramSources class                         *
+ * S7CompilerSCL.cs - S7 Compiler SCL class                             *
  *                                                                      *
  * Copyright (C) 2013-2018 CERN                                         *
  *                                                                      *

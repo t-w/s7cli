@@ -22,6 +22,7 @@ using System.IO;
 //using System.Runtime.InteropServices;
 //using System.Windows.Automation;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using SimaticLib;
 using S7HCOM_XLib;
@@ -317,7 +318,7 @@ namespace S7_cli
         }
 
 
-        /* Compile an S7 source.
+        /* Compile an S7 SCL source.
          * 
          * return values:
          *    1 success
@@ -326,28 +327,29 @@ namespace S7_cli
          *   -1 source not found
          *   -2 exception during compilation
          *   -3 error during compilation
+         *   -10 unknown
          */
-        public int compileSource(string sourceName)
+        private int compileSCLSource(S7Source src)
         {
-            S7Source src = getS7Source(sourceName);
             if (src == null)
                 return -1;
+
             try
             {
                 IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
             }
             catch (System.Exception exc)
             {
-                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                Logger.log("\n** compileSource(): Error compiling '" + src.Name + "':\n" + exc.Message + "\n");
                 return -2;
             }
 
             // get status and close the SCL compiler
             S7CompilerSCL sclc = new S7CompilerSCL();
-            Logger.log( "\nSCL status buffer:\n" + sclc.getSclStatusBuffer() );
+            Logger.log("\nSCL status buffer:\n" + sclc.getSclStatusBuffer());
             string statusLine = sclc.getSclStatusLine();
-            int    errors     = sclc.getErrorCount();
-            int    warnings   = sclc.getWarningCount();
+            int errors = sclc.getErrorCount();
+            int warnings = sclc.getWarningCount();
             sclc.closeSclWindow();
 
             //if (statusLine.Equals("Result: 0 Errors, 0 Warning(s)"))
@@ -360,6 +362,127 @@ namespace S7_cli
 
             // compilation OK (no errors, no warnings)
             return 1;
+        }
+
+
+        /* Compile an S7 AWL source.
+         * 
+         * return values:
+         *    1 success
+         *    0 warning during compilation
+         *   <0 error
+         *   -1 source not found
+         *   -2 exception during compilation
+         *   -3 error during compilation
+         *   -10 unknown
+         */
+        public int compileAWLSource(S7Source src)
+        {
+            if (src == null)
+                return -1;
+
+            SimaticAPI simaticapi = SimaticAPI.Instance;
+
+            // special setting for STL compilation, CRG-1417
+            // ("quiet" compilation with status written to a log file)
+            simaticapi.setCompilationLogfile();
+            string logFilePath = simaticapi.getCompilationLogfile();
+            Logger.log("Compilation logfile: " + logFilePath);
+
+            // truncate log file
+            FileStream oStream = new FileStream( logFilePath, FileMode.Open, FileAccess.ReadWrite );
+            oStream.SetLength(0);
+            oStream.Close();
+
+            // compile
+            try
+            {
+                IS7SWItems items = src.Compile();  // this thing returns nothing useful -> bug in SimaticLib(!)
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log("\n** compileSource(): Error compiling '" + src.Name + "':\n" + exc.Message + "\n");
+                if ( ! File.Exists( logFilePath ) )
+                    return -2;
+            }
+
+            // read and show the log file
+            string[] logfile = File.ReadAllLines( logFilePath );
+            System.IO.File.Delete( logFilePath );
+            Array.ForEach<string>( logfile, s => Logger.log( s ) );
+
+            // parse status in the logfile
+            int errors, warnings;
+            string statusLineRegExStr = "Compiler result.*Error.*Warning.*";
+            //Regex statusLineRegEx = new Regex(statusLineRegExStr);
+
+            if ( Array.Exists<string> (
+                    logfile, s => Regex.IsMatch( s, statusLineRegExStr ) ) )
+            {
+                // we get line like:
+                // Compiler result: 0 Error(s), 0 Warning(s)
+                // -> have to parse it to get the numbers of errors and warnings
+                string [] statusLine =
+                    Array.Find<string> (
+                        logfile, s => Regex.IsMatch( s, statusLineRegExStr ) ).Split(' ');
+                errors   = Int32.Parse( statusLine[2] );
+                warnings = Int32.Parse( statusLine[4] );
+
+            } else
+                // cannot get results - result unknown
+                return -10;
+
+            if ( errors > 0 )
+                return -3;
+            else if ( warnings > 0 )
+                return 0;
+
+            // compilation OK (no errors, no warnings)
+            return 1;
+        }
+
+
+        /* Compile an S7 source.
+         * 
+         * return values:
+         *    1 success
+         *    0 warning during compilation
+         *   <0 error
+         *   -1 source not found
+         *   -2 exception during compilation
+         *   -3 error during compilation
+         *   -10 unknown
+         */
+        public int compileSource(string sourceName)
+        {
+            S7Source src = getS7Source(sourceName);
+            S7SourceType sourceType = getSourceType(sourceName);
+
+            if (src == null)
+                return -1;
+
+            try
+            {
+                if (sourceType == S7SourceType.S7SCL)
+                {
+                    return compileSCLSource(src);
+                }
+                else if (sourceType == S7SourceType.S7AWL)
+                {
+                    return compileAWLSource(src);
+                }
+                else
+                {
+                    // not SCL or AWL, try anyway...
+                    IS7SWItems items = src.Compile();
+                    return -10;
+                }
+            }
+            catch (System.Exception exc)
+            {
+                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                return -2;
+            }
         }
     }
 }
