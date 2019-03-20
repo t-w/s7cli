@@ -320,11 +320,12 @@ namespace S7_cli
         /* Compile an S7 source.
          * 
          * return values:
-         *    0 success
+         *    1 success
+         *    0 warning during compilation
          *   <0 error
          *   -1 source not found
          *   -2 exception during compilation
-         *    1 unknown
+         *   -3 error during compilation
          */
         public int compileSource(string sourceName)
         {
@@ -340,31 +341,24 @@ namespace S7_cli
                 Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
                 return -2;
             }
-            //IntPtr ptr = new IntPtr((Void *) items. );
-            /*Console.Write("\n" + items. ToString() + "\n" + items.Count + "\n");
-            Type itype = items.GetType();
-            Console.Write("\n" + itype + "\n");
-            
-            int i=0;
-            foreach (S7SWItem item in items)
-            {
-                i++;
-            }
-            Console.Write("\ni = " + i + "\n");
 
-            int a = src.AppWindowHandle; */
-            //Console.Write("\n" + src.AppWindowHandle + "\n");
-            //src.AppWindowHandle
-            //src.AppWindowHandle
-            //try{
-            //  AutomationElement s7scl = AutomationElement.FromHandle(new IntPtr(src.AppWindowHandle));
-            //}
-            //catch (System.Exception e)
-            //{
-            //    e.HResult.get();
-            //}
-            //System.HR
-            //s7scl.SetFocus();
+            // get status and close the SCL compiler
+            S7CompilerSCL sclc = new S7CompilerSCL();
+            Logger.log( "\nSCL status buffer:\n" + sclc.getSclStatusBuffer() );
+            string statusLine = sclc.getSclStatusLine();
+            int    errors     = sclc.getErrorCount();
+            int    warnings   = sclc.getWarningCount();
+            sclc.closeSclWindow();
+
+            //if (statusLine.Equals("Result: 0 Errors, 0 Warning(s)"))
+            //    return 0;
+
+            if (errors > 0)
+                return -3;
+            else if (warnings > 0)
+                return 0;
+
+            // compilation OK (no errors, no warnings)
             return 1;
         }
     }

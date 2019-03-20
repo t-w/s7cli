@@ -465,6 +465,14 @@ namespace S7_cli
                 } else if (result == -2) {
                     //Logger.log("Exception compiling " + src + "!");
                     S7Status.set_status(S7Status.failure);
+                } else if (result == -3)
+                {
+                    // errors in compilation
+                    S7Status.set_status(S7Status.failure);
+                } else if ( result >= 0 )
+                {
+                    // just warnings or no problems -> set success
+                    S7Status.set_status(S7Status.success);
                 }
             }
             if (! S7Status.status_set() )
