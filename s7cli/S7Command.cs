@@ -121,7 +121,7 @@ namespace S7_cli
         S7Project openProject(string projectPathOrName)
         {
             if (s7project == null) {
-                Logger.log("Opening project: " + projectPathOrName);
+                Logger.log("Opening the project: " + projectPathOrName);
                 s7project = new S7Project(projectPathOrName);
             } else {
                 Logger.log_debug("openProject(): a project is already opened:" +
@@ -455,12 +455,12 @@ namespace S7_cli
         {
             this.openProject(projectPathOrName);
 
-            Logger.log("\nBuilding source(s) in program: " + programName + "\n\n");
+            Logger.log("\nBuilding source(s) in the program: " + programName + "\n\n");
             foreach (string src in sources)  {
-                Logger.log("\nCompiling source: " + src);
+                Logger.log("\nCompiling the source: " + src);
                 int result = s7project.compileSource(programName, src);
                 if (result == -1) {
-                    Logger.log("Source '" + src + "' not found in program '" + programName + "' !");
+                    Logger.log("The source '" + src + "' not found in the program '" + programName + "' !");
                     S7Status.set_status(S7Status.failure);
                 } else if (result == -2) {
                     //Logger.log("Exception compiling " + src + "!");
