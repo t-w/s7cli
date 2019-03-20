@@ -456,10 +456,11 @@ namespace S7_cli
         public int compileSource(string sourceName)
         {
             S7Source src = getS7Source(sourceName);
-            S7SourceType sourceType = getSourceType(sourceName);
 
             if (src == null)
                 return -1;
+
+            S7SourceType sourceType = getSourceType(sourceName);
 
             try
             {
