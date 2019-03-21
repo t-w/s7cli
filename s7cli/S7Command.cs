@@ -526,22 +526,26 @@ namespace S7_cli
             foreach (string src in sources)  {
                 Logger.log("\nCompiling the source: " + src);
                 int result = s7project.compileSource(programName, src);
-                if (result == -1) {
-                    Logger.log("The source '" + src + "' not found in the program '" + programName + "' !");
-                    S7Status.set_status(S7Status.failure);
-                } else if (result == -2) {
-                    //Logger.log("Exception compiling " + src + "!");
-                    S7Status.set_status(S7Status.failure);
-                } else if (result == -3)
+
+                if (result == -10)
                 {
-                    // errors in compilation
-                    S7Status.set_status(S7Status.failure);
-                } else if ( result >= 0 )
+                    // Result: unknown
+                    //Logger.log("Result: " + s7project.getCompilationStatusInfo(result));
+                    S7Status.set_status( S7Status.unknown );
+                }
+                else if (result < 0 && result > -10)
+                {
+                    // Result: error
+                    Logger.log_error( s7project.getCompilationStatusInfo( result ) );
+                    S7Status.set_status( S7Status.failure );
+                }
+                else if (result >= 0)
                 {
                     // just warnings or no problems -> set success
-                    S7Status.set_status(S7Status.success);
+                    S7Status.set_status( S7Status.success );
                 }
             }
+
             if (! S7Status.status_set() )
                 S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
         }
