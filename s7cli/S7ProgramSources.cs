@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * S7ProgramSources.cs - S7ProgramSources class                         *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -462,7 +462,8 @@ namespace S7_cli
 
             S7SourceType sourceType = getSourceType(sourceName);
 
-            if (sourceType == S7SourceType.S7SCL)
+            if ( sourceType == S7SourceType.S7SCL ||
+                 sourceType == S7SourceType.S7SCLMake )
             {
                 return compileSCLSource(src);
             }
@@ -472,7 +473,7 @@ namespace S7_cli
             }
             else
             {
-                // not SCL or AWL, try anyway...
+                // not SCL, SCLMake (INP) or AWL, try anyway...
                 try
                 {
                     IS7SWItems items = src.Compile();
