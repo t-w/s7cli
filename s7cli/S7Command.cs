@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * S7Command.cs - a class with high-level operations on S7 projects     *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -218,7 +218,13 @@ namespace S7_cli
             Logger.log("    from: " + symbolsPath);
             Logger.log("    to: - project: " + s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
             Logger.log("        - program: " + programName);
-            
+
+            if ( ! s7project.programExists( programName ) )
+            {
+                S7Status.set_status( S7Status.failure );
+                return 0;
+            }
+
             int symbolsImported;
 
             if (programName != "")
@@ -239,6 +245,11 @@ namespace S7_cli
         public void exportSymbols(string projectPathOrName, string programName, 
                                   string symbolsOutputFile, bool force = false){
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             string exportDirectory = Path.GetDirectoryName(symbolsOutputFile);
             if (!Directory.Exists(exportDirectory))  {
@@ -277,6 +288,12 @@ namespace S7_cli
         public void listSources(string projectPathOrName, string programName = "")
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             Logger.log("List of sources in program '" + programName + "'\n");
             string [] sources = s7project.getSourcesList(programName);
 
@@ -293,6 +310,12 @@ namespace S7_cli
         public void listBlocks(string projectPathOrName, string programName = "")
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             Logger.log("List of blocks in program '" + programName + "'\n");
             string[] blocks = s7project.getBlocksList(programName);
 
@@ -310,6 +333,12 @@ namespace S7_cli
         public void downloadSystemData(string projectPathOrName, string projectProgramName, bool force = false)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             string[] blocks;
 
             if (force)
@@ -346,6 +375,12 @@ namespace S7_cli
         public void downloadAllBlocks(string projectPathOrName, string projectProgramName, bool force = false)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             string[] blocks;
 
             if (force)
@@ -374,6 +409,11 @@ namespace S7_cli
         public void startCPU(string projectPathOrName, string projectProgramName)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             if (s7project.startCPU(projectProgramName))
             {
@@ -390,6 +430,11 @@ namespace S7_cli
         public void stopCPU(string projectPathOrName, string projectProgramName)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             if (s7project.stopCPU(projectProgramName))
             {
@@ -407,6 +452,12 @@ namespace S7_cli
                                      string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(destinationProjectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             if (s7project.importLibSources(libProjectName, libProjectProgramName,
                     destinationProjectProgramName, forceOverwrite))
                 S7Status.set_status(S7Status.success);
@@ -419,6 +470,12 @@ namespace S7_cli
                                     string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(destinationProjectProgramName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             if (s7project.importLibBlocks(libProjectName, libProjectProgramName,
                     destinationProjectProgramName, forceOverwrite))
                 S7Status.set_status(S7Status.success);
@@ -429,6 +486,11 @@ namespace S7_cli
         public void importSources(string projectPathOrName, string program, string[] sourceFiles, bool forceOverwrite = false)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(program, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             Logger.log("\nImporting sources to program: " + program + "\n\n");
             bool failure = false;
@@ -454,6 +516,11 @@ namespace S7_cli
         public void compileSources(string projectPathOrName, string programName, string[] sources)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             Logger.log("\nBuilding source(s) in the program: " + programName + "\n\n");
             foreach (string src in sources)  {
@@ -489,6 +556,11 @@ namespace S7_cli
             }
 
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             Logger.log("\nExporting source(s) from program: " + programName + " to " + exportDirectory + ".\n\n");
 
@@ -517,6 +589,12 @@ namespace S7_cli
         public void exportAllSources(string projectPathOrName, string programName, string exportDirectory)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+
             string[] sources = s7project.getSourcesList(programName);
             this.exportSources(projectPathOrName, programName, sources, exportDirectory);
         }
@@ -525,6 +603,11 @@ namespace S7_cli
         public void exportProgramStructure(string projectPathOrName, string programName, string exportFileName)
         {
             this.openProject(projectPathOrName);
+            if (!s7project.programExists(programName, true))
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
 
             Logger.log("\nExporting program structure of: " + programName + "\n\n");
             s7project.exportProgramStructure(programName, exportFileName);
