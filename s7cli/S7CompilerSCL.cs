@@ -133,7 +133,10 @@ namespace S7_cli
 
             //hProc = OpenProcess(PROCESS_ALL_ACCESS, false, (int) pid);
             hProc = OpenProcess(PROCESS_WM_READ, false, (int)pid);
-            //Logger.log("hproc: " + hProc);
+            if ( hProc == null )
+            {
+                Logger.log_error( "OpenProcess() accessing the SCL compiler failed.");
+            }
 
             //statusBuffer = "";
             statusBuffer = new List<string>();
