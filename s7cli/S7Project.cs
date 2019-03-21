@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * S7Project.cs - class with the main interface to S7project            *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -483,13 +483,33 @@ namespace S7_cli
         }
 
 
+        /// <summary>
+        /// Check if given program exists in the project
+        /// </summary>
+        /// <param name="programName"></param>
+        /// <returns>True if program exists, false otherwise</returns>
+        public bool programExists( string programName, bool showError = false )
+        {
+            bool exists = Array.Exists<string>( getListOfAvailablePrograms(),
+                                                s => s.Equals( programName ) );
+            if ( (! exists) && showError )
+            {
+                Logger.log_error("Program '" + programName + "' not found!\n");
+            }
+
+            return exists;
+        }
+
+
+
         public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
         {
             if (!checkProjectOpened())
             {
-                Logger.log_error("Error: Project not opened - aborting import!\n");
+                Logger.log_error("Project not opened - aborting the import!\n");
                 return 0;
             }
+
             return this.programs[programName].importSymbols(symbolsPath);
         }
 
@@ -610,15 +630,34 @@ namespace S7_cli
         /* compileSource()
          * 
          * return values:
-         *    0 success
+         *    1 success
+         *    0 warning during compilation
          *   <0 error
          *   -1 source not found
          *   -2 exception during compilation
-         *    1 unknown
+         *   -3 error during compilation
+         *   -4 S7 program not found
+         *   -10 unknown
          */
         public int compileSource(string programName, string sourceName)
         {
             return this.programs[programName].compileSource(sourceName);
+        }
+
+
+        public string getCompilationStatusInfo(int status)
+        {
+            Dictionary<int, string> statusInfo= new Dictionary<int, string>(){
+                {  1, "success" },
+                {  0, "warning during compilation "},
+                { -1, "source not found" },
+                { -2, "exception during compilation"},
+                { -3, "error during compilation"},
+                { -4, "S7 program not found"},
+                { -10, "unknown"}
+            };
+
+            return statusInfo[status];
         }
 
         public string getSourceTypeString(string programName, string sourceName)
