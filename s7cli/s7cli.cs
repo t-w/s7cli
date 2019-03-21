@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * s7cli.cs - the s7cli main program                                    *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -23,8 +23,6 @@ using System.Linq;
 using System.Text;
 //using System.Runtime.InteropServices;
 using System.Reflection;
-
-using SimaticLib;
 
 namespace S7_cli
 {
@@ -208,17 +206,15 @@ namespace S7_cli
 
                 else if (command == "createProject")
                     s7command.createProject(options.getOption("--projname"),
-                                            options.getOption("--projdir"),
-                                            S7ProjectType.S7Project);
+                                            options.getOption("--projdir"));
 
                 else if (command == "importConfig")
                     s7command.importConfig(options.getOption("--project"),
                                            options.getOption("--config"));
 
                 else if (command == "createLib")
-                    s7command.createProject(options.getOption("--libname"),
-                                            options.getOption("--libdir"),
-                                            S7ProjectType.S7Library);
+                    s7command.createLibrary(options.getOption("--libname"),
+                                            options.getOption("--libdir"));
 
                 else if (command == "exportConfig")
                     s7command.exportConfig(options.getOption("--project"),

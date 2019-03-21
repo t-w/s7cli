@@ -117,6 +117,17 @@ namespace S7_cli
             return s7project.isProjectOpened();
         }
 
+        public bool createProject( string name,
+                                   string dir )
+        {
+            return createProject(name, dir, S7ProjectType.S7Project);
+        }
+
+        public bool createLibrary( string name,
+                                   string dir )
+        {
+            return createProject(name, dir, S7ProjectType.S7Library);
+        }
 
         S7Project openProject(string projectPathOrName)
         {
