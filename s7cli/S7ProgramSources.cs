@@ -462,27 +462,28 @@ namespace S7_cli
 
             S7SourceType sourceType = getSourceType(sourceName);
 
-            try
+            if (sourceType == S7SourceType.S7SCL)
             {
-                if (sourceType == S7SourceType.S7SCL)
-                {
-                    return compileSCLSource(src);
-                }
-                else if (sourceType == S7SourceType.S7AWL)
-                {
-                    return compileAWLSource(src);
-                }
-                else
-                {
-                    // not SCL or AWL, try anyway...
-                    IS7SWItems items = src.Compile();
-                    return -10;
-                }
+                return compileSCLSource(src);
             }
-            catch (System.Exception exc)
+            else if (sourceType == S7SourceType.S7AWL)
             {
-                Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
-                return -2;
+                return compileAWLSource(src);
+            }
+            else
+            {
+                // not SCL or AWL, try anyway...
+                try
+                {
+                    IS7SWItems items = src.Compile();
+                }
+                catch (System.Exception exc)
+                {
+                    Logger.log("\n** compileSource(): Error compiling '" + sourceName + "':\n" + exc.Message + "\n");
+                    return -2;
+                }
+
+                return -10;
             }
         }
     }
