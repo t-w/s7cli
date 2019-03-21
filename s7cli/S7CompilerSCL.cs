@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * S7CompilerSCL.cs - S7 Compiler SCL class                             *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -20,7 +20,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-//using System.Runtime.InteropServices;
 //using System.Windows.Automation;
 using System.Collections.Generic;
 
@@ -29,22 +28,33 @@ using S7HCOM_XLib;
 
 namespace S7_cli
 {
-    /*
-     * class S7CompilerSCL - a class interact with an opened SCL compiler and access compilation status
-     */
+    //////////////////////////////////////////////////////////////////////////
+    /// class S7CompilerSCL
+    /// <summary>
+    /// A class for interacting with an opened SCL compiler and accessing
+    /// the compilation status.
+    /// </summary>
     public class S7CompilerSCL
     {
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindow(string IpClassName, string IpWindowName);
+        [ DllImport( "user32.dll", SetLastError = true ) ]
+        static extern IntPtr FindWindow( string IpClassName,
+                                         string IpWindowName );
 
-        [DllImport ("user32.dll", SetLastError = true)]
-        static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string IpszClass, string IpszWindow);
+        [ DllImport ( "user32.dll", SetLastError = true ) ]
+        static extern IntPtr FindWindowEx( IntPtr hwndParent,
+                                           IntPtr hwndChildAfter,
+                                           string IpszClass,
+                                           string IpszWindow );
 
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        [ DllImport( "user32.dll", SetLastError = true ) ]
+        static extern int SendMessage( IntPtr hwnd,
+                                       int    wMsg,
+                                       IntPtr wParam,
+                                       IntPtr lParam );
 
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern uint GetWindowThreadProcessId(IntPtr hwnd, ref uint ProcessId);
+        [ DllImport( "user32.dll", SetLastError = true ) ]
+        static extern uint GetWindowThreadProcessId( IntPtr   hwnd,
+                                                     ref uint ProcessId );
         
         public enum ProcessAccessFlags : uint
         {
@@ -64,29 +74,28 @@ namespace S7_cli
         }
 
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern IntPtr OpenProcess(
-            uint processAccess,
-            bool bInheritHandle,
-            int processId);
+        [ DllImport( "kernel32.dll", SetLastError = true ) ]
+        public static extern IntPtr OpenProcess( uint processAccess,
+                                                 bool bInheritHandle,
+                                                 int  processId );
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(
-            IntPtr hProcess,
-            IntPtr lpBaseAddress,
-            ref IntPtr lpBuffer,
-            int dwSize,
-            ref int lpnumberOfBytesRead );
+        [ DllImport( "kernel32.dll", SetLastError = true ) ]
+        public static extern bool ReadProcessMemory( IntPtr     hProcess,
+                                                     IntPtr     lpBaseAddress,
+                                                     ref IntPtr lpBuffer,
+                                                     int        dwSize,
+                                                     ref int    lpnumberOfBytesRead );
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool ReadProcessMemory(
-            IntPtr hProcess,
-            IntPtr lpBaseAddress,
-            byte[] buffer,
-            int dwSize,
-            ref int lpnumberOfBytesRead );
+        [ DllImport( "kernel32.dll", SetLastError = true ) ]
+        public static extern bool ReadProcessMemory( IntPtr  hProcess,
+                                                     IntPtr  lpBaseAddress,
+                                                     byte [] buffer,
+                                                     int     dwSize,
+                                                     ref int lpnumberOfBytesRead );
 
-
+        // System constants, more can be found on:
+        // https://referencesource.microsoft.com/UIAutomationClientsideProviders/MS/Win32/NativeMethods.cs.html
+        //
         const int WM_CLOSE       = 0x10;
         const int LB_ERR         = -1;
         const int LB_SETCURSEL   = 0x0186;
@@ -97,24 +106,30 @@ namespace S7_cli
         const int LB_GETCOUNT    = 0x018B;
         const int LB_GETITEMDATA = 0x0199;
 
-        const uint DELETE = 0x00010000;
+        const uint DELETE       = 0x00010000;
         const uint READ_CONTROL = 0x00020000;
-        const uint WRITE_DAC = 0x00040000;
-        const uint WRITE_OWNER = 0x00080000;
-        const uint SYNCHRONIZE = 0x00100000;
+        const uint WRITE_DAC    = 0x00040000;
+        const uint WRITE_OWNER  = 0x00080000;
+        const uint SYNCHRONIZE  = 0x00100000;
         const uint END = 0xFFF; //if you have Windows XP or Windows Server 2003 you must change this to 0xFFFF
         const uint PROCESS_ALL_ACCESS = (DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER | SYNCHRONIZE | END);
         //const int PROCESS_ALL_ACCESS = 0x1F0FFF;
         const int PROCESS_WM_READ = 0x0010;
 
-        IntPtr handle, nullptr;
-        
-        uint pid;
-        IntPtr hProc;
+        // the SCL compiler system data
+        IntPtr handle,            // window handle
+               nullptr;           // null pointer (required in many system calls)
+        uint   pid;               // process ID
+        IntPtr hProc;             // process handle
 
-        //string [] statusBuffer;
+        // compiler status buffer
         List<string> statusBuffer;
 
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        ///
         public S7CompilerSCL()
         {
             nullptr = new IntPtr(0);
@@ -122,14 +137,11 @@ namespace S7_cli
             handle = FindWindow( "AfxMDIFrame42", null );
             if (handle.Equals(null))
             {
-                Logger.log_error("SCL compiler window not found");
+                Logger.log_error("The SCL compiler window not found.");
                 return;
             }
-            //Logger.log("handle: " + handle);
 
-            // get process
             GetWindowThreadProcessId(handle, ref pid);
-            //Logger.log("pid: " + pid);
 
             //hProc = OpenProcess(PROCESS_ALL_ACCESS, false, (int) pid);
             hProc = OpenProcess(PROCESS_WM_READ, false, (int)pid);
@@ -138,46 +150,41 @@ namespace S7_cli
                 Logger.log_error( "OpenProcess() accessing the SCL compiler failed.");
             }
 
-            //statusBuffer = "";
             statusBuffer = new List<string>();
         }
 
-        //
-        /// traverse to listbox
-        //
+
+        /// <summary>
+        /// Find the listbox (with compilation status info) in the SCL compiler window
+        /// </summary>
         IntPtr getSclStatusListBox()
         {
             if (handle.Equals( null ) )
-                //return LB_ERR;
                 return handle;
 
-            IntPtr listboxControlBar = FindWindowEx(handle, nullptr,
+            IntPtr listboxControlBar = FindWindowEx( handle, nullptr,
                                                      "AfxControlBar42", "SCL: Errors and Warnings" );
 	        //checkHandle(listboxControlBar, "AfxControlBar42 / SCL: Errors and Warnings");
 
-            IntPtr listboxWnd42 = FindWindowEx(listboxControlBar, nullptr, "AfxWnd42", "SCL: Errors and Warnings");
+            IntPtr listboxWnd42 = FindWindowEx( listboxControlBar, nullptr,
+                                                "AfxWnd42", "SCL: Errors and Warnings" );
 	        //checkHandle(listboxWnd42, "AfxWnd42 / SCL: Errors and Warnings");
 
-
-	        //HWND listboxWnd42_2    = FindWindowExW( listboxWnd42_1,    0, _T("AfxWnd42"),        0 );
-	        //checkHandle(listboxWnd42_2, "AfxWnd42");
-
-            IntPtr listboxAfx_1 = FindWindowEx(listboxWnd42, nullptr, "Afx:400000:8", "");
+            IntPtr listboxAfx_1 = FindWindowEx( listboxWnd42, nullptr, "Afx:400000:8", "" );
 	        //checkHandle(listboxAfx_1, "Afx:400000:8");
 
-	        //HWND listbox      = FindWindowExW( listboxAfx_1,      0, _T("Afx:400000:8"),     0 );
-	        //checkHandle( listbox, "Afx:400000:8" );
-            IntPtr listbox = FindWindowEx(listboxAfx_1, nullptr, "ListBox", "");
+            IntPtr listbox = FindWindowEx( listboxAfx_1, nullptr, "ListBox", "" );
 	        //checkHandle(listbox, "ListBox");
 
 	        return listbox;
         }
- 
-        void
-        readSclStatusBuffer()
-        {
-	        //string buffer = "";
 
+
+        /// <summary>
+        /// Reads the compilation status buffer from the SCL compiler process
+        /// </summary>
+        void readSclStatusBuffer()
+        {
             IntPtr listbox = getSclStatusListBox();
 
 	        int itemCount = SendMessage(listbox, LB_GETCOUNT, nullptr, nullptr);
@@ -243,8 +250,11 @@ namespace S7_cli
 	        }
         }
 
-        public string
-        getSclStatusBuffer()
+
+        /// <summary>
+        /// Returns the summary line of compilation from the status buffer
+        /// </summary>
+        public string getSclStatusBuffer()
         {
             if ( statusBuffer.Count < 1 )
                 readSclStatusBuffer();
@@ -256,33 +266,44 @@ namespace S7_cli
             return buffer;
         }
 
-        public string
-        getSclStatusLine()
+
+        /// <summary>
+        /// Returns the summary line of compilation from the status buffer
+        /// </summary>
+        public string getSclStatusLine()
         {
             if (statusBuffer.Count < 1)
                 readSclStatusBuffer();
             return statusBuffer[ statusBuffer.Count - 1 ];
         }
 
-        public int
-        getErrorCount()
+
+        /// <summary>
+        /// Returns the number of errors (from the summary in the status buffer)
+        /// </summary>
+        public int getErrorCount()
         {
             string [] statusLine = getSclStatusLine().Split(' ');
             return Int32.Parse(statusLine[1]);
         }
 
-        public int
-        getWarningCount()
+
+        /// <summary>
+        /// Returns the number of warnings (from the summary in the status buffer)
+        /// </summary>
+        public int getWarningCount()
         {
             string[] statusLine = getSclStatusLine().Split(' ');
             return Int32.Parse(statusLine[3]);
         }
 
+
+        /// <summary>
+        /// Closes the SCL compiler application / window
+        /// </summary>
         public void closeSclWindow()
         {
             SendMessage(handle, WM_CLOSE, new IntPtr(0), new IntPtr(0) );
         }
-
     }
-
 }
