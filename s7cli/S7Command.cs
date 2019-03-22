@@ -29,7 +29,9 @@ using S7HCOM_XLib;
 
 namespace S7_cli
 {
-
+    /// <summary>
+    /// Class to manage S7 command line execution status
+    /// </summary>
     public static class S7Status
     {
         //public enum Result_code { success, failure, unknown };
@@ -57,7 +59,7 @@ namespace S7_cli
             return (status > -1);
         }
 
-        public static void set_status(int new_status)
+        public static void set_status( int new_status )
         {
             if (new_status < -1 || new_status > 2)
                 throw new System.Exception("S7Status::set_status() - illegal value " + new_status + "!");
@@ -72,7 +74,7 @@ namespace S7_cli
                 return "Status unset!";
         }
 
-        public static void set_detailed_info(string info)
+        public static void set_detailed_info( string info )
         {
             detailed_info = info;
         }
@@ -83,6 +85,11 @@ namespace S7_cli
         }
     }
 
+
+    /// <summary>
+    /// Class with the s7cli commands, allows to execute s7cli command, check status,
+    /// informing about errors etc.
+    /// </summary>
     public class S7Command
     {
         S7Project s7project = null;
@@ -106,8 +113,16 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
-
-        public bool createProject(string name, string dir, S7ProjectType type)
+        /// <summary>
+        /// Create a new (empty) SIMATIC Step 7 project
+        /// </summary>
+        /// <param name="name">project name</param>
+        /// <param name="dir">the path in which the directory with the new project will be created</param>
+        /// <param name="type">project type (</param>
+        /// <returns></returns>
+        public bool createProject( string        name,
+                                   string        dir,
+                                   S7ProjectType type )
         {
             s7project = new S7Project(name, dir, type);
             if (s7project.isProjectOpened())
@@ -129,7 +144,12 @@ namespace S7_cli
             return createProject(name, dir, S7ProjectType.S7Library);
         }
 
-        S7Project openProject(string projectPathOrName)
+        /// <summary>
+        /// Opens an existing SIMATIC Step7 project
+        /// </summary>
+        /// <param name="projectPathOrName">path to the project directory</param>
+        /// <returns>S7Project object</returns>
+        S7Project openProject( string projectPathOrName )
         {
             if (s7project == null) {
                 Logger.log("Opening the project: " + projectPathOrName);
@@ -146,7 +166,14 @@ namespace S7_cli
         }
 
 
-        public bool importConfig(string projectPathOrName, string projectConfigPath)
+        /// <summary>
+        /// Import hardware (station) configuration from a file
+        /// </summary>
+        /// <param name="projectPathOrName">Path or name of the project</param>
+        /// <param name="projectConfigPath">Path of configuration file to import</param>
+        /// <returns></returns>
+        public bool importConfig( string projectPathOrName,
+                                  string projectConfigPath )
         {
             // checking if config file exists
             if (!File.Exists(projectConfigPath)) {
@@ -163,7 +190,9 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
-        public bool exportConfig(string projectPathOrName, string stationName, string projectConfigPath)
+        public bool exportConfig( string projectPathOrName,
+                                  string stationName,
+                                  string projectConfigPath )
         {
             this.openProject(projectPathOrName);
 
@@ -176,7 +205,8 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
-        public bool compileStation(string projectPathOrName, string stationName)
+        public bool compileStation( string projectPathOrName,
+                                    string stationName )
         {
             this.openProject(projectPathOrName);
             bool cmd_status_ok = s7project.compileStation(stationName);
@@ -192,7 +222,7 @@ namespace S7_cli
          **********************************************************************************/
 
 
-        public void getListOfPrograms(string projectPathOrName)
+        public void getListOfPrograms( string projectPathOrName )
         {
             this.openProject(projectPathOrName);
             Logger.log("List of available programs:\n");
@@ -215,7 +245,9 @@ namespace S7_cli
 
         }
 
-        public int importSymbols(string projectPathOrName, string symbolsPath, string programName = "")
+        public int importSymbols( string projectPathOrName,
+                                  string symbolsPath,
+                                  string programName = "")
         {
             this.openProject(projectPathOrName);
             //Logger.log_debug("S7Command::ImportSymbols(): " + programName + "\n");
@@ -223,6 +255,7 @@ namespace S7_cli
             Logger.log("    from: " + symbolsPath);
             Logger.log("    to: - project: " + s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
             Logger.log("        - program: " + programName);
+
 
             if ( ! s7project.programExists( programName ) )
             {
@@ -247,8 +280,11 @@ namespace S7_cli
             return symbolsImported;
         }
 
-        public void exportSymbols(string projectPathOrName, string programName, 
-                                  string symbolsOutputFile, bool force = false){
+        public void exportSymbols( string projectPathOrName,
+                                   string programName,
+                                   string symbolsOutputFile,
+                                   bool   force = false )
+        {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
             {
@@ -290,7 +326,8 @@ namespace S7_cli
                 S7Status.set_status(S7Status.failure);
         }
 
-        public void listSources(string projectPathOrName, string programName = "")
+        public void listSources( string projectPathOrName,
+                                 string programName = "" )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
@@ -312,7 +349,8 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
-        public void listBlocks(string projectPathOrName, string programName = "")
+        public void listBlocks( string projectPathOrName,
+                                string programName = "" )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
@@ -335,7 +373,9 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
-        public void downloadSystemData(string projectPathOrName, string projectProgramName, bool force = false)
+        public void downloadSystemData( string projectPathOrName,
+                                        string projectProgramName,
+                                        bool   force = false )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(projectProgramName, true))
@@ -377,7 +417,9 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
          }
 
-        public void downloadAllBlocks(string projectPathOrName, string projectProgramName, bool force = false)
+        public void downloadAllBlocks( string projectPathOrName,
+                                       string projectProgramName,
+                                       bool force = false )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(projectProgramName, true))
@@ -411,7 +453,8 @@ namespace S7_cli
             S7Status.set_status(S7Status.success);
         }
 
-        public void startCPU(string projectPathOrName, string projectProgramName)
+        public void startCPU( string projectPathOrName,
+                              string projectProgramName )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(projectProgramName, true))
@@ -432,7 +475,8 @@ namespace S7_cli
             }
         }
 
-        public void stopCPU(string projectPathOrName, string projectProgramName)
+        public void stopCPU( string projectPathOrName,
+                             string projectProgramName )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(projectProgramName, true))
@@ -453,8 +497,12 @@ namespace S7_cli
             }
         }
 
-        public void importLibSources(string projectPathOrName, string libProjectName,
-                                     string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
+
+        public void importLibSources( string projectPathOrName,
+                                      string libProjectName,
+                                      string libProjectProgramName,
+                                      string destinationProjectProgramName,
+                                      bool   forceOverwrite = false )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(destinationProjectProgramName, true))
@@ -471,8 +519,12 @@ namespace S7_cli
                     
         }
 
-        public void importLibBlocks(string projectPathOrName, string libProjectName,
-                                    string libProjectProgramName, string destinationProjectProgramName, bool forceOverwrite = false)
+
+        public void importLibBlocks( string projectPathOrName,
+                                     string libProjectName,
+                                     string libProjectProgramName,
+                                     string destinationProjectProgramName,
+                                     bool   forceOverwrite = false )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(destinationProjectProgramName, true))
@@ -488,7 +540,11 @@ namespace S7_cli
                 S7Status.set_status(S7Status.failure);
         }
 
-        public void importSources(string projectPathOrName, string program, string[] sourceFiles, bool forceOverwrite = false)
+
+        public void importSources( string   projectPathOrName,
+                                   string   program,
+                                   string[] sourceFiles,
+                                   bool     forceOverwrite = false )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(program, true))
@@ -518,7 +574,10 @@ namespace S7_cli
                 S7Status.set_status(S7Status.failure);
         }
 
-        public void compileSources(string projectPathOrName, string programName, string[] sources)
+
+        public void compileSources( string   projectPathOrName,
+                                    string   programName,
+                                    string[] sources )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
@@ -531,7 +590,7 @@ namespace S7_cli
             foreach (string src in sources)  {
                 Logger.log("\nCompiling the source: " + src);
                 int result = s7project.compileSource(programName, src);
-
+                 
                 if (result == -10)
                 {
                     // Result: unknown
@@ -556,7 +615,10 @@ namespace S7_cli
         }
 
 
-        public void exportSources(string projectPathOrName, string programName, string [] sources, string exportDirectory)
+        public void exportSources( string    projectPathOrName,
+                                   string    programName,
+                                   string [] sources,
+                                   string    exportDirectory )
         {
             if (!Directory.Exists(exportDirectory))  {
                 Logger.log("Error: Cannot export source(s) - destination directory '" + exportDirectory + "' does not exist!\n");
@@ -595,7 +657,9 @@ namespace S7_cli
         }
 
 
-        public void exportAllSources(string projectPathOrName, string programName, string exportDirectory)
+        public void exportAllSources( string projectPathOrName,
+                                      string programName,
+                                      string exportDirectory )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
@@ -609,7 +673,9 @@ namespace S7_cli
         }
 
 
-        public void exportProgramStructure(string projectPathOrName, string programName, string exportFileName)
+        public void exportProgramStructure( string projectPathOrName,
+                                            string programName,
+                                            string exportFileName )
         {
             this.openProject(projectPathOrName);
             if (!s7project.programExists(programName, true))
