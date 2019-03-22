@@ -277,6 +277,30 @@ namespace S7_cli
             return true;
         }
 
+        public bool compileAllStations()
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
+                return false;
+            }
+
+            /* The S7Station3 interface has the method CompileExt() */
+            foreach (S7Station3 station in simaticProject.Stations)
+            {
+                try
+                {
+                    station.CompileExt();
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_error("Error: " + exc.Message + "\n");
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /*
          *  Blocks management
          */
@@ -307,6 +331,49 @@ namespace S7_cli
             return blocks.ToArray();
         }
 
+
+
+        public bool downloadProgramBlockContainer(string projectProgramName)
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting!\n");
+                return false;
+            }
+
+            Logger.log("Downloading program: " + projectProgramName);
+
+            //simaticapi.enableUnattendedServerMode();
+
+            foreach (S7Container container in simaticProject.Programs[projectProgramName].Next)
+            {
+                if (container.Name == "Blocks")
+                {
+                    Logger.log_debug("Found Blocks Container");
+                    // Stop the CPU
+                    // Check if already in stop
+
+                    if (simaticProject.Programs[projectProgramName].ModuleState.Equals(S7ModState.S7Stop))
+                    {
+                        Logger.log("PLC already in STOP!");
+                    }
+                    else
+                    {
+                        Logger.log("Stopping the CPU!");
+                        //add try catch
+                        simaticProject.Programs[projectProgramName].Stop();
+                    }
+
+                    container.Download(S7OverwriteFlags.S7OverwriteAll);
+                    //container.Download();
+                    // Restart the CPU
+                    Logger.log("Restarting the CPU!");
+                    simaticProject.Programs[projectProgramName].NewStart();
+                    return true;
+                }
+            } // else return false if we haven't found "Blocks"
+            return false;
+        }
 
         private void downloadBlock(S7Block block, bool force)
         {
@@ -463,6 +530,30 @@ namespace S7_cli
             return availablePrograms.ToArray();
         }
 
+        public string [] getListOfAvailableContainers()
+        {
+            // 
+            List<string> availableContainers = new List<string>();
+            foreach (IS7Program program in this.simaticProject.Programs)
+            {
+                foreach (S7Container container in program.Next)
+                {
+                    availableContainers.Add(container.Name);
+                }
+            }
+            return availableContainers.ToArray();
+        }
+
+        public string[] getListOfStations()
+        {
+            // 
+            List<string> stations = new List<string>();
+            foreach (IS7Station station in this.simaticProject.Stations)
+            {
+                stations.Add(station.Name);
+            }
+            return stations.ToArray();
+        }
 
         /// <summary>
         /// Check if given program exists in the project

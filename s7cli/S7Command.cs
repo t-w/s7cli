@@ -175,6 +175,16 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
+        public bool compileAllStations(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            bool cmd_status_ok = s7project.compileAllStations();
+            if (cmd_status_ok)
+                S7Status.set_status(S7Status.success);
+            else
+                S7Status.set_status(S7Status.failure);
+            return cmd_status_ok;
+        }
         /**********************************************************************************
          * Program commands
          **********************************************************************************/
@@ -191,6 +201,28 @@ namespace S7_cli
             foreach (string program in programs)
                 Logger.log(program);
             S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
+        }
+
+        public void getListOfContainers(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            Logger.log("List of available containers:\n");
+
+            string[] containers = s7project.getListOfAvailableContainers();
+            foreach (string container in containers)
+                Logger.log(container);
+            S7Status.set_status(S7Status.success); 
+        }
+
+        public void getListOfStations(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            Logger.log("List of available stations:\n");
+
+            string[] stations = s7project.getListOfStations();
+            foreach (string station in stations)
+                Logger.log(station);
+            S7Status.set_status(S7Status.success);
         }
 
         private string getImportSymbolsReport()
@@ -426,6 +458,26 @@ namespace S7_cli
             S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
+        /* Download a given program using its blocks container */
+        public void downloadProgram(string projectPathOrName, 
+                                    string projectProgramName)
+        {
+            this.openProject(projectPathOrName);
+            bool result;
+            result = s7project.downloadProgramBlockContainer(projectProgramName);
+
+            if (!result)
+            {
+                S7Status.set_status(S7Status.failure);
+                return;
+            }
+            else
+            {
+                S7Status.set_status(S7Status.success);
+                return;
+            }
+            
+        }
 
         public void startCPU( string projectPathOrName,
                               string projectProgramName )

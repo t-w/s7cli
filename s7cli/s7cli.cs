@@ -175,6 +175,12 @@ namespace S7_cli
                 else if (command == "listPrograms")
                     s7command.getListOfPrograms(options.getOption("--project"));
 
+                else if (command == "listStations")
+                    s7command.getListOfStations(options.getOption("--project"));
+
+                else if (command == "listContainers")
+                    s7command.getListOfContainers(options.getOption("--project"));
+
                 else if (command == "importSymbols")
                     s7command.importSymbols(options.getOption("--project"),
                                             options.getOption("--symbols"),
@@ -291,6 +297,9 @@ namespace S7_cli
                     s7command.compileStation(options.getOption("--project"),
                                              options.getOption("--station"));
 
+                else if (command == "compileAllStations")
+                    s7command.compileAllStations(options.getOption("--project"));
+
                 else if (command == "downloadSystemData") {
                     if (options.optionSet("--force"))
                         s7command.downloadSystemData(options.getOption("--project"),
@@ -310,6 +319,11 @@ namespace S7_cli
                         s7command.downloadAllBlocks(options.getOption("--project"),
                                                     options.getOption("--program"));
                 }
+
+                else if (command == "downloadProgram")
+                    s7command.downloadProgram(options.getOption("--project"),
+                                              options.getOption("--program"));
+ 
 
                 else if (command == "startCPU")
                     s7command.startCPU(options.getOption("--project"),
