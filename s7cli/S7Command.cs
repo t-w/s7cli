@@ -152,18 +152,24 @@ namespace S7_cli
         /// <returns>S7Project object</returns>
         S7Project openProject( string projectPathOrName )
         {
-            if (s7project == null) {
-                Logger.log("Opening the project: " + projectPathOrName);
-                s7project = new S7Project(projectPathOrName);
-            } else {
-                Logger.log_debug("openProject(): a project is already opened:" +
-                    s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath());
+            if ( s7project != null )
+            {
+                Logger.log_debug( "openProject(): a project is already opened:" +
+                s7project.getS7ProjectName() + ", " + s7project.getS7ProjectPath() );
+                return s7project;
             }
-            if (!s7project.isProjectOpened()) {
+
+            Logger.log( "Opening the project: " + projectPathOrName );
+            s7project = new S7Project( projectPathOrName );
+
+            if ( !s7project.isProjectOpened() )
+            {
                 s7project = null;
-                S7Status.set_status(S7Status.failure);
+                S7Status.set_status( S7Status.failure );
                 //throw new S7ProjectNotOpenException("Project not opened!");
+                Logger.log_error("Project not opened.");
             }
+
             return s7project;
         }
 
