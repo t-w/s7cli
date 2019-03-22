@@ -145,12 +145,6 @@ namespace S7_cli
             return s7project;
         }
 
-        public S7Project getProject()
-        {
-            if (s7project.isProjectOpened())
-                return s7project;
-            else return null;
-        }
 
         public bool importConfig(string projectPathOrName, string projectConfigPath)
         {
