@@ -49,16 +49,28 @@ namespace S7_cli
 
         static string detailed_info = "";
 
+        /// <summary>
+        /// Returns execution status code.
+        /// </summary>
+        /// <returns>Execution status code</returns>
         public static int get_status()
         {
             return status;
         }
 
+        /// <summary>
+        /// Check if the command status is set.
+        /// </summary>
+        /// <returns>Command status, true on success, false on failure.</returns>
         public static bool status_set()
         {
             return (status > -1);
         }
 
+        /// <summary>
+        /// Set execution status
+        /// It should be set only once - when a result (usually success or failure) is reached
+        /// </summary>
         public static void set_status( int new_status )
         {
             if (new_status < -1 || new_status > 2)
@@ -66,6 +78,10 @@ namespace S7_cli
             status = new_status;
         }
 
+        /// <summary>
+        /// Returns text information about execution status.
+        /// </summary>
+        /// <returns>Execution status info.</returns>
         public static string get_info()
         {
             if (status_set())
@@ -74,11 +90,19 @@ namespace S7_cli
                 return "Status unset!";
         }
 
+        /// <summary>
+        /// Sets detailed info about status to given text (string).
+        /// </summary>
+        /// <param name="info">Detailed status info (string)</param>
         public static void set_detailed_info( string info )
         {
             detailed_info = info;
         }
 
+        /// <summary>
+        /// Return detailed information about status.
+        /// </summary>
+        /// <returns>Detailed status information (string)</returns>
         public static string get_detailed_info()
         {
             return detailed_info;
