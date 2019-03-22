@@ -32,7 +32,7 @@ namespace S7_cli
     /// <summary>
     /// Class to manage S7 command line execution status
     /// </summary>
-    public static class S7Status
+    public static class S7CommandStatus
     {
         //public enum Result_code { success, failure, unknown };
         public const int success = 0;
@@ -134,7 +134,7 @@ namespace S7_cli
             Logger.log("List of available projects / standard libraries:\n");
             //Logger.log(S7Project.getListOfAvailableProjects());
             Logger.log( simatic.getListOfAvailableProjectsAsString() );
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
         /// <summary>
@@ -150,9 +150,9 @@ namespace S7_cli
         {
             s7project = new S7Project(name, dir, type);
             if (s7project.isProjectOpened())
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return s7project.isProjectOpened();
         }
 
@@ -189,7 +189,7 @@ namespace S7_cli
             if ( !s7project.isProjectOpened() )
             {
                 s7project = null;
-                S7Status.set_status( S7Status.failure );
+                S7CommandStatus.set_status( S7CommandStatus.failure );
                 //throw new S7ProjectNotOpenException("Project not opened!");
                 Logger.log_error("Project not opened.");
             }
@@ -210,7 +210,7 @@ namespace S7_cli
             // checking if config file exists
             if (!File.Exists(projectConfigPath)) {
                 Logger.log("Error: Cannot import project configuration because config file " + projectConfigPath + " does not exist!\n");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return false;
             }
 
@@ -219,9 +219,9 @@ namespace S7_cli
 
             bool cmd_status_ok = s7project.importConfig(projectConfigPath);
             if (cmd_status_ok)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return cmd_status_ok;
         }
 
@@ -236,9 +236,9 @@ namespace S7_cli
             Logger.log("\n\nExporting hardware config of " + stationName + " to " + projectConfigPath + "\n");
             bool cmd_status_ok = s7project.exportConfig(stationName, projectConfigPath);
             if (cmd_status_ok)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return cmd_status_ok;
         }
 
@@ -250,9 +250,9 @@ namespace S7_cli
 
             bool cmd_status_ok = s7project.compileStation(stationName);
             if (cmd_status_ok)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return cmd_status_ok;
         }
 
@@ -271,7 +271,7 @@ namespace S7_cli
             string [] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
                 Logger.log(program);
-            S7Status.set_status(S7Status.success);   // if project opened - should be ok...
+            S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
         }
 
         private string getImportSymbolsReport()
@@ -302,7 +302,7 @@ namespace S7_cli
 
             if ( ! s7project.programExists( programName ) )
             {
-                S7Status.set_status( S7Status.failure );
+                S7CommandStatus.set_status( S7CommandStatus.failure );
                 return 0;
             }
 
@@ -317,9 +317,9 @@ namespace S7_cli
 *** Report file contents ***:
 " + this.getImportSymbolsReport() + "*******************************");
             if (symbolsImported > 0)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return symbolsImported;
         }
 
@@ -333,28 +333,28 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             string exportDirectory = Path.GetDirectoryName(symbolsOutputFile);
             if (!Directory.Exists(exportDirectory))  {
                 Logger.log("Error: Cannot export symbols - destination directory '" + exportDirectory + "' does not exist!\n");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (Path.GetExtension(symbolsOutputFile) != ".sdf") {
                 Logger.log("Error: Cannot export symbols - export file '" + symbolsOutputFile + 
                     "' has incorrect extension (it must be '.sdf'!).\n");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (File.Exists(symbolsOutputFile) && !force)
             {
                 Logger.log("Error: Cannot export symbols - export file '" + symbolsOutputFile + "' already exists!\n");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -366,9 +366,9 @@ namespace S7_cli
             int status = s7project.exportSymbols(symbolsOutputFile, programName);
 
             if (status == 0)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
         }
 
         public void listSources( string projectPathOrName,
@@ -379,7 +379,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -387,13 +387,13 @@ namespace S7_cli
             string [] sources = s7project.getSourcesList(programName);
 
             if (sources == null)  {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
             foreach (string src in sources)
                 Logger.log(src);
             Logger.log("\nSources found: " + sources.Length);
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
         public void listBlocks( string projectPathOrName,
@@ -404,7 +404,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -413,13 +413,13 @@ namespace S7_cli
 
             if (blocks == null)
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
             foreach (string block in blocks)
                 Logger.log(block);
             Logger.log("\nBlocks found: " + blocks.Length);
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
         public void downloadSystemData( string projectPathOrName,
@@ -431,7 +431,7 @@ namespace S7_cli
 
             if (!s7project.programExists(projectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -450,7 +450,7 @@ namespace S7_cli
 
             if (blocks == null)
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -461,11 +461,11 @@ namespace S7_cli
             if (blocks.Length == 0)
             {
                 Logger.log_error("It seems, that there is no \"System data\" in the project!");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
          }
 
 
@@ -478,7 +478,7 @@ namespace S7_cli
 
             if (!s7project.programExists(projectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -497,14 +497,14 @@ namespace S7_cli
 
             if(blocks == null)
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             foreach (string block in blocks)
                 Logger.log(block);
             Logger.log("\nBlocks found: " + blocks.Length);
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
 
@@ -516,18 +516,18 @@ namespace S7_cli
 
             if (!s7project.programExists(projectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (s7project.startCPU(projectProgramName))
             {
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
                 return;
             }
             else
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
         }
@@ -540,18 +540,18 @@ namespace S7_cli
 
             if (!s7project.programExists(projectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (s7project.stopCPU(projectProgramName))
             {
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
                 return;
             }
             else
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
         }
@@ -568,15 +568,15 @@ namespace S7_cli
 
             if (!s7project.programExists(destinationProjectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (s7project.importLibSources(libProjectName, libProjectProgramName,
                     destinationProjectProgramName, forceOverwrite))
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                     
         }
 
@@ -592,15 +592,15 @@ namespace S7_cli
 
             if (!s7project.programExists(destinationProjectProgramName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
             if (s7project.importLibBlocks(libProjectName, libProjectProgramName,
                     destinationProjectProgramName, forceOverwrite))
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
         }
 
 
@@ -614,7 +614,7 @@ namespace S7_cli
 
             if (!s7project.programExists(program, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -634,9 +634,9 @@ namespace S7_cli
                     failure = true;
             }
             if (!failure)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
         }
 
 
@@ -649,7 +649,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -662,23 +662,23 @@ namespace S7_cli
                 {
                     // Result: unknown
                     //Logger.log("Result: " + s7project.getCompilationStatusInfo(result));
-                    S7Status.set_status( S7Status.unknown );
+                    S7CommandStatus.set_status( S7CommandStatus.unknown );
                 }
                 else if (result < 0 && result > -10)
                 {
                     // Result: error
                     Logger.log_error( s7project.getCompilationStatusInfo( result ) );
-                    S7Status.set_status( S7Status.failure );
+                    S7CommandStatus.set_status( S7CommandStatus.failure );
                 }
                 else if (result >= 0)
                 {
                     // just warnings or no problems -> set success
-                    S7Status.set_status( S7Status.success );
+                    S7CommandStatus.set_status( S7CommandStatus.success );
                 }
             }
 
-            if (! S7Status.status_set() )
-                S7Status.set_status(S7Status.unknown);   // we cannot get any useful result from compile()...
+            if (! S7CommandStatus.status_set() )
+                S7CommandStatus.set_status(S7CommandStatus.unknown);   // we cannot get any useful result from compile()...
         }
 
 
@@ -689,7 +689,7 @@ namespace S7_cli
         {
             if (!Directory.Exists(exportDirectory))  {
                 Logger.log("Error: Cannot export source(s) - destination directory '" + exportDirectory + "' does not exist!\n");
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -698,7 +698,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -720,9 +720,9 @@ namespace S7_cli
                 }
             }
             if (!failed)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
         }
 
 
@@ -735,7 +735,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 
@@ -753,7 +753,7 @@ namespace S7_cli
 
             if (!s7project.programExists(programName, true))
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
 

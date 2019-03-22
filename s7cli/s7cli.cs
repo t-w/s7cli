@@ -93,8 +93,8 @@ namespace S7_cli
                                  string result_info = "" )
         {
             Logger.log("");
-            Logger.log("Result: " + S7Status.get_info());
-            string detailed_info = S7Status.get_detailed_info();
+            Logger.log("Result: " + S7CommandStatus.get_info());
+            string detailed_info = S7CommandStatus.get_detailed_info();
 
             if (detailed_info != "")
                 Logger.log("Result info: " + detailed_info);
@@ -179,8 +179,8 @@ namespace S7_cli
                     show_available_commands();
                 }
                 if ( ! options.optionsOK())
-                    S7cli_Status.exit(S7Status.failure);
-                S7cli_Status.exit(S7Status.success);
+                    S7cli_Status.exit(S7CommandStatus.failure);
+                S7cli_Status.exit(S7CommandStatus.success);
             }
 
             if (options.optionSet("--debug"))
@@ -193,7 +193,7 @@ namespace S7_cli
                 } else {
                     Logger.log("Specified bug level is out of range (" + Logger.min_debug_level +
                         ", " + Logger.max_debug_level + ").\n");
-                    S7cli_Status.exit(S7Status.failure);
+                    S7cli_Status.exit(S7CommandStatus.failure);
                 }
             }
 
@@ -376,15 +376,15 @@ namespace S7_cli
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();
-                    S7cli_Status.exit(S7Status.failure);
+                    S7cli_Status.exit(S7CommandStatus.failure);
                 }
 
             } catch (S7ProjectNotOpenException e) {
                 Logger.log("Error: exception: project not opened with info:\n" + e.ToString() + ", " + e.Message + "\n");
-                S7cli_Status.exit_with_info(S7Status.failure);
+                S7cli_Status.exit_with_info(S7CommandStatus.failure);
             }
 
-            S7cli_Status.exit_with_info(S7Status.get_status());
+            S7cli_Status.exit_with_info(S7CommandStatus.get_status());
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 
             //System.Console.Write("\nsources LogPath: " + sources.LogPath + "\n");
