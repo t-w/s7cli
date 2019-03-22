@@ -26,6 +26,9 @@ using System.Reflection;
 
 namespace S7_cli
 {
+    /// <summary>
+    /// Static class - common logger with several debug levels.
+    /// </summary>
     static class Logger
     {
         public const int min_debug_level = 0;
@@ -75,11 +78,19 @@ namespace S7_cli
         }
     }
 
+
+    /// <summary>
+    /// s7cli status class
+    /// </summary>
     public static class S7cli_Status
     {
-
-        //public static void show(Result_code result_code, string result_info = "")
-        public static void show(int result_code, string result_info = "")
+        /// <summary>
+        /// Show s7cli execution status
+        /// </summary>
+        /// <param name="result_code"></param>
+        /// <param name="result_info"></param>
+        public static void show( int result_code,
+                                 string result_info = "" )
         {
             Logger.log("");
             Logger.log("Result: " + S7Status.get_info());
@@ -105,7 +116,6 @@ namespace S7_cli
             show(result_code, result_info);
             exit(result_code);
         }
-
     }
 
     class s7cli
@@ -188,12 +198,6 @@ namespace S7_cli
             }
 
             string command = options.getCommand();
-
-            //System.Console.Write("\ncommand: " + command + "\n");
-            //WinAPI winAPI = new WinAPI();
-            //winAPI.test();
-            //return;
-            
 
             Console.Write("\n\n");
 
