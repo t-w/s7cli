@@ -78,7 +78,7 @@ namespace S7_cli
 
             if (simaticProject == null) {
                 Logger.log_error("Project with the path or name: '" + pathOrName +
-                    "' not found on the list of available projects!!!\n\nAvailable projects:\n");
+                    "' not found on the list of available projects!!!\n\nS7 projects found:\n");
                 Logger.log( simaticapi.getListOfAvailableProjectsAsString() );
                 return;
             }
