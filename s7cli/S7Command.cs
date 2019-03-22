@@ -236,7 +236,7 @@ namespace S7_cli
             if ( this.openProject( projectPathOrName ) == null )
                 return;
 
-            Logger.log("List of available programs:\n");
+            Logger.log("\nThe S7 programs found:\n");
 
             string [] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
