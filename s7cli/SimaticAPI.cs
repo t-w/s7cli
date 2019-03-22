@@ -107,17 +107,30 @@ namespace S7_cli
             }
         }
 
-
-        public string getListOfAvailableProjects()
+        /// <summary>
+        /// Returns list of available projects (at least once opened in SIMATIC).
+        /// </summary>
+        /// <returns>A Dictionary of { "project name", "project path" }</returns>
+        //public Dictionary<string, string> getListOfAvailableProjects()
+        public List<KeyValuePair<string, string>> getListOfAvailableProjects()
         {
-            string availableProjects = "";
+            //Dictionary<string, string> availableProjects = new Dictionary<string, string>();
+            List<KeyValuePair<string, string>> availableProjects = new List<KeyValuePair<string, string>>();
+
             foreach (IS7Project project in simatic.Projects)
             {
-                availableProjects += ("- " + project.Name + ", " + project.LogPath + "\n");
+                availableProjects.Add( new KeyValuePair<string, string>( project.Name, project.LogPath ) );
             }
             return availableProjects;
         }
 
+        public string getListOfAvailableProjectsAsString()
+        {
+            string availableProjects = "";
+            foreach (KeyValuePair<string, string> project in getListOfAvailableProjects())
+                availableProjects += ( "- " + project.Key + ", " + project.Value + "\n" );
+            return availableProjects;
+        }
 
         /// <summary>
         /// Returns IS7Project instance for specified name (can be ambiguous!) or path (safer!)
