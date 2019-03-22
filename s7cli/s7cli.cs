@@ -27,59 +27,6 @@ using System.Reflection;
 namespace S7_cli
 {
     /// <summary>
-    /// Static class - common logger with several debug levels.
-    /// </summary>
-    static class Logger
-    {
-        public const int min_debug_level = 0;
-        public const int max_debug_level = 3;
-
-        public const int level_none = 0;
-        public const int level_error = 1;
-        public const int level_warning = 2;
-        public const int level_debug = 3;
-
-        static int level = 1;       // default is error level
-
-        public static void setLevel(int log_level)  {
-            level = log_level;
-        }
-
-        public static int getLevel()  {
-            return level;
-        }
-
-        public static void log(string info)
-        {
-            Console.Write(info + "\n");
-        }
-
-        public static void log_debug(string info)  {
-            // only console output
-            if (level >= level_debug)
-                log ("Debug: " + info + "\n");
-        }
-
-        public static void log_warning(string info)   {
-            // only console output
-            if (level >= level_warning)
-                log ("Warning: " + info + "\n");
-        }
-
-        public static void log_error(string info)  {
-            // only console output
-            if (level >= level_error)
-                //log ("Error: " + info + "\n");
-                log("Error: " + info);
-        }
-
-        public static void log_result(string info)  {
-            log("Result: " + info);
-        }
-    }
-
-
-    /// <summary>
     /// s7cli status class
     /// </summary>
     public static class S7cli_Status
