@@ -165,16 +165,19 @@ namespace S7_cli
         }
 
 
-        // return the only existing instance (singleton)
+        /// <summary>
+        /// Returns the only existing instance (singleton)
+        /// </summary>
+        /// <returns>Simatic instance</returns>
         public Simatic getSimatic()
         {
             return simatic;
         }
 
 
-        /*
-         * Destructor
-         */
+        /// <summary>
+        /// Destructor
+        /// </summary>
         ~SimaticAPI()
         {
             //Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
@@ -190,26 +193,37 @@ namespace S7_cli
 
 
         /*
-         * for STL (AWL) compilation result, see documentation for API
+         * Methods below are for getting STL (AWL) compilation result
+         * (for details see the documentation for the Simatic API)
          * 
-         * notes:
+         * Notes:
          * - file directory for the file must exist (otherwise no log file appears)
          * - the Compile() method called on an STL source is appending the results 
          *   (status buffer) to the log file
          */
+
+        /// <summary>
+        /// Set compilation log file and enable GUI-less compilation (only STL...)
+        /// </summary>
+        /// <param name="filePath">Path to the compilation log file</param>
         public void setCompilationLogfile(string filePath)
         {
             simatic.VerbLogFile = filePath;
         }
 
-
+        /// <summary>
+        /// Set compilation log file to a random temp. file.
+        /// </summary>
         public void setCompilationLogfile()
         {
             //setCompilationLogfile("C:\\Temp\\STL_compilation_log.txt");
             setCompilationLogfile( System.IO.Path.GetTempFileName() );
         }
 
-
+        /// <summary>
+        /// Returns the path to the compilation log file.
+        /// </summary>
+        /// <returns></returns>
         public string getCompilationLogfile()
         {
             return simatic.VerbLogFile;
