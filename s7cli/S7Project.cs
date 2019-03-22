@@ -74,31 +74,12 @@ namespace S7_cli
             simaticapi = SimaticAPI.Instance;
             Simatic simatic = simaticapi.getSimatic();
 
-            foreach (IS7Project project in simatic.Projects)  {
-                //System.Console.Write("Project creator: \n" + project.Creator simatic.Projects.Count + "\n");
-                /*System.Console.Write("Project name: " + project.Name + "\n");
-                System.Console.Write("Project creator: " + project.Creator + "\n");
-                System.Console.Write("Project comment: " + project.Comment + "\n");
-                System.Console.Write("Project LogPath: " + project.LogPath + "\n");
-                System.Console.Write("stations count: " + project.Stations.Count + "\n");
-                System.Console.Write("path from command: " + Path + "\n");*/
-
-                if ( //project.Name == "ARC_LSS" &&
-                    //project.LogPath == "D:\\controls\\apps\\sector56\\plc\\mirror56")
-                    //project.LogPath == Path)
-                    project.LogPath.ToLower() == pathOrName.ToLower() ||
-                    project.Name.ToLower() == pathOrName.ToLower() )
-                {
-                    Logger.log_debug("S7Project(): Found project: " + project.Name + ", " + project.LogPath);
-                    simaticProject = project;
-                    break;
-                }
-            }
+            simaticProject = simaticapi.getProject(pathOrName);
 
             if (simaticProject == null) {
-                Logger.log_error("Project with the path or name: " + pathOrName +
-                    " not found on the list of available projects!!!\n\nAvailable projects:\n");
-                Logger.log_error(simaticapi.getListOfAvailableProjects());
+                Logger.log_error("Project with the path or name: '" + pathOrName +
+                    "' not found on the list of available projects!!!\n\nAvailable projects:\n");
+                Logger.log( simaticapi.getListOfAvailableProjectsAsString() );
                 return;
             }
 

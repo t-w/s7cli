@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * SimaticAPI.cs - SimaticAPI class                                     *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -21,7 +21,7 @@ using System;
 //using System.IO;
 //using System.Runtime.InteropServices;
 //using System.Windows.Automation;
-//using System.Collections.Generic;
+using System.Collections.Generic;
 
 using SimaticLib;
 using S7HCOM_XLib;
@@ -116,6 +116,39 @@ namespace S7_cli
                 availableProjects += ("- " + project.Name + ", " + project.LogPath + "\n");
             }
             return availableProjects;
+        }
+
+
+        /// <summary>
+        /// Returns IS7Project instance for specified name (can be ambiguous!) or path (safer!)
+        /// </summary>
+        /// <param name="pathOrName">The name or path of the project</param>
+        /// <returns>IS7Project instance</returns>
+        public IS7Project getProject(string pathOrName)
+        {
+            IS7Project simaticProject = null;
+            foreach (IS7Project project in simatic.Projects)
+            {
+                //System.Console.Write("Project creator: \n" + project.Creator simatic.Projects.Count + "\n");
+                /*System.Console.Write("Project name: " + project.Name + "\n");
+                System.Console.Write("Project creator: " + project.Creator + "\n");
+                System.Console.Write("Project comment: " + project.Comment + "\n");
+                System.Console.Write("Project LogPath: " + project.LogPath + "\n");
+                System.Console.Write("stations count: " + project.Stations.Count + "\n");
+                System.Console.Write("path from command: " + Path + "\n");*/
+
+                if ( //project.Name == "ARC_LSS" &&
+                    //project.LogPath == "D:\\controls\\apps\\sector56\\plc\\mirror56")
+                    //project.LogPath == Path)
+                    project.LogPath.ToLower() == pathOrName.ToLower() ||
+                    project.Name.ToLower() == pathOrName.ToLower())
+                {
+                    //Logger.log_debug("S7Project(): Found project: " + project.Name + ", " + project.LogPath);
+                    simaticProject = project;
+                    break;
+                }
+            }
+            return simaticProject;
         }
 
 
