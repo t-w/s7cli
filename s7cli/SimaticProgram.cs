@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * SimaticProgram.cs - SimaticProgram class                             *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -77,28 +77,25 @@ namespace S7_cli
             }
         }
 
-
-        // imports symbols from a file
-        // - returns number of imported symbols
-        public int importSymbols(string symbolsPath)
+       
+        /// <summary>
+        /// Imports symbols from a file
+        /// </summary>
+        /// <param name="symbolsPath"></param>
+        /// <returns>number of imported symbols (or -1 on error)</returns>
+        public int importSymbols( string symbolsPath )
         {
-            if (!File.Exists(symbolsPath))
-            {
-                Logger.log_error("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
-                return 0;
-            }
-
-            int nrOfSymbols = 0;
+            int nrOfSymbols = -1;
 
             try
             {
-                S7SymbolTable symbolTable = (S7SymbolTable)getSymbolTable();
-                nrOfSymbols = symbolTable.Import(symbolsPath);
+                S7SymbolTable symbolTable = ( S7SymbolTable )getSymbolTable();
+                nrOfSymbols = symbolTable.Import( symbolsPath );
             }
-            catch (SystemException exc)
+            catch ( SystemException exc )
             {
                 Logger.log_error("Error: " + exc.Message + "\n");
-                // return -1; / return error here???
+                return -1;
             }
             return nrOfSymbols;
         }

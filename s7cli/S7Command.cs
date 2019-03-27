@@ -225,6 +225,12 @@ namespace S7_cli
                 return 0;
             }
 
+            if (!File.Exists(symbolsPath))
+            {
+                Logger.log_error("Error: File " + symbolsPath + " does not exist! Aborting import!\n");
+                return 0;
+            }
+
             int symbolsImported;
 
             if (programName != "")
@@ -235,7 +241,7 @@ namespace S7_cli
             Logger.log(@"*******************************
 *** Report file contents ***:
 " + this.getImportSymbolsReport() + "*******************************");
-            if (symbolsImported > 0)
+            if (symbolsImported >= 0)
                 S7CommandStatus.set_status(S7CommandStatus.success);
             else
                 S7CommandStatus.set_status(S7CommandStatus.failure);
