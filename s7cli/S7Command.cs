@@ -180,9 +180,9 @@ namespace S7_cli
             this.openProject(projectPathOrName);
             bool cmd_status_ok = s7project.compileAllStations();
             if (cmd_status_ok)
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
             else
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             return cmd_status_ok;
         }
         /**********************************************************************************
@@ -211,7 +211,7 @@ namespace S7_cli
             string[] containers = s7project.getListOfAvailableContainers();
             foreach (string container in containers)
                 Logger.log(container);
-            S7Status.set_status(S7Status.success); 
+            S7CommandStatus.set_status(S7CommandStatus.success); 
         }
 
         public void getListOfStations(string projectPathOrName)
@@ -222,7 +222,7 @@ namespace S7_cli
             string[] stations = s7project.getListOfStations();
             foreach (string station in stations)
                 Logger.log(station);
-            S7Status.set_status(S7Status.success);
+            S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
         private string getImportSymbolsReport()
@@ -468,12 +468,12 @@ namespace S7_cli
 
             if (!result)
             {
-                S7Status.set_status(S7Status.failure);
+                S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
             else
             {
-                S7Status.set_status(S7Status.success);
+                S7CommandStatus.set_status(S7CommandStatus.success);
                 return;
             }
             
