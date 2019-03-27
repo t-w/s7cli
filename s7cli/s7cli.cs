@@ -178,7 +178,8 @@ namespace S7_cli
                 else if (command == "importSymbols")
                     s7command.importSymbols(options.getOption("--project"),
                                             options.getOption("--symbols"),
-                                            options.getOption("--program"));
+                                            options.getOption("--program"),
+                                            options.getOption("--conflictok") == "y");
 
                 else if (command == "exportSymbols")  {
                     if (options.optionSet("--force"))

@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 using SimaticLib;
 using S7HCOM_XLib;
@@ -206,7 +207,32 @@ namespace S7_cli
             } else {
                 return "Import report file " + reportFile + " not found!";
             }
+        }
 
+        /// <summary>
+        /// Returns counted errors, warnings and conflicts by parsing the content
+        /// of the symbol importation file.
+        /// </summary>
+        /// <param name="errors">Number of errors during importation</param>
+        /// <param name="warnings">Number of warnings during importation</param>
+        /// <param name="conflicts">Number of symbol conflicts during importation</param>
+        /// <returns>The total number of critical errors (sum of errors and conflicts)</returns>
+        int getImportSymbolsCounters( ref int errors,
+                                      ref int warnings,
+                                      ref int conflicts )
+        {
+            string [] reportFile = getImportSymbolsReport().Split('\n');
+
+            int errorIndex = Array.FindIndex<string>(
+                                      reportFile, s => Regex.IsMatch( s, "^Error:.*" ) );
+            int warningsIndex  = errorIndex + 1;
+            int conflictsIndex = errorIndex + 2;
+
+            errors    = Int32.Parse( reportFile[ errorIndex ].Split(' ')[ 1 ] );
+            warnings  = Int32.Parse( reportFile[ warningsIndex ].Split(' ')[ 1 ] );
+            conflicts = Int32.Parse( reportFile[ conflictsIndex ].Split(' ')[ 1 ] );
+
+            return errors + conflicts;
         }
 
 
@@ -216,10 +242,12 @@ namespace S7_cli
         /// <param name="projectPathOrName">Path or name of the project</param>
         /// <param name="symbolsPath">Path to symbols file (usually .sdf) to import</param>
         /// <param name="programName">The name of the S7 program (where the symbols will be imported).</param>
+        /// <param name="conflictOK">Conflict on symbols does not fail he import command.</param>
         /// <returns></returns>
         public int importSymbols( string projectPathOrName,
                                   string symbolsPath,
-                                  string programName = "")
+                                  string programName = "",
+                                  bool   conflictOK  = false )
         {
             if ( this.openProject( projectPathOrName ) == null )
                 return 0;
@@ -243,20 +271,35 @@ namespace S7_cli
                 return 0;
             }
 
+            // import
             int symbolsImported;
 
             if (programName != "")
                 symbolsImported = s7project.importSymbols(symbolsPath, programName);
             else
                 symbolsImported = s7project.importSymbols(symbolsPath);
+
+            // get results
+            int errors    = -1,
+                warnings  = -1,
+                conflicts = -1;
+
+            getImportSymbolsCounters( ref errors, ref warnings, ref conflicts );
+
+            if ( ! conflictOK )
+                // treat conflicts as errors
+                errors += conflicts;
+
+            // show info and set the command status
             Logger.log("Imported " + symbolsImported + " symbols.");
             Logger.log(@"*******************************
 *** Report file contents ***:
 " + this.getImportSymbolsReport() + "*******************************");
-            if (symbolsImported >= 0)
-                S7CommandStatus.set_status(S7CommandStatus.success);
+            if ( ( symbolsImported >= 0 ) &&
+                 ( errors          == 0 ) )
+                S7CommandStatus.set_status( S7CommandStatus.success );
             else
-                S7CommandStatus.set_status(S7CommandStatus.failure);
+                S7CommandStatus.set_status( S7CommandStatus.failure );
             return symbolsImported;
         }
 

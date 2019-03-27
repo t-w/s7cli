@@ -1,7 +1,7 @@
 ﻿/************************************************************************
  * Option_parser.cs - an option parser for s7cli                        *
  *                                                                      *
- * Copyright (C) 2013-2018 CERN                                         *
+ * Copyright (C) 2013-2019 CERN                                         *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -71,6 +71,7 @@ namespace S7_cli
                     { "--symbols",             new string[] { "-s", "path to file with symbols" }},
                     { "--sources",             new string[] { "",   "list of files with source code (CSV)" }},
                     { "--force",               new string[] { "",   "force overwrite (replace) existing sources in project (y/n)" }},
+                    { "--conflictok",          new string[] { "",   "treat conflicts as errors (y/n)" }},
 
                     { "--output",              new string[] { "-o", "output file" }},
                     { "--outputdir",           new string[] { "",   "output directory" }},
@@ -114,7 +115,7 @@ namespace S7_cli
                     { "listPrograms",           new string[] { "--debug", "--project" }},
                     { "importConfig",           new string[] { "--debug", "--project", "--config" }},
                     { "exportConfig",           new string[] { "--debug", "--project", "--config", "--station" }},
-                    { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols" }},
+                    { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols", "--conflictok" }},
                     { "exportSymbols",          new string[] { "--debug", "--project", "--program", "--output", "--force" }},
                     { "listSources",            new string[] { "--debug", "--project", "--program" }},
                     { "listBlocks",             new string[] { "--debug", "--project", "--program" }},
