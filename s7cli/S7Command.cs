@@ -193,9 +193,13 @@ namespace S7_cli
             S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
         }
 
+        /// <summary>
+        /// Reads and returns symbol importation log file.
+        /// </summary>
+        /// <returns>The content of the symbol importation file (or information about error if such).</returns>
         private string getImportSymbolsReport()
         {
-            // file found by accindent, seems not always named like this...
+            // file found by chance, seems not always named like this...
             const string reportFile = "c:\\ProgramData\\Siemens\\Automation\\Step7\\S7Tmp\\sym_imp.txt";
             if (File.Exists(reportFile))  {
                 return File.ReadAllText(reportFile);
@@ -205,6 +209,14 @@ namespace S7_cli
 
         }
 
+
+        /// <summary>
+        /// Import symbols command
+        /// </summary>
+        /// <param name="projectPathOrName">Path or name of the project</param>
+        /// <param name="symbolsPath">Path to symbols file (usually .sdf) to import</param>
+        /// <param name="programName">The name of the S7 program (where the symbols will be imported).</param>
+        /// <returns></returns>
         public int importSymbols( string projectPathOrName,
                                   string symbolsPath,
                                   string programName = "")
@@ -248,6 +260,14 @@ namespace S7_cli
             return symbolsImported;
         }
 
+
+        /// <summary>
+        /// Export symbols command
+        /// </summary>
+        /// <param name="projectPathOrName">Path or name of the project</param>
+        /// <param name="programName">The name of the S7 program (from which the symbols will be exported).</param>
+        /// <param name="symbolsOutputFile">Path to symbols file (usually .sdf) where the symbols will be exported.</param>
+        /// <param name="force">If true the destination file will be overwritten (otherwise the command fails if the file exists.</param>
         public void exportSymbols( string projectPathOrName,
                                    string programName,
                                    string symbolsOutputFile,
