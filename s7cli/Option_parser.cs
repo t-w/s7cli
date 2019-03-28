@@ -71,7 +71,7 @@ namespace S7_cli
                     { "--symbols",             new string[] { "-s", "path to file with symbols" }},
                     { "--sources",             new string[] { "",   "list of files with source code (CSV)" }},
                     { "--force",               new string[] { "",   "force overwrite (replace) existing sources in project (y/n)" }},
-                    { "--conflictok",          new string[] { "",   "treat conflicts as errors (y/n)" }},
+                    { "--conflictok",          new string[] { "",   "do not treat conflicts as errors (y/n)" }},
 
                     { "--output",              new string[] { "-o", "output file" }},
                     { "--outputdir",           new string[] { "",   "output directory" }},
