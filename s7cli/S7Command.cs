@@ -237,6 +237,20 @@ namespace S7_cli
 
 
         /// <summary>
+        /// Close the Notepad window with importation log.
+        /// </summary>
+        private void closeSymbolImportationLogWindow()
+        {
+            IntPtr handle = WindowsAPI.FindWindow(null, "sym_imp - Notepad");
+            if (handle.Equals(null))
+            {
+                Logger.log("The Notepad window with importation log not found.");
+                return;
+            }
+            WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
+        }
+
+        /// <summary>
         /// Import symbols command
         /// </summary>
         /// <param name="projectPathOrName">Path or name of the project</param>
@@ -300,6 +314,9 @@ namespace S7_cli
                 S7CommandStatus.set_status( S7CommandStatus.success );
             else
                 S7CommandStatus.set_status( S7CommandStatus.failure );
+
+            closeSymbolImportationLogWindow();
+
             return symbolsImported;
         }
 
