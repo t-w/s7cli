@@ -20,7 +20,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-//using System.Windows.Automation;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 using SimaticLib;
@@ -303,7 +303,20 @@ namespace S7_cli
         /// </summary>
         public void closeSclWindow()
         {
-            SendMessage(handle, WM_CLOSE, new IntPtr(0), new IntPtr(0) );
+            SendMessage( handle, WM_CLOSE, new IntPtr(0), new IntPtr(0) );
+
+            // wait until the SCL compiler process dissappears
+            Process[] processes;
+            while ( Array.Exists< Process >( Process.GetProcesses(),
+                                             s => s.Id == pid ) )
+            {
+                System.Threading.Thread.Sleep( 1000 );
+            }
+
+            // unset SCL compiler "handles"
+            handle = new IntPtr(0);
+            pid    = 0;
+            hProc  = new IntPtr(0);
         }
     }
 }
