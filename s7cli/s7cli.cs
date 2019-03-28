@@ -181,17 +181,11 @@ namespace S7_cli
                                             options.getOption("--program"),
                                             options.getOption("--conflictok") == "y");
 
-                else if (command == "exportSymbols")  {
-                    if (options.optionSet("--force"))
-                        s7command.exportSymbols(options.getOption("--project"),
-                                                options.getOption("--program"),
-                                                options.getOption("--output"),
-                                                options.getOption("--force") == "y");
-                    else
-                        s7command.exportSymbols(options.getOption("--project"),
-                                                options.getOption("--program"),
-                                                options.getOption("--output"));
-                }
+                else if (command == "exportSymbols")
+                    s7command.exportSymbols(options.getOption("--project"),
+                                            options.getOption("--program"),
+                                            options.getOption("--output"),
+                                            options.getOption("--force") == "y");
 
                 else if (command == "listSources")
                     s7command.listSources(options.getOption("--project"),
@@ -201,45 +195,25 @@ namespace S7_cli
                     s7command.listBlocks(options.getOption("--project"),
                                          options.getOption("--program"));
 
-                else if (command == "importLibSources") {
-                    if (options.optionSet("--force"))
-                        s7command.importLibSources(options.getOption("--project"),
-                                                   options.getOption("--library"),
-                                                   options.getOption("--libprg"),
-                                                   options.getOption("--program"),
-                                                   options.getOption("--force") == "y");
-                    else
-                        s7command.importLibSources(options.getOption("--project"),
-                                                   options.getOption("--library"),
-                                                   options.getOption("--libprg"),
-                                                   options.getOption("--program"));
-                }
-
-                else if (command == "importLibBlocks") {
-                    if (options.optionSet("--force"))
-                        s7command.importLibBlocks(options.getOption("--project"),
-                                                  options.getOption("--library"),
-                                                  options.getOption("--libprg"),
-                                                  options.getOption("--program"),
-                                                  options.getOption("--force") == "y");
-                    else
-                        s7command.importLibBlocks(options.getOption("--project"),
-                                                  options.getOption("--library"),
-                                                  options.getOption("--libprg"),
-                                                  options.getOption("--program"));
-                }
-
-                else if (command == "importSources") {
-                    if (options.optionSet("--force"))
-                        s7command.importSources(options.getOption("--project"),
+                else if (command == "importLibSources")
+                    s7command.importLibSources(options.getOption("--project"),
+                                                options.getOption("--library"),
+                                                options.getOption("--libprg"),
                                                 options.getOption("--program"),
-                                                options.getOption("--sources").Split(','),
                                                 options.getOption("--force") == "y");
-                    else
-                        s7command.importSources(options.getOption("--project"),
+
+                else if (command == "importLibBlocks")
+                    s7command.importLibBlocks(options.getOption("--project"),
+                                                options.getOption("--library"),
+                                                options.getOption("--libprg"),
                                                 options.getOption("--program"),
-                                                options.getOption("--sources").Split(','));
-                }
+                                                options.getOption("--force") == "y");
+
+                else if (command == "importSources")
+                    s7command.importSources(options.getOption("--project"),
+                                            options.getOption("--program"),
+                                            options.getOption("--sources").Split(','),
+                                            options.getOption("--force") == "y");
 
                 else if (command == "importSourcesDir") {
                     string srcdir = options.getOption("--srcdir");
@@ -255,16 +229,11 @@ namespace S7_cli
                             System.IO.Directory.GetFiles(srcdir, ext,
                                 System.IO.SearchOption.TopDirectoryOnly));
                     string[] srcfiles = srcfileslist.ToArray();
-                    if (options.optionSet("--force"))
-                        s7command.importSources(options.getOption("--project"),
-                                                options.getOption("--program"),
-                                                srcfiles,
-                                                options.getOption("--force") == "y");
-                    else
-                        s7command.importSources(options.getOption("--project"),
-                                                options.getOption("--program"),
-                                                srcfiles);
 
+                    s7command.importSources(options.getOption("--project"),
+                                            options.getOption("--program"),
+                                            srcfiles,
+                                            options.getOption("--force") == "y");
                 }
 
                 else if (command == "compileSources")
@@ -292,25 +261,15 @@ namespace S7_cli
                     s7command.compileStation(options.getOption("--project"),
                                              options.getOption("--station"));
 
-                else if (command == "downloadSystemData") {
-                    if (options.optionSet("--force"))
-                        s7command.downloadSystemData(options.getOption("--project"),
-                                                     options.getOption("--program"),
-                                                     options.getOption("--force") == "y");
-                    else
-                        s7command.downloadSystemData(options.getOption("--project"),
-                                                     options.getOption("--program"));
-                }
-
-                else if (command == "downloadAllBlocks") {
-                    if (options.optionSet("--force"))
-                        s7command.downloadAllBlocks(options.getOption("--project"),
+                else if (command == "downloadSystemData")
+                    s7command.downloadSystemData(options.getOption("--project"),
                                                     options.getOption("--program"),
                                                     options.getOption("--force") == "y");
-                    else
-                        s7command.downloadAllBlocks(options.getOption("--project"),
-                                                    options.getOption("--program"));
-                }
+
+                else if (command == "downloadAllBlocks")
+                    s7command.downloadAllBlocks(options.getOption("--project"),
+                                                options.getOption("--program"),
+                                                options.getOption("--force") == "y");
 
                 else if (command == "startCPU")
                     s7command.startCPU(options.getOption("--project"),
