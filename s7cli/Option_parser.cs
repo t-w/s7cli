@@ -264,7 +264,9 @@ namespace S7_cli
 
         public string getOption(string option)  {
             Logger.log_debug("getOption('" + option + "')");
-            return this.options_parsed[option];
+            if ( optionSet( option ) )
+                return this.options_parsed[option];
+            return "";
         }
 
         public bool needHelp(){
