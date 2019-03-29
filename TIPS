@@ -23,8 +23,3 @@ Below are some tips regarding issues that may occur.
   in a way they can be _easily_ identified, ie. give unique name for 
   each program within a single Step7 project (at least do it for each 
   program which you need to use with the tool) 
-
-* After executing some methods SIMATIC may leave some graphical applications
-  open(!), ie. Notepad with the log of symbols importation report,
-  S7SCL or S7AWL compilers(!). Since the SIMATIC API do not provide any help
-  it must be dealt externally (with external tools/scripting).
