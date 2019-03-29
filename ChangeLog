@@ -1,4 +1,36 @@
-2019-03-21, Tomasz Wolak <tomasz.wolak@cern.ch>
+2019-03-28, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.9
+	- s7cli closes the Notepad window with symbol importation log
+
+
+2019-03-28, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.8
+	- bugfix (failing to start compilation): s7cli waits for
+	the compiler process to finish
+
+
+2019-03-28, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.7
+	- internal changes, code improvements (refactoring, clean-up)
+
+
+2019-03-25, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.6
+	- symbol importation: conflicts are errors by default and
+	a new option set (eventually) the opposite
+
+
+2019-03-25, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.5
+	- internal changes, code improvements (refactoring, clean-up)
+
+
+2019-03-20, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.3
+	- fixed checking if the specified source exists
+
+
+2019-03-20, Tomasz Wolak <tomasz.wolak@cern.ch>
 	* 0.8.2
 	- added getting compilation results for STL (AWL) sources
 
