@@ -29,13 +29,33 @@ namespace S7_cli
     class Option_parser
     {
         public static readonly string[] commands = { 
-            "createProject", "createLib", "listProjects", "listPrograms", "importConfig", "exportConfig", 
-            "importSymbols", "exportSymbols",
-            "listSources", "listBlocks", "importLibSources", "importLibBlocks", "importSources", 
-            "importSourcesDir", "compileSources", "exportSources", 
-            "exportAllSources", "exportProgramStructure",
-            "compileStation", "downloadSystemData", "downloadAllBlocks",
-            "startCPU", "stopCPU"
+            "createProject",
+            "createLib",
+            "listProjects",
+            "listPrograms",
+            "listContainers",
+            "listStations",
+            "importConfig",
+            "exportConfig",
+            "importSymbols",
+            "exportSymbols",
+            "listSources",
+            "listBlocks",
+            "importLibSources",
+            "importLibBlocks",
+            "importSources",
+            "importSourcesDir",
+            "compileSources",
+            "exportSources",
+            "exportAllSources",
+            "exportProgramStructure",
+            "compileStation",
+            "compileAllStations",
+            "downloadSystemData",
+            "downloadBlocks",
+            "download",
+            "startCPU",
+            "stopCPU"
         };
 
         Dictionary<string, string> command_help;
@@ -86,6 +106,8 @@ namespace S7_cli
                     { "createLib",           "Create a new, empty library in specified location"},
                     { "listProjects",        "List available Simatic projects" },
                     { "listPrograms",        "List available programs in Simatic project/library" },
+                    { "listStations",        "List available stations in Simatic project/library" },
+                    { "listContainers",      "List available containers in Simatic project/library" },
                     { "importConfig",        "Import station configuration from a file" },
                     { "exportConfig",        "Export station configuration to a file" },
                     { "importSymbols",       "Import program symbols from a file" },
@@ -101,8 +123,10 @@ namespace S7_cli
                     { "exportAllSources",    "Export all source code module(s) from a program" },
                     { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" },
                     { "compileStation",      "Compiles station hardware and connections (experimental, don't use it!!!)" },
-                    { "downloadAllBlocks",   "Downloads blocks (omits \"System data\") to the PLC" },
+                    { "compileAllStations",  "Compiles all stations' hardware and connections " },
+                    { "downloadBlocks",      "Downloads blocks (omits \"System data\") to the PLC" },
                     { "downloadSystemData",  "Downloads \"System data\" to the PLC" },
+                    { "download",            "Downloads all blocks (including system data) for a given program to the PLC" },
                     { "startCPU",            "Starts (new start) PLC" },
                     { "stopCPU",             "Stops PLC" }
                 };
@@ -113,6 +137,8 @@ namespace S7_cli
                     { "createLib",              new string[] { "--debug", "--libdir", "--libname"}},
                     { "listProjects",           new string[] { "--debug", }},
                     { "listPrograms",           new string[] { "--debug", "--project" }},
+                    { "listStations",           new string[] { "--debug", "--project" }},
+                    { "listContainers",         new string[] { "--debug", "--project" }},
                     { "importConfig",           new string[] { "--debug", "--project", "--config" }},
                     { "exportConfig",           new string[] { "--debug", "--project", "--config", "--station" }},
                     { "importSymbols",          new string[] { "--debug", "--project", "--program", "--symbols", "--conflictok" }},
@@ -128,8 +154,10 @@ namespace S7_cli
                     { "exportAllSources",       new string[] { "--debug", "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
                     { "compileStation",         new string[] { "--debug", "--project", "--station" }},
-                    { "downloadAllBlocks",      new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "compileAllStations",     new string[] { "--debug", "--project" }},
+                    { "downloadBlocks",         new string[] { "--debug", "--project", "--program", "--force" }},
                     { "downloadSystemData",     new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "download",               new string[] { "--debug", "--project", "--program" }},
                     { "startCPU",               new string[] { "--debug", "--project", "--program" }},
                     { "stopCPU",                new string[] { "--debug", "--project", "--program" }}
                 };
@@ -140,6 +168,8 @@ namespace S7_cli
                     { "createLib",           new string[] { "--libdir", "--libname"}},
                     { "listProjects",        new string[] { }},
                     { "listPrograms",        new string[] { "--project" }},
+                    { "listStations",        new string[] { "--project" }},
+                    { "listContainers",      new string[] { "--project" }},
                     { "importConfig",        new string[] { "--project", "--config" }},
                     { "exportConfig",        new string[] { "--project", "--config", "--station" }},
                     { "importSymbols",       new string[] { "--project", "--program", "--symbols" }},
@@ -155,8 +185,10 @@ namespace S7_cli
                     { "exportAllSources",       new string[] { "--project", "--program", "--outputdir" }},
                     { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
                     { "compileStation",         new string[] { "--project", "--station" }},
-                    { "downloadAllBlocks",      new string[] { "--project", "--program" }},
+                    { "compileAllStations",     new string[] { "--project" }},
+                    { "downloadBlocks",         new string[] { "--project", "--program" }},
                     { "downloadSystemData",     new string[] { "--project", "--program" }},
+                    { "download",               new string[] { "--project", "--program" }},
                     { "startCPU",               new string[] { "--project", "--program" }},
                     { "stopCPU",                new string[] { "--project", "--program" }}
                 };

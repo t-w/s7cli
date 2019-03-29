@@ -175,6 +175,12 @@ namespace S7_cli
                 else if (command == "listPrograms")
                     s7command.getListOfPrograms(options.getOption("--project"));
 
+                else if (command == "listStations")
+                    s7command.getListOfStations(options.getOption("--project"));
+
+                else if (command == "listContainers")
+                    s7command.getListOfContainers(options.getOption("--project"));
+
                 else if (command == "importSymbols")
                     s7command.importSymbols(options.getOption("--project"),
                                             options.getOption("--symbols"),
@@ -261,16 +267,23 @@ namespace S7_cli
                     s7command.compileStation(options.getOption("--project"),
                                              options.getOption("--station"));
 
+                else if (command == "compileAllStations")
+                    s7command.compileAllStations(options.getOption("--project"));
+
                 else if (command == "downloadSystemData")
                     s7command.downloadSystemData(options.getOption("--project"),
-                                                    options.getOption("--program"),
-                                                    options.getOption("--force") == "y");
+                                                 options.getOption("--program"),
+                                                 options.getOption("--force") == "y");
 
-                else if (command == "downloadAllBlocks")
-                    s7command.downloadAllBlocks(options.getOption("--project"),
-                                                options.getOption("--program"),
-                                                options.getOption("--force") == "y");
+                else if (command == "downloadBlocks")
+                        s7command.downloadBlocks(options.getOption("--project"),
+                                                 options.getOption("--program"),
+                                                 options.getOption("--force") == "y");
 
+                else if (command == "download")
+                    s7command.download(options.getOption("--project"),
+                                       options.getOption("--program"));
+ 
                 else if (command == "startCPU")
                     s7command.startCPU(options.getOption("--project"),
                                        options.getOption("--program"));

@@ -176,6 +176,16 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
+        public bool compileAllStations(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            bool cmd_status_ok = s7project.compileAllStations();
+            if (cmd_status_ok)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+            return cmd_status_ok;
+        }
         /**********************************************************************************
          * Program commands
          **********************************************************************************/
@@ -193,6 +203,31 @@ namespace S7_cli
                 Logger.log(program);
             S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
         }
+
+
+        public void getListOfContainers(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            Logger.log("List of available containers:\n");
+
+            string[] containers = s7project.getListOfAvailableContainers();
+            foreach (string container in containers)
+                Logger.log(container);
+            S7CommandStatus.set_status(S7CommandStatus.success); 
+        }
+
+
+        public void getListOfStations(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            Logger.log("List of available stations:\n");
+
+            string[] stations = s7project.getListOfStations();
+            foreach (string station in stations)
+                Logger.log(station);
+            S7CommandStatus.set_status(S7CommandStatus.success);
+        }
+
 
         /// <summary>
         /// Reads and returns symbol importation log file.
@@ -474,9 +509,9 @@ namespace S7_cli
          }
 
 
-        public void downloadAllBlocks( string projectPathOrName,
-                                       string projectProgramName,
-                                       bool force = false )
+        public void downloadBlocks( string projectPathOrName,
+                                    string projectProgramName,
+                                    bool force = false )
         {
             if ( this.openProject( projectPathOrName ) == null )
                 return;
@@ -512,6 +547,26 @@ namespace S7_cli
             S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
+        /* Download a given program using its blocks container */
+        public void download( string projectPathOrName, 
+                              string projectProgramName )
+        {
+            this.openProject(projectPathOrName);
+            bool result;
+            result = s7project.downloadProgramBlockContainer(projectProgramName);
+
+            if (!result)
+            {
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+            else
+            {
+                S7CommandStatus.set_status(S7CommandStatus.success);
+                return;
+            }
+            
+        }
 
         public void startCPU( string projectPathOrName,
                               string projectProgramName )
