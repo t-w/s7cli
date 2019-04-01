@@ -7,7 +7,7 @@
         _|_|_|      _|          _|_|_|  _|  _|
 
         Command-line interface for Siemens SIMATIC Step7(tm)
-        (C) 2013-2018 CERN, TE-CRG-CE
+        (C) 2013-2019 CERN, TE-CRG-CE
 
         Authors: Michal Dudek, Tomasz Wolak
 ===============================================================================
@@ -42,13 +42,19 @@ Available commands:
       - Create new, empty project in specified location
 
   createLib
-      - Create a new, empty libraryin specified location
+      - Create a new, empty library in specified location
 
   listProjects
       - List available Simatic projects
 
   listPrograms
       - List available programs in Simatic project/library
+
+  listContainers
+      - List available containers in Simatic project/library
+
+  listStations
+      - List available stations in Simatic project/library
 
   importConfig
       - Import station configuration from a file
@@ -69,10 +75,10 @@ Available commands:
       - List of blocks in specified program
 
   importLibSources
-      - Import all sources from a library to project
+      - Import all sources from a library to a project
 
   importLibBlocks
-      - Import all blocks from a library to project
+      - Import all blocks from a library to a project
 
   importSources
       - Import specified source code files
@@ -97,11 +103,17 @@ Available commands:
   compileStation
       - Compiles station hardware and connections (experimental, don't use it!)
 
+  compileAllStations
+      - Compiles all stations' hardware and connections
+
   downloadSystemData
       - Downloads "System data" to the PLC
 
-  downloadAllBlocks
+  downloadBlocks
       - Downloads blocks (omits "System data") to the PLC
+
+  download
+      - Downloads all blocks (including system data) for a given program to the PLC
 
   startCPU
       - Starts (new start) PLC
