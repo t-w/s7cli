@@ -530,14 +530,21 @@ namespace S7_cli
             return availablePrograms.ToArray();
         }
 
+
+        /// <summary>
+        /// Returns names of available containers
+        /// </summary>
+        /// <returns>Array og string containing the names of found containers</returns>
         public string [] getListOfAvailableContainers()
         {
             // 
             List<string> availableContainers = new List<string>();
-            foreach (IS7Program program in this.simaticProject.Programs)
+            foreach ( string program in this.programs.Keys )
             {
-                foreach (S7Container container in program.Next)
+                Logger.log_debug( "Program: " + program );
+                foreach ( S7Container container in programs[ program ].getProgram().Next )
                 {
+                    Logger.log_debug( "Adding the container: " + container.Name );
                     availableContainers.Add(container.Name);
                 }
             }
