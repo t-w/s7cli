@@ -14,6 +14,21 @@ namespace UnitTests_s7cli
             string [] args = { };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
 
+            args = new string [] { "whatever" };
+            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
+
+            args = new string[] { "--help" };
+            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
+
+            args = new string[] { "-h" };
+            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
+
+
+            args = new string[] { "whatever", "--help" };
+            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
+
+            args = new string[] { "whatever", "-h" };
+            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
         }
     }
 
