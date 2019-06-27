@@ -64,7 +64,7 @@ namespace S7_cli
         Dictionary<string, string[]> options_required;
 
         // program actions
-        public string programAction = "";
+        public string programAction = null;
 
         Dictionary<string, string> options_parsed = new Dictionary<string, string>();
         bool options_ok = false;
@@ -264,6 +264,13 @@ namespace S7_cli
             // C# does not count program name as argument
             if ( nrOfArguments < 1 ) return false;
 
+            // if help option set - do not continue checking other args (not needed)
+            if (args[ 0 ] == "--help" || args[ 0 ] == "-h")
+            {
+                this.options_parsed.Add("--help", "");
+                return false;
+            }
+
             // parse command
             Logger.log_debug("\nCommand: " + args[0] + "\n");
             if ( ! isCommand( args[ 0 ] ) ) return false;
@@ -319,20 +326,22 @@ namespace S7_cli
                 return false;
             }
             return true; */
-            if (options_parsed.ContainsKey(option))
-                return true;
-            else
-                return false;
+            return options_parsed.ContainsKey(option);
         }
 
-        private void validateOptions(){
-            this.options_ok = true;
-            foreach (string opt in options_required[programAction])
-                if (!this.optionSet(opt)) {
-                    //Logger.log_debug("\n options not ok: " + opt);
-                    this.options_ok = false;
-                    return;
-                }
+        private void validateOptions()
+        {
+            if ( programAction != null )
+            {
+                this.options_ok = true;
+                foreach ( string opt in options_required[ programAction ] )
+                    if ( ! this.optionSet( opt ) )
+                    {
+                        //Logger.log_debug("\n options not ok: " + opt);
+                        this.options_ok = false;
+                        return;
+                    }
+            }
         }
 
         public bool optionsOK()   {
@@ -351,10 +360,7 @@ namespace S7_cli
         }
 
         public bool needHelp(){
-            if (this.optionSet("--help"))
-                return true;
-            else
-                return false;
+            return this.optionSet( "--help" );
         }
 
         public string getOptionHelp(string option)  {
@@ -362,14 +368,19 @@ namespace S7_cli
         }
 
         public string getCommandHelp(string command)  {
-            return command_help[command];
+            if ( isCommand( command ) )
+                return command_help[ command ];
+            else return "";
         }
 
         public string getCommandOptionsHelp(string command)
         {
+            if ( ! isCommand( command ) )
+                return "";
+
             string helpInfo = "";
             foreach (string opt in options_valid[command])
-                helpInfo = helpInfo + "\n\n    " + opt + (options[opt][0] != "" ? ", " + options[opt][0] : "" ) + 
+                helpInfo = helpInfo + "\n\n    " + opt + (options[opt][0] != "" ? ", " + options[opt][0] : "") +
                     "\n        " + options[opt][1];
             return helpInfo;
         }
