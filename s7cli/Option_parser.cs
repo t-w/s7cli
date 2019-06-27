@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 namespace S7_cli
 {
 
-    class Option_parser
+    public class Option_parser
     {
         public static readonly string[] commands = { 
             "createProject",
@@ -197,8 +197,19 @@ namespace S7_cli
                 this.validateOptions();
         }
 
+        /// <summary>
+        /// Parse command line options, building options_command dictionary,
+        /// return info if parsing correct
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>
+        /// true  if options are parsed correctly,
+        /// false otherwies
+        /// </returns>
         private bool parseOptions(string [] args){
-            
+
+            if (args == null) return false;
+
             // nr of passed arguments to the program
             int nrOfArguments = args.Length;
             Logger.log_debug("\nparseOptions(): Number of arguments: " + nrOfArguments);
@@ -240,7 +251,10 @@ namespace S7_cli
                         if (args[currentArgument].CompareTo(option.Key) == 0 ||     // long option
                              args[currentArgument].CompareTo(option.Value[0]) == 0)  // short option
                         {
-                            if (nrOfArguments > (currentArgument + 1)) {
+
+                            if ( nrOfArguments > (currentArgument + 1) &&   // all options require an arg.
+                                 args[currentArgument + 1] != "" )          // ... and an non-empty one
+                            {
                                 //this.projectConfigPath = args[currentArgument + 1];
                                 this.options_parsed.Add(option.Key, args[currentArgument + 1]);
                                 Logger.log_debug("Adding parsed arg: " + option.Key);
