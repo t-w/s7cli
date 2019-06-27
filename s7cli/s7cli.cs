@@ -27,48 +27,17 @@ using System.Reflection;
 namespace S7_cli
 {
     /// <summary>
-    /// s7cli status class
+    /// s7cli main program
     /// </summary>
-    public static class S7cli_Status
-    {
-        /// <summary>
-        /// Show s7cli execution status
-        /// </summary>
-        /// <param name="result_code"></param>
-        /// <param name="result_info"></param>
-        public static void show( int result_code,
-                                 string result_info = "" )
-        {
-            Logger.log("");
-            Logger.log("Result: " + S7CommandStatus.get_info());
-            string detailed_info = S7CommandStatus.get_detailed_info();
-
-            if (detailed_info != "")
-                Logger.log("Result info: " + detailed_info);
-
-            if (result_info != "")
-                Logger.log("Result info: " + result_info);
-        }
-
-        //public static void exit(Result_code result_code)
-        public static void exit(int result_code)
-        {
-            Logger.log_debug("Exiting with status:" + result_code);
-            Environment.Exit((int)result_code);
-        }
-
-        //public static void exit_with_info(Result_code result_code, string result_info = "")
-        public static void exit_with_info(int result_code, string result_info = "")
-        {
-            show(result_code, result_info);
-            exit(result_code);
-        }
-    }
-
     public class s7cli
     {
         static Option_parser options;
 
+        /// <summary>
+        /// Main program
+        /// </summary>
+        /// <param name="args">command-line args</param>
+        /// <returns>status, ==0 -> OK (otherwise fail)</returns>
         public static int Main(string[] args)
         {
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info

@@ -72,6 +72,7 @@
     <Reference Include="UIAutomationClient" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="S7cli_Status.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="S7CommandStatus.cs" />
     <Compile Include="S7CompilerSCL.cs" />
