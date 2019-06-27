@@ -198,6 +198,53 @@ namespace S7_cli
         }
 
         /// <summary>
+        /// Return information if the given argument is a valid command
+        /// </summary>
+        /// <param name="arg">command line argument</param>
+        /// <returns>true if arg is a valid command (false otherwise)</returns>
+        private bool isCommand(string arg)
+        {
+            //return command_help.ContainsKey(arg);
+            return commands.Contains(arg);
+        }
+
+        /// <summary>
+        /// Return information if the given argument is a valid command option
+        /// </summary>
+        /// <param name="arg">command line argument</param>
+        /// <returns>true if arg is a valid option (false otherwise)</returns>
+        private bool isOption( string arg )
+        {
+            //return options.ContainsKey(arg);  // only long
+
+            foreach ( KeyValuePair< string, string[] > option in options )
+            {
+                if ( arg.CompareTo( option.Key ) == 0 ||        // long option
+                     arg.CompareTo( option.Value[ 0 ] ) == 0 )  // short option
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Return long option for given short option
+        /// (if long option is given, it is returned unchanged)
+        /// </summary>
+        /// <param name="arg">a command-line option</param>
+        /// <returns>long option (null if fail)</returns>
+        private string longOption( string short_option )
+        {
+            foreach ( KeyValuePair< string, string[] > option in options )
+            {
+                if ( short_option.CompareTo( option.Key ) == 0 ||        // long option
+                     short_option.CompareTo( option.Value[ 0 ] ) == 0 )  // short option
+                    return option.Key;
+            }
+            return null;
+        }
+
+
+        /// <summary>
         /// Parse command line options, building options_command dictionary,
         /// return info if parsing correct
         /// </summary>
@@ -215,64 +262,52 @@ namespace S7_cli
             Logger.log_debug("\nparseOptions(): Number of arguments: " + nrOfArguments);
 
             // C# does not count program name as argument
-            if (nrOfArguments != 0)  {
-                Logger.log_debug("\nCommand: " + args[0] + "\n");
-                foreach (string command in commands)
-                    if (args[0].CompareTo(command) == 0)
-                        this.programAction = command;
-                
-                if (this.programAction.CompareTo("") == 0)   // unknown command (?)
-                    return false;
-                
-                for (int currentArgument = 1; currentArgument < nrOfArguments; currentArgument++)  {
-                    Logger.log_debug("\nCurrent arg: " + args[currentArgument] + "\n");
+            if ( nrOfArguments < 1 ) return false;
 
-                    // if help option set - do not continue checking other args (not needed)
-                    if (args[currentArgument] == "--help" || args[currentArgument] == "-h") {
-                        this.options_parsed.Add("--help", "");
-                        return true;
-                    }
+            // parse command
+            Logger.log_debug("\nCommand: " + args[0] + "\n");
+            if ( ! isCommand( args[ 0 ] ) ) return false;
+            this.programAction = args[0];
 
-                    /*
-                    if (args[currentArgument] == "--debug" || args[currentArgument] == "-d") {
-                        
-                        int debug_level = -1;  // not set
-                        if ((nrOfArguments > (currentArgument + 1)) &&
-                             (int.TryParse(args[currentArgument + 1], out debug_level)))  {
-                            this.options_parsed.Add("--debug", args[currentArgument + 1]);
-                            return true;
-                        }  else  {
-                            Logger.log("\n\n*** Error: option --debug/-d needs an argument.\n");
-                            return false;
-                        }
-                    }*/
+            // parse command options
+            for ( int currentArgument = 1 ; currentArgument < nrOfArguments ; currentArgument++ )
+            {
+                string arg = args[ currentArgument ];
+                Logger.log_debug("\nCurrent arg: " + args[ currentArgument ] + "\n");
 
-                    foreach (KeyValuePair<string, string[]> option in options)  {
-                        if (args[currentArgument].CompareTo(option.Key) == 0 ||     // long option
-                             args[currentArgument].CompareTo(option.Value[0]) == 0)  // short option
-                        {
-
-                            if ( nrOfArguments > (currentArgument + 1) &&   // all options require an arg.
-                                 args[currentArgument + 1] != "" )          // ... and an non-empty one
-                            {
-                                //this.projectConfigPath = args[currentArgument + 1];
-                                this.options_parsed.Add(option.Key, args[currentArgument + 1]);
-                                Logger.log_debug("Adding parsed arg: " + option.Key);
-                            } else {
-                                //Console.Write("Error: " + option.Value[0] + " is not correctly specified.\n");
-                                Logger.log("\n\n*** Error: option " + option.Key + " needs an argument.\n");
-                                //Environment.Exit(1);
-                                return false;
-                            }
-                        }
-                    }
-                    Logger.log_debug(options_parsed.Count + " " + options_parsed.Keys);
-
+                // if help option set - do not continue checking other args (not needed)
+                if ( arg == "--help" || arg == "-h")
+                {
+                    this.options_parsed.Add("--help", "");
+                    return true;
                 }
-                this.options_ok = true;
-                return this.options_ok;
+
+                if ( ! isOption( arg ) )
+                {
+                    Logger.log("\n\n*** Error: '" + arg + "' is not a valid option.\n");
+                    return false;
+                }
+
+                string option = longOption( arg );
+                if ( nrOfArguments <= currentArgument + 1 ||   // all options (except '--help') require an arg.
+                     args[ currentArgument + 1 ] == "")        // ... and a non-empty one
+                {
+                    //Console.Write("Error: " + option.Value[0] + " is not correctly specified.\n");
+                    Logger.log("\n\n*** Error: option " + option + " needs an argument.\n");
+                    //Environment.Exit(1);
+                    return false;
+                }
+
+                //this.projectConfigPath = args[currentArgument + 1];
+                string option_arg = args[ currentArgument + 1 ];
+                this.options_parsed.Add( option, option_arg );
+                Logger.log_debug( "Adding parsed arg: " + option + " with value " + option_arg );
+                currentArgument++;
+
+                Logger.log_debug(options_parsed.Count + " " + options_parsed.Keys);
             }
-            return false;
+            this.options_ok = true;
+            return this.options_ok;
         }
 
         public bool optionSet(string option)
