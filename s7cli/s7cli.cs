@@ -69,46 +69,6 @@ namespace S7_cli
     {
         static Option_parser options;
 
-        static public string get_version()
-        {
-            return Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
-                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString() + 
-                   //Assembly.GetExecutingAssembly().GetName().Version.MajorRevision.ToString() + "." +
-                   ( Assembly.GetExecutingAssembly().GetName().Version.MinorRevision > 0 ? "." +
-                     Assembly.GetExecutingAssembly().GetName().Version.MinorRevision.ToString() : "" );
-        }
-
-        static public void show_logo()
-        {
-            string logo = @"
-                                      
-                  _|_|_|_|_|            _|  _|
-          _|_|_|          _|    _|_|_|  _|    
-        _|_|            _|    _|        _|  _|
-            _|_|      _|      _|        _|  _|
-        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
-
-        Command-line interface for Siemens SIMATIC Step7(tm)
-        (C) 2013-2019 CERN, TE-CRG-CE
-
-        Authors: Michal Dudek, Tomasz Wolak
-";
-            Console.Write(logo);
-        }
-
-        static public void show_available_commands()
-        {
-            Console.Write("\n\nAvailable commands:\n\n");
-            foreach (string cmd in Option_parser.commands)
-                Console.Write(String.Format("  {0:20}\n      - {1}\n\n", cmd, options.getCommandHelp(cmd)));
-            Console.Write("\n\n");
-        }
-
-        static public void usage()
-        {
-            Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
-        }
-
         public static int Main(string[] args)
         {
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
@@ -329,6 +289,61 @@ namespace S7_cli
             //src_modules.Add("Test1", SimaticLib.S7SWObjType.S7Source ,"D:\\test1.scl");
             //project.addSourceModuleSCL("ARC56_program", "D:\\test1.scl");
 
+        }
+
+
+        /// <summary>
+        /// Return program version (as string)
+        /// </summary>
+        /// <returns>program version (string)</returns>
+        static public string get_version()
+        {
+            return Assembly.GetExecutingAssembly().GetName().Version.Major.ToString() + "." +
+                   Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString() +
+                   //Assembly.GetExecutingAssembly().GetName().Version.MajorRevision.ToString() + "." +
+                   (Assembly.GetExecutingAssembly().GetName().Version.MinorRevision > 0 ? "." +
+                     Assembly.GetExecutingAssembly().GetName().Version.MinorRevision.ToString() : "");
+        }
+
+        /// <summary>
+        /// Shows program logo / info
+        /// </summary>
+        static public void show_logo()
+        {
+            string logo = @"
+
+                  _|_|_|_|_|            _|  _|
+          _|_|_|          _|    _|_|_|  _|
+        _|_|            _|    _|        _|  _|
+            _|_|      _|      _|        _|  _|
+        _|_|_|      _|          _|_|_|  _|  _|   " + get_version() + @"
+
+        Command-line interface for Siemens SIMATIC Step7(tm)
+        (C) 2013-2019 CERN, TE-CRG-CE
+
+        Authors: Michal Dudek, Tomasz Wolak
+";
+            Console.Write(logo);
+        }
+
+        /// <summary>
+        /// Shows list of available commands
+        /// </summary>
+        static public void show_available_commands()
+        {
+            Console.Write("\n\nAvailable commands:\n\n");
+            foreach (string cmd in Option_parser.commands)
+                Console.Write(String.Format("  {0:20}\n      - {1}\n\n", cmd, options.getCommandHelp(cmd)));
+            Console.Write("\n\n");
+        }
+
+
+        /// <summary>
+        /// Display usage help information
+        /// </summary>
+        static public void usage()
+        {
+            Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
         }
     }
 }
