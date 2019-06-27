@@ -25,9 +25,15 @@ namespace UnitTests_s7cli
 
 
             args = new string[] { "whatever", "--help" };
-            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
+            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
 
             args = new string[] { "whatever", "-h" };
+            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
+
+            args = new string[] { "createProject", "--help" };
+            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
+
+            args = new string[] { "createProject", "-h" };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
         }
     }
@@ -41,18 +47,23 @@ namespace UnitTests_s7cli
         {
             S7_cli.Option_parser parser = new S7_cli.Option_parser(null);
             Assert.AreEqual(false, parser.optionsOK());
+            Assert.IsNull( parser.getCommand() );
 
             string[] args = { };
             parser = new S7_cli.Option_parser(args);
             Assert.AreEqual(false, parser.optionsOK());
+            Assert.IsNull(parser.getCommand());
 
             args = new string[] { "non-existent-cmd"};
             parser = new S7_cli.Option_parser(args);
             Assert.AreEqual(false, parser.optionsOK());
+            Assert.IsNull(parser.getCommand());
 
             args = new string[] { "createProject" };
             parser = new S7_cli.Option_parser(args);
             Assert.AreEqual(false, parser.optionsOK());
+            Assert.IsNotNull(parser.getCommand());
+            Assert.AreEqual( "createProject", parser.getCommand() );
 
             args = new string[] { "createProject", "--an_incorrect_option" };
             parser = new S7_cli.Option_parser(args);
