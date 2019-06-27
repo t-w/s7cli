@@ -46,23 +46,29 @@ namespace S7_cli
             if ( args.Length < 1 )
             {
                 usage();
-                return 0;
+                return S7CommandStatus.success;
             }
 
             options = new Option_parser(args);
 
-            if ( ( ! options.optionsOK() )  || options.needHelp())  {
+            if ( options.needHelp() )
+            {
                 usage();
-                if (options.needHelp()) {
-                    Console.Write("\nCommand line options for '" + options.getCommand() + "':" +
-                        options.getCommandOptionsHelp(options.getCommand()) + "\n");
-                } else {
-                    Console.Write("\nOption -h displays help for specified command.\n");
+                show_command_help( options.getCommand() );
+                return S7CommandStatus.success; ;
+            }
+
+            if ( ! options.optionsOK() )
+            {
+                usage();
+                if ( options.getCommand() != null )
+                {
+                    show_command_help( options.getCommand() );
+                } else { 
+                    Console.Write( "\nOption -h displays help for specified command.\n" );
                     show_available_commands();
                 }
-                if ( ! options.optionsOK())
-                    return S7CommandStatus.failure;
-                return S7CommandStatus.success;
+                return S7CommandStatus.failure;
             }
 
             if (options.optionSet("--debug"))
@@ -313,6 +319,12 @@ namespace S7_cli
         static public void usage()
         {
             Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
+        }
+
+        static public void show_command_help(string command)
+        {
+            Console.Write( "\nCommand line options for '" + command + "':" +
+                           options.getCommandOptionsHelp( command ) + "\n");
         }
     }
 }
