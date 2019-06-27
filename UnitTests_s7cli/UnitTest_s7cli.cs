@@ -85,9 +85,23 @@ namespace UnitTests_s7cli
 
 
             // OK
-            args = new string[] { "createProject", "--projname", "test", "--projdir", "test" };
+            args = new string[] { "createProject", "--projname", "testprj", "--projdir", "testdir", "--debug", "3" };
+            S7_cli.Logger.setLevel(3);
+            parser = new S7_cli.Option_parser( args );
+            Assert.AreEqual( true, parser.optionsOK() );
+            Assert.AreEqual( "testprj", parser.getOption( "--projname" ) );
+            Assert.AreEqual( "testdir", parser.getOption( "--projdir" ) );
+            //System.Console.WriteLine("debug option:" + )
+            Assert.AreEqual( "3", parser.getOption("--debug") );
+
+            // OK
+            args = new string[] { "createProject", "--projname", "testprj", "--projdir", "testdir", "-d", "3" };
+            S7_cli.Logger.setLevel(3);
             parser = new S7_cli.Option_parser(args);
             Assert.AreEqual(true, parser.optionsOK());
+            Assert.AreEqual("testprj", parser.getOption("--projname"));
+            Assert.AreEqual("testdir", parser.getOption("--projdir"));
+            Assert.AreEqual("3", parser.getOption("--debug"));
 
 
             args = new string[] { "listProjects" };
