@@ -73,6 +73,17 @@ namespace UnitTests_s7cli
             parser = new S7_cli.Option_parser(args);
             Assert.AreEqual(false, parser.optionsOK());
 
+            // empty name
+            args = new string[] { "createProject", "--projname", "", "--projdir", "test" };
+            parser = new S7_cli.Option_parser(args);
+            Assert.AreEqual(false, parser.optionsOK());
+
+            // empty dir
+            args = new string[] { "createProject", "--projname", "test", "--projdir", "" };
+            parser = new S7_cli.Option_parser(args);
+            Assert.AreEqual(false, parser.optionsOK());
+
+
             // OK
             args = new string[] { "createProject", "--projname", "test", "--projdir", "test" };
             parser = new S7_cli.Option_parser(args);
