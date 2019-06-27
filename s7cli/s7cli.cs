@@ -65,7 +65,7 @@ namespace S7_cli
         }
     }
 
-    class s7cli
+    public class s7cli
     {
         static Option_parser options;
 
@@ -109,7 +109,7 @@ namespace S7_cli
             Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
         }
 
-        static void Main(string[] args)
+        public static int Main(string[] args)
         {
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
             show_logo();
@@ -126,8 +126,8 @@ namespace S7_cli
                     show_available_commands();
                 }
                 if ( ! options.optionsOK())
-                    S7cli_Status.exit(S7CommandStatus.failure);
-                S7cli_Status.exit(S7CommandStatus.success);
+                    return S7CommandStatus.failure;
+                return S7CommandStatus.success;
             }
 
             if (options.optionSet("--debug"))
@@ -140,7 +140,7 @@ namespace S7_cli
                 } else {
                     Logger.log("Specified bug level is out of range (" + Logger.min_debug_level +
                         ", " + Logger.max_debug_level + ").\n");
-                    S7cli_Status.exit(S7CommandStatus.failure);
+                    return S7CommandStatus.failure;
                 }
             }
 
@@ -296,15 +296,21 @@ namespace S7_cli
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();
-                    S7cli_Status.exit(S7CommandStatus.failure);
+                    return S7CommandStatus.failure;
                 }
 
             } catch (S7ProjectNotOpenException e) {
                 Logger.log("Error: exception: project not opened with info:\n" + e.ToString() + ", " + e.Message + "\n");
-                S7cli_Status.exit_with_info(S7CommandStatus.failure);
+                //S7cli_Status.exit_with_info(S7CommandStatus.failure);
+                S7cli_Status.show(S7CommandStatus.failure);
+                return S7CommandStatus.failure;
             }
 
-            S7cli_Status.exit_with_info(S7CommandStatus.get_status());
+            //S7cli_Status.exit_with_info(S7CommandStatus.get_status());
+            int status = S7CommandStatus.get_status();
+            S7cli_Status.show(status);
+            return status;
+
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 
             //System.Console.Write("\nsources LogPath: " + sources.LogPath + "\n");
@@ -316,7 +322,7 @@ namespace S7_cli
             //System.Console.Write(src_module.Name);
             //src_modules.Add("Test1", SimaticLib.S7SWObjType.S7Source ,"D:\\test1.scl");
             //project.addSourceModuleSCL("ARC56_program", "D:\\test1.scl");
-            
+
         }
     }
 }
