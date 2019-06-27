@@ -114,6 +114,12 @@ namespace S7_cli
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
             show_logo();
 
+            if ( args.Length < 1 )
+            {
+                usage();
+                return 0;
+            }
+
             options = new Option_parser(args);
 
             if ( ( ! options.optionsOK() )  || options.needHelp())  {
