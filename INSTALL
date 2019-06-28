@@ -9,30 +9,35 @@ are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.  This file is offered as-is,
 without warranty of any kind.
 
+
 Installation
 ============
 
-   The compiled binary bin/s7cli.exe is a standalone program, it can be 
+   The compiled binary bin/s7cli.exe is a standalone program, it can be
 executed from any place. For easy access, it can be placed eg. in one of the
 directories included in the Windows system PATH.
 
    The s7cli (obviously) requires the Siemens SIMATIC Step 7 installed.
 
-   The program was built using Microsoft Visual Studio 2013 as a 32bit Windows
-executable. It was tested and used on 64bit versions of Windows 7 and 
-Windows Server 2008 with:
-  - STEP 7 Professional SR4, V5.5 + SP4
-  - SIMATIC S7-SCL Professional 2010 SR4, V5.3 + SP6 + Upd2
+   It was tested and used on:
 
-It was briefly tested (importing sources and compiling) using a newer version: 
-  - Step7 Professional 2017 V5.6 + HF1
-  - SIMATIC S7-SCL Professional 2017 V5.6 + HF1
+   - Windows 2010, Windows Server 2008, 2016 and 2019 with the Siemens PLC
+     software development environment:
+     - Step7 Professional 2017 V5.6 + HF1
+     - SIMATIC S7-SCL Professional 2017 V5.6 + HF1
+
+   - Windows 7 and Windows Server 2008 (64bit versions) with:
+     - STEP 7 Professional SR4, V5.5 + SP4
+     - SIMATIC S7-SCL Professional 2010 SR4, V5.3 + SP6 + Upd2
 
 
 Building from sources
 =====================
-   Compiling the program from sources may require similar environment
-as described above (ie. Microsoft Visual Studio, probably at least the same
-version). The project does not require any special configurations, rebuilding
-it should be straightforward.
 
+   The program was built using Microsoft Visual Studio 2017.
+
+   Compiling the program from sources would require similar environment
+as described above (ie. Microsoft Visual Studio and Siemens SIMATIC Step7,
+probably both at least the same version as above).
+   The project does not require any special configurations, building it
+should be straightforward.
