@@ -71,29 +71,29 @@ import_generated_sources: import_instances import_logic
 
 
 compile_baseline:
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
-		--sources 1_Compilation_Baseline || exit 0 )
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
-		--sources 1_Compilation_Baseline || exit 0 )
+	${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
+		--sources 1_Compilation_Baseline
+	${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
+		--sources 1_Compilation_Baseline
 
 compile_instances:
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
-		--sources 2_Compilation_instance || exit 0 )
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
-		--sources 2_Compilation_instance || exit 0 )
+	${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
+		--sources 2_Compilation_instance
+	${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
+		--sources 2_Compilation_instance
 
 compile_logic:
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
-		--sources 3_Compilation_LOGIC || exit 0 )
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
-		--sources 3_Compilation_LOGIC || exit 0 )
+	${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
+		--sources 3_Compilation_LOGIC
+	${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
+		--sources 3_Compilation_LOGIC
 
 
 compile_main:
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
-		--sources 4_Compilation_OB || exit 0 )
-	( ${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
-		--sources 4_Compilation_OB || exit 0 )
+	${S7CLI} compileSources -p ${PROJECT} --program ${ARC_APP} \
+		--sources 4_Compilation_OB
+	${S7CLI} compileSources -p ${PROJECT} --program ${LSS_APP} \
+		--sources 4_Compilation_OB
 
 
 compile: compile_baseline compile_instances compile_logic compile_main
