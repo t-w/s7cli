@@ -12,7 +12,7 @@
         Authors: Michal Dudek, Tomasz Wolak
 ===============================================================================
 
-s7cli is a simple command line interface to Siemens SIMATIC Step7(r)
+S7cli is a simple command line interface to Siemens SIMATIC Step7(r)
 (programming environment for Siemens Programmable Logic Controllers, PLCs).
 
 It was created to fill the gap in tools for automation scripting that would
@@ -69,7 +69,7 @@ Available commands:
       - Export program symbols to a file
 
   listSources
-      - List of source code modules in specified program
+      - List of source code modules in a program
 
   listBlocks
       - List of blocks in specified program
@@ -85,7 +85,7 @@ Available commands:
 
   importSourcesDir
       - Import all source code files from specified directory
-        (only valid ones: .SCL, .AWL, .INP, .GR7)
+        (valid sources: .SCL, .AWL, .INP, .GR7)
 
   compileSources
       - Compile specified source code module(s)
@@ -101,7 +101,7 @@ Available commands:
         (experimental, not tested!!!)
 
   compileStation
-      - Compiles station hardware and connections (experimental, don't use it!)
+      - Compiles station hardware and connections (experimental, don't use it!!!)
 
   compileAllStations
       - Compiles all stations' hardware and connections
