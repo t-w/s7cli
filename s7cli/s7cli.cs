@@ -50,20 +50,24 @@ namespace S7_cli
             }
 
             options = new Option_parser(args);
+            string command = options.getCommand();
 
             if ( options.needHelp() )
             {
                 usage();
-                show_command_help( options.getCommand() );
+                if ( command != null )
+                    show_command_help( options.getCommand() );
+                else
+                    show_available_commands();
                 return S7CommandStatus.success; ;
             }
 
             if ( ! options.optionsOK() )
             {
                 usage();
-                if ( options.getCommand() != null )
+                if ( command != null )
                 {
-                    show_command_help( options.getCommand() );
+                    show_command_help( command );
                 } else { 
                     Console.Write( "\nOption -h displays help for specified command.\n" );
                     show_available_commands();
@@ -85,7 +89,7 @@ namespace S7_cli
                 }
             }
 
-            string command = options.getCommand();
+
 
             Console.Write("\n\n");
 
