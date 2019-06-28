@@ -1,3 +1,15 @@
+2019-06-28, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.11
+	- some internal changes (refactoring, better option parsing,
+	added some unit tests)
+
+
+2019-04-02, Tomasz Wolak <tomasz.wolak@cern.ch>
+	* 0.8.10
+	- new commands: listContainers, listStations, compileAllStations,
+	download (by Brad Schofield <brad.schofield@cern.ch>)
+
+
 2019-03-28, Tomasz Wolak <tomasz.wolak@cern.ch>
 	* 0.8.9
 	- s7cli closes the Notepad window with symbol importation log
