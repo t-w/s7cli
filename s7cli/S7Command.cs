@@ -207,7 +207,9 @@ namespace S7_cli
 
         public void getListOfContainers(string projectPathOrName)
         {
-            this.openProject(projectPathOrName);
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
             Logger.log("List of available containers:\n");
 
             string[] containers = s7project.getListOfAvailableContainers();
@@ -219,7 +221,9 @@ namespace S7_cli
 
         public void getListOfStations(string projectPathOrName)
         {
-            this.openProject(projectPathOrName);
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
             Logger.log("List of available stations:\n");
 
             string[] stations = s7project.getListOfStations();
@@ -551,7 +555,15 @@ namespace S7_cli
         public void download( string projectPathOrName, 
                               string projectProgramName )
         {
-            this.openProject(projectPathOrName);
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+
             bool result;
             result = s7project.downloadProgramBlockContainer(projectProgramName);
 
