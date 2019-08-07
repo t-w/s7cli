@@ -530,6 +530,35 @@ namespace S7_cli
             return availablePrograms.ToArray();
         }
 
+        // Iterates over all Program objects (including hidden programs used by modules such as OPC Server which do not exist in programs.Keys 
+        public string[] getAllPrograms()
+        {
+            List<string> allPrograms = new List<string>();
+            foreach (IS7Program program in this.simaticProject.Programs)
+            {
+                Logger.log("Found a program called " + program.Name);
+                allPrograms.Add(program.Name);
+            }
+            return allPrograms.ToArray();
+        }
+
+        // Testing getting programs via Module objects
+        public string[] getProgramsByStation()
+        {
+            List<string> allPrograms = new List<string>();
+            string stationName = "CVW-PLCCI-2"; 
+            IS7Station5 station5 = simaticProject.Stations[stationName];
+            Logger.log("Found a program in module " + station5.Racks[0].Modules[2].Name);
+            allPrograms.Add(this.simaticProject.Programs[station5.Racks[0].Modules[2]].Name);
+            //foreach (IS7Program program in this.simaticProject.Programs[station5])
+            //{
+            //    Logger.log("Found a program called " + program.Name);
+            //    allPrograms.Add(program.Name);
+            //}
+            return allPrograms.ToArray();
+
+        }
+
 
         /// <summary>
         /// Returns names of available containers
