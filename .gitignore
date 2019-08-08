@@ -1,0 +1,4 @@
+packages/
+s7cli/bin/Debug/
+*/obj/
+.vs/
