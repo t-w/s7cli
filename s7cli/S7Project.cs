@@ -545,6 +545,26 @@ namespace S7_cli
         }
 
         /// <summary>
+        /// Returns list of stations, optionally filtered by type
+        /// </summary>
+        /// <param name="type">Type of target stations</param>
+        /// <returns>List of stations</returns>
+        public List<IS7Station> getStations(string type = "")
+        {
+            List<IS7Station> output = new List<IS7Station>();
+            bool filterType = !string.IsNullOrEmpty(type);
+
+            foreach (IS7Station station in this.simaticProject.Stations)
+            {
+                if (filterType && station.Type.ToString() != type)
+                    continue;
+                output.Add(station);
+            }
+
+            return output;
+        }
+
+        /// <summary>
         /// Recursively obtains the list of child modules, given a root module
         /// </summary>
         /// <param name="parentModule"></param>
@@ -570,7 +590,7 @@ namespace S7_cli
         /// <param name="parentStation">Name of program's parent station</param>
         /// <param name="parentModule">Name of program's parent module</param>
         /// <returns>Array of program objects</returns>
-        public IS7Program[] getStationPrograms(string parentStation = "", string parentModule="")
+        public IS7Program[] getStationPrograms(string parentStation = "", string parentModule = "")
         {
             List<IS7Program> output = new List<IS7Program>();
             bool filterStation = !string.IsNullOrEmpty(parentStation);
@@ -606,6 +626,84 @@ namespace S7_cli
             }
  
             return output.ToArray();
+        }
+
+        /*
+         * Station management
+         */
+
+        /// <summary>
+        /// Attempts to start all programs in a station
+        /// </summary>
+        /// <param name="station">Target station</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public int startStation(string station)
+        {
+            IS7Program[] programs = getStationPrograms(parentStation: station);
+            IS7Station6 station6 = this.simaticProject.Stations[station];
+            Logger.log(station6.Type.ToString());
+            foreach (IS7Program program in programs)
+            {
+                try
+                {
+                    Logger.log($"Attempting to start program {program.Name}...");
+                    program.NewStart();
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_error($"Could not start program {program.Name}: " + exc.Message);
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Attempts to stop all programs in a station
+        /// </summary>
+        /// <param name="station">Target station</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public int stopStation(string station)
+        {
+            IS7Program[] programs = getStationPrograms(parentStation: station);
+            foreach (IS7Program program in programs)
+            {
+                try
+                {
+                    Logger.log($"Attempting to stop program {program.Name}...");
+                    program.Stop();
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_error($"Could not stop program {program.Name}: " + exc.Message);
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Attempts to donwload all programs to a station
+        /// </summary>
+        /// <param name="station">Target station</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public int downloadStation(string stationName)
+        {
+            IS7Program[] programs = getStationPrograms(parentStation: stationName);
+            foreach (IS7Program program in programs)
+            {
+                foreach (S7Container container in program.Next)
+                {
+                    try
+                    {
+                        Logger.log($"Attempting to download container {program.Name} - {container.Name}...");
+                        container.Download();
+                    }
+                    catch (SystemException exc)
+                    {
+                        Logger.log_error($"Could not download container {program.Name} - {container.Name}:" + exc.Message);
+                    }
+                }
+            }
+            return 0;
         }
 
         /// <summary>
