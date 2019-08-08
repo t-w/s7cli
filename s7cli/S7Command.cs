@@ -197,11 +197,20 @@ namespace S7_cli
                 return;
 
             Logger.log("\nThe S7 programs found:\n");
-
-            // TESTING functions for getting programs using listPrograms 
-            string[] programs = s7project.getProgramsByStation(); // s7project.getAllPrograms(); //s7project.getListOfAvailablePrograms();
+            string[] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
+            {
                 Logger.log(program);
+            }
+
+            /*
+            IS7Program[] programs = s7project.getStationPrograms();
+            foreach (IS7Program program in programs)
+            {
+                Logger.log($"{program.Module.Name}::{program.Name}");
+            }
+            */
+
             S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
         }
 

@@ -515,50 +515,98 @@ namespace S7_cli
          * Program management
          */
 
+        /// <summary>
+        /// Returns array with names of all SIMATIC programs in project
+        /// </summary>
+        /// <returns>Names of all SIMATIC programs</returns>
         public string [] getListOfAvailablePrograms()
         {
             //string [] availablePrograms;
             List<string> availablePrograms = new List<string>();
-/*            foreach (IS7Program program in this.simaticProject.Programs)     {
-                availablePrograms.Add (program.Name);
-            }
- */
             foreach (string programName in this.programs.Keys)
             {
-                availablePrograms.Add (programName);
+                availablePrograms.Add(programName);
             }
             return availablePrograms.ToArray();
         }
 
-        // Iterates over all Program objects (including hidden programs used by modules such as OPC Server which do not exist in programs.Keys 
-        public string[] getAllPrograms()
+        /// <summary>
+        /// Returns array with names of all programs, including hidden i.e. non-SIMATIC programs in project
+        /// </summary>
+        /// <returns>Names of all programs</returns>
+        public string[] getAllProgramNames()
         {
             List<string> allPrograms = new List<string>();
             foreach (IS7Program program in this.simaticProject.Programs)
             {
-                Logger.log("Found a program called " + program.Name);
                 allPrograms.Add(program.Name);
             }
             return allPrograms.ToArray();
         }
 
-        // Testing getting programs via Module objects
-        public string[] getProgramsByStation()
+        /// <summary>
+        /// Recursively obtains the list of child modules, given a root module
+        /// </summary>
+        /// <param name="parentModule"></param>
+        /// <returns></returns>
+        public List<IS7Module> getListChildModules(IS7Module rootModule)
         {
-            List<string> allPrograms = new List<string>();
-            string stationName = "CVW-PLCCI-2"; 
-            IS7Station5 station5 = simaticProject.Stations[stationName];
-            Logger.log("Found a program in module " + station5.Racks[0].Modules[2].Name);
-            allPrograms.Add(this.simaticProject.Programs[station5.Racks[0].Modules[2]].Name);
-            //foreach (IS7Program program in this.simaticProject.Programs[station5])
-            //{
-            //    Logger.log("Found a program called " + program.Name);
-            //    allPrograms.Add(program.Name);
-            //}
-            return allPrograms.ToArray();
-
+            List<IS7Module> output = new List<IS7Module>();
+            output.Add(rootModule);
+            foreach (IS7Module module in rootModule.Modules)
+            {
+                output.AddRange(getListChildModules(module));
+            }
+            return output;
         }
 
+        /// <summary>
+        /// Returns array of program objects associated with project stations
+        /// </summary>
+        /// <note>
+        /// Some additional programs may exist which cannot be acessed by stations,
+        /// yet can still be obtained via `this.simaticProject.Programs`
+        /// </note>
+        /// <param name="parentStation">Name of program's parent station</param>
+        /// <param name="parentModule">Name of program's parent module</param>
+        /// <returns>Array of program objects</returns>
+        public IS7Program[] getStationPrograms(string parentStation = "", string parentModule="")
+        {
+            List<IS7Program> output = new List<IS7Program>();
+            bool filterStation = !string.IsNullOrEmpty(parentStation);
+            bool filterModule = !string.IsNullOrEmpty(parentModule);
+            S7Programs programs = this.simaticProject.Programs;
+
+            foreach (IS7Station station in simaticProject.Stations)
+            {
+                if (filterStation && station.Name != parentStation)
+                    continue;
+                foreach (IS7Rack rack in station.Racks)
+                {
+                    foreach (IS7Module rootModule in rack.Modules)
+                    {
+                        List<IS7Module> childModules = getListChildModules(rootModule);
+                        foreach (IS7Module module in childModules)
+                        {
+                            if (filterModule && module.Name != parentModule)
+                                continue;
+                            try
+                            {
+                                IS7Program program = programs[module];
+                                Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name}");
+                                output.Add(program);
+                            }
+                            catch (System.Runtime.InteropServices.COMException ex)
+                            {
+                                Logger.log_debug("Module " + module.Name + " has no child program");
+                            }
+                        }
+                    }
+                }
+            }
+ 
+            return output.ToArray();
+        }
 
         /// <summary>
         /// Returns names of available containers
