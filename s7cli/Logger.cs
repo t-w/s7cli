@@ -25,7 +25,7 @@ namespace S7_cli
     /// <summary>
     /// Static class - common logger with several debug levels.
     /// </summary>
-    static class Logger
+    public static class Logger
     {
         public const int min_debug_level = 0;
         public const int max_debug_level = 3;
