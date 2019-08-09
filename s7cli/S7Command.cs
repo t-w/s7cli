@@ -210,7 +210,6 @@ namespace S7_cli
                 Logger.log($"{program.Module.Name}::{program.Name}");
             }
             */
-
             S7CommandStatus.set_status(S7CommandStatus.success);   // if project opened - should be ok...
         }
 
@@ -638,6 +637,96 @@ namespace S7_cli
             }
         }
 
+        /* cli - Station commands */
+
+        /// <summary>
+        /// Downloads programs in station or list of stations
+        /// </summary>
+        /// <param name="projectPathOrName">Project path, or project name</param>
+        /// <param name="stationName">Name of target station</param>
+        /// <param name="stationType">Type of target stations</param>
+        public void downloadStation( string projectPathOrName,
+                                     string stationName,
+                                     string stationType)
+        {
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            {
+                Logger.log_error("Please provide either --station or --station-type argument.");
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            foreach (IS7Station station in stations)
+            {
+                s7project.downloadStation(station.Name);
+            }
+
+            S7CommandStatus.set_status(S7CommandStatus.success);
+        }
+
+        /// <summary>
+        /// Attempts to start programs in station or list of stations
+        /// </summary>
+        /// <param name="projectPathOrName">Project path, or project name</param>
+        /// <param name="stationName">Name of target station</param>
+        /// <param name="stationType">Type of target stations</param>
+        public void startStation( string projectPathOrName,
+                                  string stationName,
+                                  string stationType)
+        {
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            {
+                Logger.log_error("Please provide either --station or --station-type argument.");
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            foreach (IS7Station station in stations)
+            {
+                s7project.startStation(station.Name);
+            }
+
+            S7CommandStatus.set_status(S7CommandStatus.success);
+        }
+
+        /// <summary>
+        /// Attempts to stop programs in station or list of stations
+        /// </summary>
+        /// <param name="projectPathOrName">Project path, or project name</param>
+        /// <param name="stationName">Name of target station</param>
+        /// <param name="stationType">Type of target stations</param>
+        public void stopStation( string projectPathOrName,
+                                 string stationName,
+                                 string stationType)
+        {
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            {
+                Logger.log_error("Please provide either --station or --station-type argument.");
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            foreach (IS7Station station in stations)
+            {
+                s7project.stopStation(station.Name);
+            }
+
+            S7CommandStatus.set_status(S7CommandStatus.success);
+        }
+
+        /* cli - Library / Sources commands */
 
         public void importLibSources( string projectPathOrName,
                                       string libProjectName,

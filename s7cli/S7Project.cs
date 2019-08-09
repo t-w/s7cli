@@ -547,20 +547,36 @@ namespace S7_cli
         /// <summary>
         /// Returns list of stations, optionally filtered by type
         /// </summary>
+        /// <param name="name">name of target station</param>
         /// <param name="type">Type of target stations</param>
         /// <returns>List of stations</returns>
-        public List<IS7Station> getStations(string type = "")
+        public List<IS7Station> getStations(string name = "", string type = "")
         {
             List<IS7Station> output = new List<IS7Station>();
+            bool filterName = !string.IsNullOrEmpty(name);
             bool filterType = !string.IsNullOrEmpty(type);
 
-            foreach (IS7Station station in this.simaticProject.Stations)
+            if (filterName)
             {
-                if (filterType && station.Type.ToString() != type)
-                    continue;
-                output.Add(station);
+                try
+                {
+                    IS7Station station = this.simaticProject.Stations[name];
+                    output.Add(station);
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_error($"Could not find station {name}: {exc}");
+                }
             }
-
+            else
+            {
+                foreach (IS7Station station in this.simaticProject.Stations)
+                {
+                    if (filterType && station.Type.ToString() != type)
+                        continue;
+                    output.Add(station);
+                }
+            }
             return output;
         }
 

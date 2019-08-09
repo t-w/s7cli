@@ -141,7 +141,7 @@ namespace S7_cli
                 else if (command == "listSources")
                     s7command.listSources(options.getOption("--project"),
                                           options.getOption("--program"));
-                
+
                 else if (command == "listBlocks")
                     s7command.listBlocks(options.getOption("--project"),
                                          options.getOption("--program"));
@@ -166,7 +166,8 @@ namespace S7_cli
                                             options.getOption("--sources").Split(','),
                                             options.getOption("--force") == "y");
 
-                else if (command == "importSourcesDir") {
+                else if (command == "importSourcesDir")
+                {
                     string srcdir = options.getOption("--srcdir");
                     /*Logger.log_debug("\nImporting source files\n\n");
                     Logger.log_debug("\nProject: " + projectDir + "\n");
@@ -221,14 +222,14 @@ namespace S7_cli
                                                  options.getOption("--force") == "y");
 
                 else if (command == "downloadBlocks")
-                        s7command.downloadBlocks(options.getOption("--project"),
-                                                 options.getOption("--program"),
-                                                 options.getOption("--force") == "y");
+                    s7command.downloadBlocks(options.getOption("--project"),
+                                             options.getOption("--program"),
+                                             options.getOption("--force") == "y");
 
                 else if (command == "download")
                     s7command.download(options.getOption("--project"),
                                        options.getOption("--program"));
- 
+
                 else if (command == "startCPU")
                     s7command.startCPU(options.getOption("--project"),
                                        options.getOption("--program"));
@@ -237,7 +238,23 @@ namespace S7_cli
                     s7command.stopCPU(options.getOption("--project"),
                                       options.getOption("--program"));
 
-                else  {
+                else if (command == "downloadStation")
+                    s7command.downloadStation(options.getOption("--project"),
+                                              options.getOption("--station"),
+                                              options.getOption("--station-type"));
+
+                else if (command == "startStation")
+                    s7command.startStation(options.getOption("--project"),
+                                           options.getOption("--station"),
+                                           options.getOption("--station-type"));
+
+                else if (command == "stopStation")
+                    s7command.stopStation(options.getOption("--project"),
+                                          options.getOption("--station"),
+                                          options.getOption("--station-type"));
+
+                else
+                {
                     System.Console.WriteLine("Unknown command: " + command + "\n\n");
                     usage();
                     show_available_commands();

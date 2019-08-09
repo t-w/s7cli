@@ -53,9 +53,12 @@ namespace S7_cli
             "compileAllStations",
             "downloadSystemData",
             "downloadBlocks",
+            "downloadStation",
             "download",
             "startCPU",
-            "stopCPU"
+            "stopCPU",
+            "startStation",
+            "stopStation"
         };
 
         Dictionary<string, string> command_help;
@@ -80,7 +83,8 @@ namespace S7_cli
                     { "--program",             new string[] { "", "program name in project" }},
 
                     { "--config",              new string[] { "-c", "station (hardware) configuration file" }},
-                    { "--station",              new string[] { "", "station name" }},
+                    { "--station",             new string[] { "", "station name" }},
+                    { "--station-type",        new string[] { "", "type of target stations" }},
                     { "--srcdir",              new string[] { "",   "directory with source code files" }},
                     { "--library",             new string[] { "-l", "library name (do 'listProjects' if not sure)" }},
                     { "--libprg",              new string[] { "",   "program in library project" }},
@@ -124,11 +128,14 @@ namespace S7_cli
                     { "exportProgramStructure", "Exports the block calling structure into a DIF-File (experimental, not tested!!!)" },
                     { "compileStation",      "Compiles station hardware and connections (experimental, don't use it!!!)" },
                     { "compileAllStations",  "Compiles all stations' hardware and connections " },
-                    { "downloadBlocks",      "Downloads blocks (omits \"System data\") to the PLC" },
                     { "downloadSystemData",  "Downloads \"System data\" to the PLC" },
+                    { "downloadBlocks",      "Downloads blocks (omits \"System data\") to the PLC" },
+                    { "downloadStation",     "Downloads all programs associated with a station"},
                     { "download",            "Downloads all blocks (including system data) for a given program to the PLC" },
                     { "startCPU",            "Starts (new start) PLC" },
-                    { "stopCPU",             "Stops PLC" }
+                    { "stopCPU",             "Stops PLC" },
+                    { "startStation",        "Starts all the programs in a station" },
+                    { "stopStation",         "Stops all the programs in a station" }
                 };
 
             options_valid = new Dictionary<string, string[]>()
@@ -155,11 +162,14 @@ namespace S7_cli
                     { "exportProgramStructure", new string[] { "--debug", "--project", "--program", "--output" }},
                     { "compileStation",         new string[] { "--debug", "--project", "--station" }},
                     { "compileAllStations",     new string[] { "--debug", "--project" }},
-                    { "downloadBlocks",         new string[] { "--debug", "--project", "--program", "--force" }},
                     { "downloadSystemData",     new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "downloadBlocks",         new string[] { "--debug", "--project", "--program", "--force" }},
+                    { "downloadStation",        new string[] { "--debug", "--project", "--station", "--station-type" }},
                     { "download",               new string[] { "--debug", "--project", "--program" }},
                     { "startCPU",               new string[] { "--debug", "--project", "--program" }},
-                    { "stopCPU",                new string[] { "--debug", "--project", "--program" }}
+                    { "stopCPU",                new string[] { "--debug", "--project", "--program" }},
+                    { "startStation",           new string[] { "--debug", "--project", "--station", "--station-type" }},
+                    { "stopStation",            new string[] { "--debug", "--project", "--station", "--station-type" }}
                 };
 
             options_required = new Dictionary<string, string[]>()
@@ -186,11 +196,14 @@ namespace S7_cli
                     { "exportProgramStructure", new string[] { "--project", "--program", "--output" }},
                     { "compileStation",         new string[] { "--project", "--station" }},
                     { "compileAllStations",     new string[] { "--project" }},
-                    { "downloadBlocks",         new string[] { "--project", "--program" }},
                     { "downloadSystemData",     new string[] { "--project", "--program" }},
+                    { "downloadBlocks",         new string[] { "--project", "--program" }},
+                    { "downloadStation",        new string[] { "--project" }},
                     { "download",               new string[] { "--project", "--program" }},
                     { "startCPU",               new string[] { "--project", "--program" }},
-                    { "stopCPU",                new string[] { "--project", "--program" }}
+                    { "stopCPU",                new string[] { "--project", "--program" }},
+                    { "startStation",           new string[] { "--project" }},
+                    { "stopStation",            new string[] { "--project" }}
                 };
 
             if (this.parseOptions(args))
