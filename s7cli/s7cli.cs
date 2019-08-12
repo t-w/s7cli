@@ -53,6 +53,8 @@ namespace S7_cli
             try
             {
                 var result = Parser.Default.ParseArguments(args, OptionTypes.get())
+                    .WithParsed<Options>(opts =>
+                        setDebugLevel(opts.debug))
                     .WithParsed<CreateProjectOptions>(opts =>
                         cmd.createProject(opts.projectName, opts.projectDir))
                     .WithParsed<CreateLibOptions>(opts =>
@@ -142,6 +144,23 @@ namespace S7_cli
 
         }
 
+        /// <summary>
+        /// Sets Logger debugging level
+        /// </summary>
+        /// <param name="debugLevel">Logging level (check Logger class)</param>
+        static public void setDebugLevel(int debugLevel = Logger.min_debug_level)
+        {
+            int min = Logger.min_debug_level;
+            int max = Logger.max_debug_level;
+            if (debugLevel >= min && debugLevel <= max)
+            {
+                Logger.setLevel(debugLevel);
+            }
+            else
+            {
+                Logger.log_error($"Specified bug level is out of range ({min}-{max})");
+            }
+        }
 
         /// <summary>
         /// Return program version (as string)
