@@ -24,6 +24,8 @@ using System.Text;
 //using System.Runtime.InteropServices;
 using System.Reflection;
 
+using CommandLine;
+
 namespace S7_cli
 {
     /// <summary>
@@ -31,241 +33,94 @@ namespace S7_cli
     /// </summary>
     public class s7cli
     {
-        static Option_parser options;
-
         /// <summary>
         /// Main program
         /// </summary>
-        /// <param name="args">command-line args</param>
-        /// <returns>status, ==0 -> OK (otherwise fail)</returns>
+        /// <param name="args">command-line arguments</param>
+        /// <returns>0 on success, error code otherwise</returns>
         public static int Main(string[] args)
         {
             //Logger.setLevel(Logger.level_debug);   // switch on more debugging info
             show_logo();
-
-            if ( args.Length < 1 )
-            {
-                usage();
-                return S7CommandStatus.success;
-            }
-
-            options = new Option_parser(args);
-            string command = options.getCommand();
-
-            if ( options.needHelp() )
-            {
-                usage();
-                if ( command != null )
-                    show_command_help( options.getCommand() );
-                else
-                    show_available_commands();
-                return S7CommandStatus.success; ;
-            }
-
-            if ( ! options.optionsOK() )
-            {
-                usage();
-                if ( command != null )
-                {
-                    show_command_help( command );
-                } else { 
-                    Console.Write( "\nOption -h displays help for specified command.\n" );
-                    show_available_commands();
-                }
-                return S7CommandStatus.failure;
-            }
-
-            if (options.optionSet("--debug"))
-            {                                         // set debug level from cmd line option
-                int debug_level;
-                int.TryParse(options.getOption("--debug"), out debug_level);
-                if (debug_level >= Logger.min_debug_level && debug_level <= Logger.max_debug_level)  {
-                    Logger.log_debug("Setting debug level to " + debug_level + ".");
-                    Logger.setLevel(debug_level);
-                } else {
-                    Logger.log("Specified bug level is out of range (" + Logger.min_debug_level +
-                        ", " + Logger.max_debug_level + ").\n");
-                    return S7CommandStatus.failure;
-                }
-            }
-
-
-
             Console.Write("\n\n");
 
-            S7Command s7command = new S7Command();
+            S7Command cmd = new S7Command();
+            // TODO: Correctly handle help and version commands, which do not set the command status
+            var parseErrors = new List<CommandLine.Error>();
 
-            try   {
-
-                if (command == "listProjects")
-                    s7command.getListOfProjects();
-
-                else if (command == "createProject")
-                    s7command.createProject(options.getOption("--projname"),
-                                            options.getOption("--projdir"));
-
-                else if (command == "importConfig")
-                    s7command.importConfig(options.getOption("--project"),
-                                           options.getOption("--config"));
-
-                else if (command == "createLib")
-                    s7command.createLibrary(options.getOption("--libname"),
-                                            options.getOption("--libdir"));
-
-                else if (command == "exportConfig")
-                    s7command.exportConfig(options.getOption("--project"),
-                                           options.getOption("--station"),
-                                           options.getOption("--config"));
-
-                else if (command == "listPrograms")
-                    s7command.getListOfPrograms(options.getOption("--project"));
-
-                else if (command == "listStations")
-                    s7command.getListOfStations(options.getOption("--project"));
-
-                else if (command == "listContainers")
-                    s7command.getListOfContainers(options.getOption("--project"));
-
-                else if (command == "importSymbols")
-                    s7command.importSymbols(options.getOption("--project"),
-                                            options.getOption("--symbols"),
-                                            options.getOption("--program"),
-                                            options.getOption("--conflictok") == "y");
-
-                else if (command == "exportSymbols")
-                    s7command.exportSymbols(options.getOption("--project"),
-                                            options.getOption("--program"),
-                                            options.getOption("--output"),
-                                            options.getOption("--force") == "y");
-
-                else if (command == "listSources")
-                    s7command.listSources(options.getOption("--project"),
-                                          options.getOption("--program"));
-
-                else if (command == "listBlocks")
-                    s7command.listBlocks(options.getOption("--project"),
-                                         options.getOption("--program"));
-
-                else if (command == "importLibSources")
-                    s7command.importLibSources(options.getOption("--project"),
-                                                options.getOption("--library"),
-                                                options.getOption("--libprg"),
-                                                options.getOption("--program"),
-                                                options.getOption("--force") == "y");
-
-                else if (command == "importLibBlocks")
-                    s7command.importLibBlocks(options.getOption("--project"),
-                                                options.getOption("--library"),
-                                                options.getOption("--libprg"),
-                                                options.getOption("--program"),
-                                                options.getOption("--force") == "y");
-
-                else if (command == "importSources")
-                    s7command.importSources(options.getOption("--project"),
-                                            options.getOption("--program"),
-                                            options.getOption("--sources").Split(','),
-                                            options.getOption("--force") == "y");
-
-                else if (command == "importSourcesDir")
-                {
-                    string srcdir = options.getOption("--srcdir");
-                    /*Logger.log_debug("\nImporting source files\n\n");
-                    Logger.log_debug("\nProject: " + projectDir + "\n");
-                    Logger.log_debug("\nProgram: " + program + "\n");
-                    Logger.log_debug("\ndirectory with sources to import: " + srcdir + "\n"); */
-                    List<string> srcfileslist = new List<string>();
-                    srcfileslist = new List<string>();
-                    string[] ext2import = { "*.SCL", "*.AWL", "*.INP", "*.GR7" };
-                    foreach (string ext in ext2import)
-                        srcfileslist.AddRange(
-                            System.IO.Directory.GetFiles(srcdir, ext,
-                                System.IO.SearchOption.TopDirectoryOnly));
-                    string[] srcfiles = srcfileslist.ToArray();
-
-                    s7command.importSources(options.getOption("--project"),
-                                            options.getOption("--program"),
-                                            srcfiles,
-                                            options.getOption("--force") == "y");
-                }
-
-                else if (command == "compileSources")
-                    s7command.compileSources(options.getOption("--project"),
-                                             options.getOption("--program"),
-                                             options.getOption("--sources").Split(','));
-
-                else if (command == "exportSources")
-                    s7command.exportSources(options.getOption("--project"),
-                                            options.getOption("--program"),
-                                            options.getOption("--sources").Split(','),
-                                            options.getOption("--outputdir"));
-
-                else if (command == "exportAllSources")
-                    s7command.exportAllSources(options.getOption("--project"),
-                                               options.getOption("--program"),
-                                               options.getOption("--outputdir"));
-
-                else if (command == "exportProgramStructure")
-                    s7command.exportProgramStructure(options.getOption("--project"),
-                                                     options.getOption("--program"),
-                                                     options.getOption("--output"));
-
-                else if (command == "compileStation")
-                    s7command.compileStation(options.getOption("--project"),
-                                             options.getOption("--station"));
-
-                else if (command == "compileAllStations")
-                    s7command.compileAllStations(options.getOption("--project"));
-
-                else if (command == "downloadSystemData")
-                    s7command.downloadSystemData(options.getOption("--project"),
-                                                 options.getOption("--program"),
-                                                 options.getOption("--force") == "y");
-
-                else if (command == "downloadBlocks")
-                    s7command.downloadBlocks(options.getOption("--project"),
-                                             options.getOption("--program"),
-                                             options.getOption("--force") == "y");
-
-                else if (command == "download")
-                    s7command.download(options.getOption("--project"),
-                                       options.getOption("--program"));
-
-                else if (command == "startCPU")
-                    s7command.startCPU(options.getOption("--project"),
-                                       options.getOption("--program"));
-
-                else if (command == "stopCPU")
-                    s7command.stopCPU(options.getOption("--project"),
-                                      options.getOption("--program"));
-
-                else if (command == "downloadStation")
-                    s7command.downloadStation(options.getOption("--project"),
-                                              options.getOption("--station"),
-                                              options.getOption("--station-type"));
-
-                else if (command == "startStation")
-                    s7command.startStation(options.getOption("--project"),
-                                           options.getOption("--station"),
-                                           options.getOption("--station-type"));
-
-                else if (command == "stopStation")
-                    s7command.stopStation(options.getOption("--project"),
-                                          options.getOption("--station"),
-                                          options.getOption("--station-type"));
-
-                else
-                {
-                    System.Console.WriteLine("Unknown command: " + command + "\n\n");
-                    usage();
-                    show_available_commands();
-                    return S7CommandStatus.failure;
-                }
-
-            } catch (S7ProjectNotOpenException e) {
+            // TODO: Consistent naming for getList* or List* (should actually be getNames...)
+            // TODO: Remove huge try catch block, catch at a lower level and return error code
+            try
+            {
+                var result = Parser.Default.ParseArguments(args, OptionTypes.get())
+                    .WithParsed<CreateProjectOptions>(opts =>
+                        cmd.createProject(opts.projectName, opts.projectDir))
+                    .WithParsed<CreateLibOptions>(opts =>
+                        cmd.createLibrary(opts.libName, opts.libDir))
+                    .WithParsed<ImportConfigOptions>(opts =>
+                        cmd.importConfig(opts.project, opts.config))
+                    .WithParsed<ExportConfigOptions>(opts =>
+                        cmd.exportConfig(opts.project, opts.station, opts.config))
+                    .WithParsed<ListProgramsOptions>(opts =>
+                        cmd.getListOfPrograms(opts.project))
+                    .WithParsed<ListStationsOptions>(opts =>
+                        cmd.getListOfStations(opts.project))
+                    .WithParsed<ListContainersOptions>(opts =>
+                        cmd.getListOfContainers(opts.project))
+                    .WithParsed<ImportSymbolsOptions>(opts =>
+                        cmd.importSymbols(opts.project, opts.symbols, opts.program, opts.conflictOk == "y"))
+                    .WithParsed<ExportSymbolsOptions>(opts =>
+                        cmd.exportSymbols(opts.project, opts.program, opts.output, opts.force == "y"))
+                    .WithParsed<ListSourcesOptions>(opts =>
+                        cmd.listSources(opts.project, opts.program))
+                    .WithParsed<ListBlocksOptions>(opts =>
+                        cmd.listBlocks(opts.project, opts.program))
+                    .WithParsed<ImportSourcesOptions>(opts =>
+                        cmd.importSources(opts.project, opts.program, opts.sources.Split(','), opts.force == "y"))
+                    .WithParsed<ImportSourcesDirOptions>(opts =>
+                        cmd.importSourcesDir(opts.project, opts.program, opts.sourcesDir, opts.force == "y"))
+                    .WithParsed<CompileSourcesOptions>(opts =>
+                        cmd.compileSources(opts.project, opts.program, opts.sources.Split(',')))
+                    .WithParsed<ExportSourcesOptions>(opts =>
+                        cmd.exportSources(opts.project, opts.program, opts.sources.Split(','), opts.outputDir))
+                    .WithParsed<ExportAllSourcesOptions>(opts =>
+                        cmd.exportAllSources(opts.project, opts.program, opts.outputDir))
+                    .WithParsed<ExportProgramStructureOptions>(opts =>
+                        cmd.exportProgramStructure(opts.project, opts.program, opts.output))
+                    .WithParsed<CompileStationOptions>(opts =>
+                        cmd.compileStation(opts.project, opts.station))
+                    .WithParsed<CompileAllStationsOptions>(opts =>
+                        cmd.compileAllStations(opts.project))
+                    .WithParsed<DownloadSystemDataOptions>(opts =>
+                        cmd.downloadSystemData(opts.project, opts.program, opts.force == "y"))
+                    .WithParsed<DownloadBlocksOptions>(opts =>
+                        cmd.downloadBlocks(opts.project, opts.program, opts.force == "y"))
+                    .WithParsed<DownloadOptions>(opts =>
+                        cmd.download(opts.project, opts.program))
+                    .WithParsed<StartCpuOptions>(opts =>
+                        cmd.startCPU(opts.project, opts.program))
+                    .WithParsed<StopCpuOptions>(opts =>
+                        cmd.stopCPU(opts.project, opts.program))
+                    .WithParsed<DownloadStationOptions>(opts =>
+                        cmd.downloadStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y", opts.force == "y"))
+                    .WithParsed<StopStationOptions>(opts =>
+                        cmd.stopStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y"))
+                    .WithParsed<StartStationOptions>(opts =>
+                        cmd.startStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y"))
+                    .WithNotParsed(errors => parseErrors = errors.ToList());
+            }
+            catch (S7ProjectNotOpenException e)
+            {
                 Logger.log("Error: exception: project not opened with info:\n" + e.ToString() + ", " + e.Message + "\n");
                 //S7cli_Status.exit_with_info(S7CommandStatus.failure);
                 S7cli_Status.show(S7CommandStatus.failure);
                 return S7CommandStatus.failure;
+            }
+
+            // Handle parsing errors
+            if (parseErrors.Any())
+            {
+                S7CommandStatus.set_status(S7CommandStatus.failure);
             }
 
             //S7cli_Status.exit_with_info(S7CommandStatus.get_status());
@@ -320,32 +175,6 @@ namespace S7_cli
         Authors: Michal Dudek, Tomasz Wolak
 ";
             Console.Write(logo);
-        }
-
-        /// <summary>
-        /// Shows list of available commands
-        /// </summary>
-        static public void show_available_commands()
-        {
-            Console.Write("\n\nAvailable commands:\n\n");
-            foreach (string cmd in Option_parser.commands)
-                Console.Write(String.Format("  {0:20}\n      - {1}\n\n", cmd, options.getCommandHelp(cmd)));
-            Console.Write("\n\n");
-        }
-
-
-        /// <summary>
-        /// Display usage help information
-        /// </summary>
-        static public void usage()
-        {
-            Console.Write("\n\nUsage: s7cli <command> [command args] [-h]\n");
-        }
-
-        static public void show_command_help(string command)
-        {
-            Console.Write( "\nCommand line options for '" + command + "':" +
-                           options.getCommandOptionsHelp( command ) + "\n");
         }
     }
 }

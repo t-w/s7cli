@@ -545,23 +545,32 @@ namespace S7_cli
         }
 
         /// <summary>
-        /// Returns list of stations, optionally filtered by type
+        /// Returns list of all stations, or a set of stations filtered by name or type
         /// </summary>
         /// <param name="name">name of target station</param>
         /// <param name="type">Type of target stations</param>
+        /// <param name="all">Whether to return all stations</param>
         /// <returns>List of stations</returns>
-        public List<IS7Station> getStations(string name = "", string type = "")
+        public List<IS7Station> getStations(string name = "", string type = "", bool all = false)
         {
             List<IS7Station> output = new List<IS7Station>();
             bool filterName = !string.IsNullOrEmpty(name);
             bool filterType = !string.IsNullOrEmpty(type);
 
-            if (filterName)
+            if (all)
+            {
+                foreach (IS7Station station in this.simaticProject.Stations)
+                {
+                    output.Add(station);
+                }
+            }
+            else if (filterName)
             {
                 try
                 {
                     IS7Station station = this.simaticProject.Stations[name];
-                    output.Add(station);
+                    if (filterType && station.Type.ToString() == type)
+                        output.Add(station);
                 }
                 catch (SystemException exc)
                 {
@@ -632,7 +641,7 @@ namespace S7_cli
                                 Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name}");
                                 output.Add(program);
                             }
-                            catch (System.Runtime.InteropServices.COMException ex)
+                            catch (System.Runtime.InteropServices.COMException)
                             {
                                 Logger.log_debug("Module " + module.Name + " has no child program");
                             }
@@ -668,6 +677,7 @@ namespace S7_cli
                 catch (SystemException exc)
                 {
                     Logger.log_error($"Could not start program {program.Name}: " + exc.Message);
+                    return 1;
                 }
             }
             return 0;
@@ -691,6 +701,7 @@ namespace S7_cli
                 catch (SystemException exc)
                 {
                     Logger.log_error($"Could not stop program {program.Name}: " + exc.Message);
+                    return 1;
                 }
             }
             return 0;
@@ -701,7 +712,7 @@ namespace S7_cli
         /// </summary>
         /// <param name="station">Target station</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public int downloadStation(string stationName)
+        public int downloadStation(string stationName, bool force = false)
         {
             IS7Program[] programs = getStationPrograms(parentStation: stationName);
             foreach (IS7Program program in programs)
@@ -711,11 +722,14 @@ namespace S7_cli
                     try
                     {
                         Logger.log($"Attempting to download container {program.Name} - {container.Name}...");
-                        container.Download();
+                        // Prevents exception being thrown, as Sources container does not have DOWNLOAD method
+                        if (container.Name != "Sources")
+                            container.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
                     }
                     catch (SystemException exc)
                     {
                         Logger.log_error($"Could not download container {program.Name} - {container.Name}:" + exc.Message);
+                        return 1;
                     }
                 }
             }

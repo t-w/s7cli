@@ -645,13 +645,17 @@ namespace S7_cli
         /// <param name="projectPathOrName">Project path, or project name</param>
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
+        /// <param name="allStations">Whether to target every station</param>
+        /// <param name="force">Whether to force download</param>
         public void downloadStation( string projectPathOrName,
                                      string stationName,
-                                     string stationType)
+                                     string stationType,
+                                     bool   allStations = false,
+                                     bool   force = false)
         {
-            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
             {
-                Logger.log_error("Please provide either --station or --station-type argument.");
+                Logger.log_error("Please provide either --station, --station-type or --allstations argument.");
                 S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
@@ -659,10 +663,11 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
-                s7project.downloadStation(station.Name);
+                // TODO: Evaluate return value
+                s7project.downloadStation(station.Name, force);
             }
 
             S7CommandStatus.set_status(S7CommandStatus.success);
@@ -674,13 +679,15 @@ namespace S7_cli
         /// <param name="projectPathOrName">Project path, or project name</param>
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
+        /// <param name="allStations">Whether to target every station</param>
         public void startStation( string projectPathOrName,
                                   string stationName,
-                                  string stationType)
+                                  string stationType,
+                                  bool   allStations = false)
         {
-            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
             {
-                Logger.log_error("Please provide either --station or --station-type argument.");
+                Logger.log_error("Please provide either --station, --station-type or --allstations argument.");
                 S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
@@ -688,7 +695,7 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
                 s7project.startStation(station.Name);
@@ -703,13 +710,15 @@ namespace S7_cli
         /// <param name="projectPathOrName">Project path, or project name</param>
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
+        /// <param name="allStations">Whether to target every station</param>     
         public void stopStation( string projectPathOrName,
                                  string stationName,
-                                 string stationType)
+                                 string stationType,
+                                 bool   allStations = false)
         {
-            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType))
+            if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
             {
-                Logger.log_error("Please provide either --station or --station-type argument.");
+                Logger.log_error("Please provide either --station, --station-type or --allstations argument.");
                 S7CommandStatus.set_status(S7CommandStatus.failure);
                 return;
             }
@@ -717,7 +726,7 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType);
+            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
                 s7project.stopStation(station.Name);
@@ -774,6 +783,22 @@ namespace S7_cli
                 S7CommandStatus.set_status(S7CommandStatus.failure);
         }
 
+
+        public void importSourcesDir( string projectPathOrName,
+                                      string program,
+                                      string sourceDir,
+                                      bool   forceOverwrite = false)
+        {
+            List<string> sourceFiles = new List<string>();
+            sourceFiles = new List<string>();
+            string[] supportedExtensions = { "*.SCL", "*.AWL", "*.INP", "*.GR7" };
+            foreach (string ext in supportedExtensions)
+                sourceFiles.AddRange(
+                    System.IO.Directory.GetFiles(sourceDir, ext,
+                        System.IO.SearchOption.TopDirectoryOnly));
+
+            importSources(projectPathOrName, program, sourceFiles.ToArray(), forceOverwrite);
+        }
 
         public void importSources( string   projectPathOrName,
                                    string   program,
