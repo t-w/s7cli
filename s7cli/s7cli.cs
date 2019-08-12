@@ -77,6 +77,10 @@ namespace S7_cli
                         cmd.listSources(opts.project, opts.program))
                     .WithParsed<ListBlocksOptions>(opts =>
                         cmd.listBlocks(opts.project, opts.program))
+                    .WithParsed<ImportLibSourcesOptions>(opts =>
+                        cmd.importLibSources(opts.project, opts.library, opts.libraryProgram, opts.program, opts.force == "y"))
+                    .WithParsed<ImportLibBlocksOptions>(opts =>
+                        cmd.importLibBlocks(opts.project, opts.library, opts.libraryProgram, opts.program, opts.force == "y"))
                     .WithParsed<ImportSourcesOptions>(opts =>
                         cmd.importSources(opts.project, opts.program, opts.sources.Split(','), opts.force == "y"))
                     .WithParsed<ImportSourcesDirOptions>(opts =>
