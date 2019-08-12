@@ -42,7 +42,7 @@ namespace S7_cli
         public string stationName { get; set; }
         [Option("stationtype", HelpText = "Type of target stations", SetName = "target")]
         public string stationType { get; set; }
-        [Option("allstations", HelpText = "Target all stations", SetName = "target")]
+        [Option("allstations", HelpText = "Target all stations (y/n)", SetName = "target")]
         public string allStations { get; set; }
     }
 

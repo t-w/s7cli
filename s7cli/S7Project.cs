@@ -666,18 +666,18 @@ namespace S7_cli
         {
             IS7Program[] programs = getStationPrograms(parentStation: station);
             IS7Station6 station6 = this.simaticProject.Stations[station];
-            Logger.log(station6.Type.ToString());
+
             foreach (IS7Program program in programs)
             {
                 try
                 {
-                    Logger.log($"Attempting to start program {program.Name}...");
+                    Logger.log($"Attempting to start program {program.Module.Name}::{program.Name}...");
                     program.NewStart();
                 }
                 catch (SystemException exc)
                 {
-                    Logger.log_error($"Could not start program {program.Name}: " + exc.Message);
-                    return 1;
+                    Logger.log_error($"Could not start program {program.Module.Name}::{program.Name}: " + exc.Message);
+                    //return 1;
                 }
             }
             return 0;
@@ -695,13 +695,13 @@ namespace S7_cli
             {
                 try
                 {
-                    Logger.log($"Attempting to stop program {program.Name}...");
+                    Logger.log($"Attempting to stop program {program.Module.Name}::{program.Name}...");
                     program.Stop();
                 }
                 catch (SystemException exc)
                 {
-                    Logger.log_error($"Could not stop program {program.Name}: " + exc.Message);
-                    return 1;
+                    Logger.log_error($"Could not stop program {program.Module.Name}::{program.Name}: " + exc.Message);
+                    //return 1;
                 }
             }
             return 0;
@@ -721,14 +721,14 @@ namespace S7_cli
                 {
                     try
                     {
-                        Logger.log($"Attempting to download container {program.Name} - {container.Name}...");
+                        Logger.log($"Attempting to download container {program.Module.Name}::{program.Name} - {container.Name}...");
                         // Prevents exception being thrown, as Sources container does not have DOWNLOAD method
                         if (container.Name != "Sources")
                             container.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
                     }
                     catch (SystemException exc)
                     {
-                        Logger.log_error($"Could not download container {program.Name} - {container.Name}:" + exc.Message);
+                        Logger.log_error($"Could not download container {program.Module.Name}::{program.Name} - {container.Name}:" + exc.Message);
                         return 1;
                     }
                 }
