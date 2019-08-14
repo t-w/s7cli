@@ -44,6 +44,8 @@ namespace S7_cli
         public string stationType { get; set; }
         [Option("allstations", HelpText = "Target all stations (y/n)", SetName = "target")]
         public string allStations { get; set; }
+        [Option("modulename", HelpText = "Name of target module")]
+        public string moduleName { get; set; }
     }
 
     /* Commands */
@@ -96,8 +98,11 @@ namespace S7_cli
         public string station { get; set; }
     }
 
-    [Verb("compileAllStations", HelpText = "Compiles all stations' hardware and connections")]
+    [Verb("compileAllStations", HelpText = "Compiles all stations' HW configuration")]
     class CompileAllStationsOptions : ProjectOptions { }
+
+    [Verb("compileAllConnections", HelpText = "Compiles all stations' connections")]
+    class CompileAllConnectionsOptions : ProjectOptions { }
 
     /* Commands that require --project and --program options */
 
@@ -197,7 +202,7 @@ namespace S7_cli
         public string force { get; set; }
     }
 
-    [Verb("downloadBlocks", HelpText = "SLOW: Downloads Blocks to the PLC, one at a time (check download command")]
+    [Verb("downloadBlocks", HelpText = "SLOW: Downloads Blocks to the PLC, one at a time (check download command)")]
     class DownloadBlocksOptions : ProgramOptions
     {
         [Option("force", HelpText = "Force overwrite (replace) existing blocks in PLC (y/n)")]
@@ -215,17 +220,17 @@ namespace S7_cli
 
     /* Commands that require --project, --program and the --station* options */
 
-    [Verb("downloadStation", HelpText = "Downloads all the programs to a given station")]
+    [Verb("downloadStation", HelpText = "Downloads programs to a given station")]
     class DownloadStationOptions : StationOptions
     {
         [Option('f', "force", HelpText = "Force overwrite station data")]
         public string force { get; set; }
     }
 
-    [Verb("startStation", HelpText = "Starts all the programs in a given station")]
+    [Verb("startStation", HelpText = "Starts programs in a given station")]
     class StartStationOptions : StationOptions { }
 
-    [Verb("stopStation", HelpText = "Stops all the programs in a given station")]
+    [Verb("stopStation", HelpText = "Stops programs in a given station")]
     class StopStationOptions : StationOptions { }
 
     /* Experimental features */

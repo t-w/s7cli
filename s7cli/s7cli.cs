@@ -95,6 +95,8 @@ namespace S7_cli
                         cmd.exportProgramStructure(opts.project, opts.program, opts.output))
                     .WithParsed<CompileStationOptions>(opts =>
                         cmd.compileStation(opts.project, opts.station))
+                    .WithParsed<CompileAllConnectionsOptions>(opts =>
+                        cmd.compileAllConnections(opts.project))
                     .WithParsed<CompileAllStationsOptions>(opts =>
                         cmd.compileAllStations(opts.project))
                     .WithParsed<DownloadSystemDataOptions>(opts =>
@@ -108,11 +110,14 @@ namespace S7_cli
                     .WithParsed<StopCpuOptions>(opts =>
                         cmd.stopCPU(opts.project, opts.program))
                     .WithParsed<DownloadStationOptions>(opts =>
-                        cmd.downloadStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y", opts.force == "y"))
+                        cmd.downloadStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y",
+                            opts.moduleName, opts.force == "y"))
                     .WithParsed<StopStationOptions>(opts =>
-                        cmd.stopStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y"))
+                        cmd.stopStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y",
+                            opts.moduleName))
                     .WithParsed<StartStationOptions>(opts =>
-                        cmd.startStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y"))
+                        cmd.startStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y",
+                            opts.moduleName))
                     .WithNotParsed(errors => parseErrors = errors.ToList());
             }
             catch (S7ProjectNotOpenException e)

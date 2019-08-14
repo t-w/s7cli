@@ -176,16 +176,29 @@ namespace S7_cli
             return cmd_status_ok;
         }
 
-        public bool compileAllStations(string projectPathOrName)
+        /* Compile station HW config and connections commands */
+
+        public void compileAllConnections(string projectPathOrName)
         {
             this.openProject(projectPathOrName);
-            bool cmd_status_ok = s7project.compileAllStations();
-            if (cmd_status_ok)
+            if (s7project.compileAllConnections() == 0)
                 S7CommandStatus.set_status(S7CommandStatus.success);
             else
                 S7CommandStatus.set_status(S7CommandStatus.failure);
-            return cmd_status_ok;
+            return;
         }
+
+        public void compileAllStations(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            if (s7project.compileAllStations() == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+            return;
+        }
+
+
         /**********************************************************************************
          * Program commands
          **********************************************************************************/
@@ -197,11 +210,13 @@ namespace S7_cli
                 return;
 
             Logger.log("\nThe S7 programs found:\n");
+            /*
             string[] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
             {
                 Logger.log(program);
             }
+            */
 
             /*
             IS7Program[] programs = s7project.getStationPrograms();
@@ -646,11 +661,13 @@ namespace S7_cli
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
         /// <param name="allStations">Whether to target every station</param>
+        /// <param name="moduleName">Name of target module</param>
         /// <param name="force">Whether to force download</param>
         public void downloadStation( string projectPathOrName,
                                      string stationName,
                                      string stationType,
                                      bool   allStations = false,
+                                     string moduleName = "",
                                      bool   force = false)
         {
             if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
@@ -667,7 +684,7 @@ namespace S7_cli
             foreach (IS7Station station in stations)
             {
                 // TODO: Evaluate return value
-                s7project.downloadStation(station.Name, force);
+                s7project.downloadStation(station.Name, moduleName, force);
             }
 
             S7CommandStatus.set_status(S7CommandStatus.success);
@@ -680,10 +697,12 @@ namespace S7_cli
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
         /// <param name="allStations">Whether to target every station</param>
+        /// <param name="moduleName">Name of target module</param>
         public void startStation( string projectPathOrName,
                                   string stationName,
                                   string stationType,
-                                  bool   allStations = false)
+                                  bool   allStations = false,
+                                  string moduleName = "")
         {
             if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
             {
@@ -698,7 +717,7 @@ namespace S7_cli
             List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
-                s7project.startStation(station.Name);
+                s7project.startStation(station.Name, moduleName);
             }
 
             S7CommandStatus.set_status(S7CommandStatus.success);
@@ -711,10 +730,12 @@ namespace S7_cli
         /// <param name="stationName">Name of target station</param>
         /// <param name="stationType">Type of target stations</param>
         /// <param name="allStations">Whether to target every station</param>     
+        /// <param name="moduleName">Name of target module</param>
         public void stopStation( string projectPathOrName,
                                  string stationName,
                                  string stationType,
-                                 bool   allStations = false)
+                                 bool allStations = false,
+                                 string moduleName = "")
         {
             if (string.IsNullOrEmpty(stationName) && string.IsNullOrEmpty(stationType) && !allStations)
             {
@@ -729,7 +750,7 @@ namespace S7_cli
             List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
-                s7project.stopStation(station.Name);
+                s7project.stopStation(station.Name, moduleName);
             }
 
             S7CommandStatus.set_status(S7CommandStatus.success);

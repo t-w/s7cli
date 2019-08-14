@@ -166,6 +166,17 @@ namespace S7_cli
             }
         }
 
+        /// <summary>
+        /// Sets the server mode status, which prevents UI prompts
+        /// </summary>
+        /// <param name="serverMode">Server mode enabled status flag</param>
+        public void setServerMode(bool serverMode)
+        {
+            if (serverMode)
+                simaticapi.enableUnattendedServerMode();
+            else
+                simaticapi.disableUnattendedServerMode();
+        }
 
         /*
          * Project methods
@@ -277,28 +288,71 @@ namespace S7_cli
             return true;
         }
 
-        public bool compileAllStations()
+        /// <summary>
+        /// Compiles all the connections
+        /// </summary>
+        /// <param name="serverMode">Activate unnatended server mode, prevents UI prompts</param>
+        /// <returns>0 on success, 1 otherwise</returns>
+        public int compileAllConnections(bool serverMode = true)
         {
             if (!checkProjectOpened())
             {
                 Logger.log_error("Error: Project not opened - aborting station compilation!\n");
-                return false;
+                return 1;
             }
 
-            /* The S7Station3 interface has the method CompileExt() */
-            foreach (S7Station3 station in simaticProject.Stations)
+            setServerMode(serverMode);
+
+            IS7Stations stations = this.simaticProject.Stations;
+            foreach (IS7Station station in stations)
             {
-                try
+                S7Station6 station6 = (S7Station6)station;
+                IS7Racks racks = station.Racks;
+                foreach (IS7Rack rack in racks)
                 {
-                    station.CompileExt();
+                    IS7Modules modules = rack.Modules;
+                    foreach (IS7Module module in modules)
+                    {
+                        S7Module6 module6 = (S7Module6)module;
+                        IS7Conns connections = (IS7Conns)module6.Conns;
+                        try
+                        {
+                            station6.CompileConns(connections);
+                        }
+                        catch (SystemException exc)
+                        {
+                            Logger.log_error($"Could not compile connections for module {station.Name}.{rack.Name}.{module.Name}: {exc}");
+                            //return 1;
+                        }
+                    }
                 }
-                catch (SystemException exc)
-                {
-                    Logger.log_error("Error: " + exc.Message + "\n");
-                    return false;
-                }
+
             }
-            return true;
+            return 0;
+        }
+
+        /// <summary>
+        /// Compiles all stations' HW configuration
+        /// </summary>
+        /// <param name="serverMode">Activate unnatended server mode, prevents UI prompts</param>
+        /// <returns></returns>
+        public int compileAllStations(bool serverMode = true)
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
+                return 1;
+            }
+
+            setServerMode(serverMode);
+
+            IS7Stations stations = this.simaticProject.Stations;
+            foreach (IS7Station station in stations)
+            {
+                S7Station6 station6 = (S7Station6)station;
+                station6.CompileExt();
+            }
+            return 0;
         }
 
         /*
@@ -605,6 +659,17 @@ namespace S7_cli
             return output;
         }
 
+        public IS7Program[] getPrograms()
+        {
+            List<IS7Program> output = new List<IS7Program>();
+            S7Programs programs = this.simaticProject.Programs;
+            foreach (IS7Program program in programs)
+            {
+                output.Add(program);
+            }
+            return output.ToArray();
+        }
+
         /// <summary>
         /// Returns array of program objects associated with project stations
         /// </summary>
@@ -662,9 +727,9 @@ namespace S7_cli
         /// </summary>
         /// <param name="station">Target station</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public int startStation(string station)
+        public int startStation(string station, string module)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: station);
+            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
             IS7Station6 station6 = this.simaticProject.Stations[station];
 
             foreach (IS7Program program in programs)
@@ -688,9 +753,9 @@ namespace S7_cli
         /// </summary>
         /// <param name="station">Target station</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public int stopStation(string station)
+        public int stopStation(string station, string module)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: station);
+            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
             foreach (IS7Program program in programs)
             {
                 try
@@ -712,9 +777,9 @@ namespace S7_cli
         /// </summary>
         /// <param name="station">Target station</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public int downloadStation(string stationName, bool force = false)
+        public int downloadStation(string station, string module, bool force = false)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: stationName);
+            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
             foreach (IS7Program program in programs)
             {
                 foreach (S7Container container in program.Next)
@@ -724,7 +789,9 @@ namespace S7_cli
                         Logger.log($"Attempting to download container {program.Module.Name}::{program.Name} - {container.Name}...");
                         // Prevents exception being thrown, as Sources container does not have DOWNLOAD method
                         if (container.Name != "Sources")
+                        {
                             container.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
+                        }
                     }
                     catch (SystemException exc)
                     {
