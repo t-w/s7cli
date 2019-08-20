@@ -11,8 +11,10 @@ namespace S7_cli
     /// </summary>
     class Options
     {
-        [Option('d', "debug", HelpText = "Debug level (0-3)")]
+        [Option('d', "debug", HelpText = "Debug level (0-3)", Default = Logger.min_debug_level)]
         public int debug { get; set; }
+        [Option('s', "serverMode", HelpText = "Unatended Server Mode (y/n)", Default = "y")]
+        public string serverMode { get; set; }
     }
 
     /// <summary>
@@ -29,7 +31,7 @@ namespace S7_cli
     /// </summary>
     class ProgramOptions : ProjectOptions
     {
-        [Option("program", Required = true, HelpText = "Project name or path to project")]
+        [Option("program", Required = true, HelpText = "Program name")]
         public string program { get; set; }
     }
 

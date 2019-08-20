@@ -58,11 +58,7 @@ namespace S7_cli
             }
 
             Logger.log_debug("AutomaticSave: " + simatic.AutomaticSave.ToString());
-
-            // force server mode
-            enableUnattendedServerMode();
         }
-
 
         public void enableUnattendedServerMode()
         {
@@ -76,7 +72,6 @@ namespace S7_cli
                 Logger.log_error("Cannot set \"UnattendedServerMode\" to true! Simatic variable is null!");
             }
         }
-
 
         public void disableUnattendedServerMode()
         {

@@ -54,7 +54,7 @@ namespace S7_cli
             {
                 var result = Parser.Default.ParseArguments(args, OptionTypes.get())
                     .WithParsed<Options>(opts =>
-                        setDebugLevel(opts.debug))
+                        setGeneralOptions(debugLevel : opts.debug, serverMode : opts.serverMode == "y"))
                     .WithParsed<CreateProjectOptions>(opts =>
                         cmd.createProject(opts.projectName, opts.projectDir))
                     .WithParsed<CreateLibOptions>(opts =>
@@ -163,10 +163,21 @@ namespace S7_cli
         }
 
         /// <summary>
+        /// Sets general options, such as debug level and unnatended server mode
+        /// </summary>
+        /// <param name="debugLevel">Logging level (check Logger class)</param>
+        /// <param name="serverMode">Unattended server mode status</param>
+        static public void setGeneralOptions(int debugLevel = Logger.min_debug_level, bool serverMode = true)
+        {
+            setDebugLevel(debugLevel);
+            setUnattendedServerMode(serverMode);
+        }
+
+        /// <summary>
         /// Sets Logger debugging level
         /// </summary>
         /// <param name="debugLevel">Logging level (check Logger class)</param>
-        static public void setDebugLevel(int debugLevel = Logger.min_debug_level)
+        static public void setDebugLevel(int debugLevel)
         {
             int min = Logger.min_debug_level;
             int max = Logger.max_debug_level;
@@ -178,6 +189,19 @@ namespace S7_cli
             {
                 Logger.log_error($"Specified bug level is out of range ({min}-{max})");
             }
+        }
+
+        /// <summary>
+        /// Sets unnatended server mode option (disables UI prompts, selecting default option)
+        /// </summary>
+        /// <param name="serverMode">Unnatended server mode status</param>
+        static public void setUnattendedServerMode(bool serverMode = true)
+        {
+            SimaticAPI api = SimaticAPI.Instance;
+            if (serverMode)
+                api.enableUnattendedServerMode();
+            else
+                api.disableUnattendedServerMode();
         }
 
         /// <summary>
