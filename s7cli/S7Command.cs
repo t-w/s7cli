@@ -198,6 +198,26 @@ namespace S7_cli
             return;
         }
 
+        public void downloadAllConnections(string projectPathOrName)
+        {
+            this.openProject(projectPathOrName);
+            if (s7project.downloadAllConnections() == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+            return;
+        }
+
+        public void exportAllStations(string projectPathOrName, string outputDir)
+        {
+            this.openProject(projectPathOrName);
+            if (s7project.exportAllStations(outputDir) == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+            return;
+        }
+
 
         /**********************************************************************************
          * Program commands
@@ -210,13 +230,11 @@ namespace S7_cli
                 return;
 
             Logger.log("\nThe S7 programs found:\n");
-            /*
             string[] programs = s7project.getListOfAvailablePrograms();
             foreach (string program in programs)
             {
                 Logger.log(program);
             }
-            */
 
             /*
             IS7Program[] programs = s7project.getStationPrograms();

@@ -19,8 +19,8 @@
 
 using System;
 using System.IO;
-//using System.Runtime.InteropServices;
-//using System.Windows.Automation;
+using System.Runtime.InteropServices;
+using System.Windows.Automation;
 using System.Collections.Generic;
 
 using SimaticLib;
@@ -166,18 +166,6 @@ namespace S7_cli
             }
         }
 
-        /// <summary>
-        /// Sets the server mode status, which prevents UI prompts
-        /// </summary>
-        /// <param name="serverMode">Server mode enabled status flag</param>
-        public void setServerMode(bool serverMode)
-        {
-            if (serverMode)
-                simaticapi.enableUnattendedServerMode();
-            else
-                simaticapi.disableUnattendedServerMode();
-        }
-
         /*
          * Project methods
          */
@@ -291,9 +279,8 @@ namespace S7_cli
         /// <summary>
         /// Compiles all the connections
         /// </summary>
-        /// <param name="serverMode">Activate unnatended server mode, prevents UI prompts</param>
         /// <returns>0 on success, 1 otherwise</returns>
-        public int compileAllConnections(bool serverMode = true)
+        public int compileAllConnections()
         {
             if (!checkProjectOpened())
             {
@@ -301,12 +288,10 @@ namespace S7_cli
                 return 1;
             }
 
-            setServerMode(serverMode);
-
             IS7Stations stations = this.simaticProject.Stations;
             foreach (IS7Station station in stations)
             {
-                S7Station6 station6 = (S7Station6)station;
+                S7Station5 station5 = (S7Station5)station;
                 IS7Racks racks = station.Racks;
                 foreach (IS7Rack rack in racks)
                 {
@@ -317,11 +302,11 @@ namespace S7_cli
                         IS7Conns connections = (IS7Conns)module6.Conns;
                         try
                         {
-                            station6.CompileConns(connections);
+                            station5.CompileConns(connections);
                         }
                         catch (SystemException exc)
                         {
-                            Logger.log_error($"Could not compile connections for module {station.Name}.{rack.Name}.{module.Name}: {exc}");
+                            Logger.log_debug($"Could not compile connections for module {station.Name}.{rack.Name}.{module.Name}: {exc}");
                             //return 1;
                         }
                     }
@@ -334,9 +319,8 @@ namespace S7_cli
         /// <summary>
         /// Compiles all stations' HW configuration
         /// </summary>
-        /// <param name="serverMode">Activate unnatended server mode, prevents UI prompts</param>
         /// <returns></returns>
-        public int compileAllStations(bool serverMode = true)
+        public int compileAllStations()
         {
             if (!checkProjectOpened())
             {
@@ -344,13 +328,91 @@ namespace S7_cli
                 return 1;
             }
 
-            setServerMode(serverMode);
+            IS7Stations stations = this.simaticProject.Stations;
+            foreach (IS7Station station in stations)
+            {
+                S7Station5 station5 = (S7Station5)station;
+                try
+                {
+                    Logger.log_debug($"Attempting to compile station {station.Name}");
+                    station5.Compile();
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_debug($"Could not compile station {station.Name}: {exc}");
+                    //return 1;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Downloads all stations
+        /// </summary>
+        /// <returns></returns>
+        public int downloadAllConnections()
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
+                return 1;
+            }
+            
+            S7ConnType[] connectionTypes = { S7ConnType.S7_CONNECTION };
 
             IS7Stations stations = this.simaticProject.Stations;
             foreach (IS7Station station in stations)
             {
-                S7Station6 station6 = (S7Station6)station;
-                station6.CompileExt();
+                S7Station5 station5 = (S7Station5)station;
+                IS7Racks racks = station.Racks;
+                foreach (IS7Rack rack in racks)
+                {
+                    IS7Modules modules = rack.Modules;
+                    foreach (IS7Module module in modules)
+                    {
+                        List<IS7Module> submodules = getListChildModules(module);
+                        foreach (IS7Module submodule in submodules)
+                        {
+                            S7Module6 module6 = (S7Module6)submodule;
+                            foreach (S7ConnType type in connectionTypes)
+                            {
+                                try
+                                {
+                                    if (module6.Conns.Count > 0)
+                                    {
+                                        Logger.log_debug($"Downloading {type} connections for module {station.Name}.{rack.Name}.{submodule.Name}...");
+                                        module6.DownloadConnections(type);
+                                    }
+                                }
+                                catch (SystemException exc)
+                                {
+                                    Logger.log_debug($"Error: {exc}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Exports station information to text files
+        /// </summary>
+        /// <param name="outputDir">Output directory</param>
+        /// <returns>0 on success, 1 otherwise</returns>
+        public int exportAllStations(string outputDir)
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
+                return 1;
+            }
+
+            IS7Stations stations = this.simaticProject.Stations;
+            foreach (IS7Station station in stations)
+            {
+                station.Export(Path.Combine(outputDir, station.Name + ".txt"));
             }
             return 0;
         }
@@ -446,15 +508,6 @@ namespace S7_cli
             List<string> blocks = new List<string>();
             try
             {
-                if (force)
-                {
-                    simaticapi.enableUnattendedServerMode();
-                }
-                else
-                {
-                    simaticapi.disableUnattendedServerMode();
-                }
-
                 foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                 {
                     if (block.Name == "System data")
@@ -491,15 +544,6 @@ namespace S7_cli
 
             try
             {
-                if (force)
-                {
-                    simaticapi.enableUnattendedServerMode();
-                }
-                else
-                {
-                    simaticapi.disableUnattendedServerMode();
-                }
-
                 foreach (S7Block block in simaticProject.Programs[projectProgramName].Next["Blocks"].Next)
                 {
                     if (block.Name != "System data")
@@ -703,12 +747,12 @@ namespace S7_cli
                             try
                             {
                                 IS7Program program = programs[module];
-                                Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name}");
-                                output.Add(program);
+                                Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name} ({program.ModuleState})");
+                                output.Insert(0, program);
                             }
-                            catch (System.Runtime.InteropServices.COMException)
+                            catch (SystemException exc)
                             {
-                                Logger.log_debug("Module " + module.Name + " has no child program");
+                                Logger.log_error($"Module {module.Name} has no child program: {exc}");
                             }
                         }
                     }
@@ -726,23 +770,31 @@ namespace S7_cli
         /// Attempts to start all programs in a station
         /// </summary>
         /// <param name="station">Target station</param>
-        /// <returns>0 on success, -1 otherwise</returns>
+        /// <returns>0 on success, 1 otherwise</returns>
         public int startStation(string station, string module)
         {
             IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
-            IS7Station6 station6 = this.simaticProject.Stations[station];
+            IS7Station5 station5 = this.simaticProject.Stations[station];
 
             foreach (IS7Program program in programs)
             {
                 try
                 {
-                    Logger.log($"Attempting to start program {program.Module.Name}::{program.Name}...");
-                    program.NewStart();
+                    if (program.ModuleState != S7ModState.S7Run)
+                    {
+                        Logger.log_debug($"Attempting to start program {program.Module.Name}::{program.Name} ({program.ModuleState}) ...");
+                        program.NewStart();
+                    }
+                    else
+                    {
+                        Logger.log_debug($"{program.Module.Name}::{program.Name} is already in {program.ModuleState} mode. Restarting...");
+                        program.Restart();
+                    }
                 }
                 catch (SystemException exc)
                 {
                     Logger.log_error($"Could not start program {program.Module.Name}::{program.Name}: " + exc.Message);
-                    //return 1;
+                    return 1;
                 }
             }
             return 0;
@@ -752,7 +804,7 @@ namespace S7_cli
         /// Attempts to stop all programs in a station
         /// </summary>
         /// <param name="station">Target station</param>
-        /// <returns>0 on success, -1 otherwise</returns>
+        /// <returns>0 on success, 1 otherwise</returns>
         public int stopStation(string station, string module)
         {
             IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
@@ -760,13 +812,20 @@ namespace S7_cli
             {
                 try
                 {
-                    Logger.log($"Attempting to stop program {program.Module.Name}::{program.Name}...");
-                    program.Stop();
+                    if (program.ModuleState != S7ModState.S7Stop)
+                    {
+                        Logger.log_debug($"Attempting to stop program {program.Module.Name}::{program.Name} ({program.ModuleState}) ...");
+                        program.Stop();
+                    }
+                    else
+                    {
+                        Logger.log_debug($"{program.Module.Name}::{program.Name} is already in {program.ModuleState} mode");
+                    }
                 }
                 catch (SystemException exc)
                 {
                     Logger.log_error($"Could not stop program {program.Module.Name}::{program.Name}: " + exc.Message);
-                    //return 1;
+                    return 1;
                 }
             }
             return 0;
@@ -776,28 +835,47 @@ namespace S7_cli
         /// Attempts to donwload all programs to a station
         /// </summary>
         /// <param name="station">Target station</param>
-        /// <returns>0 on success, -1 otherwise</returns>
+        /// <returns>0 on success, 1 otherwise</returns>
         public int downloadStation(string station, string module, bool force = false)
         {
             IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
+
             foreach (IS7Program program in programs)
             {
+                try
+                {
+                    program.Stop();
+                }
+                catch (Exception exc)
+                {
+                    Logger.log_error($"Can't stop {program.Module.Name}::{program.Name}: {exc}");
+                }
+
                 foreach (S7Container container in program.Next)
                 {
                     try
                     {
-                        Logger.log($"Attempting to download container {program.Module.Name}::{program.Name} - {container.Name}...");
-                        // Prevents exception being thrown, as Sources container does not have DOWNLOAD method
-                        if (container.Name != "Sources")
+                        // Only Block containers can be downloaded
+                        if (container.ConcreteType == S7ContainerType.S7BlockContainer)
                         {
+                            Logger.log_debug($"Attempting to download container {program.Module.Name}::{program.Name} - {container.Name}...");
                             container.Download(force ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk);
                         }
                     }
                     catch (SystemException exc)
                     {
                         Logger.log_error($"Could not download container {program.Module.Name}::{program.Name} - {container.Name}:" + exc.Message);
-                        return 1;
+                        //return 1;
                     }
+                }
+
+                try
+                {
+                    program.NewStart();
+                }
+                catch (Exception exc)
+                {
+                    Logger.log_error($"Can't start {program.Module.Name}::{program.Name}: {exc}");
                 }
             }
             return 0;

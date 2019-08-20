@@ -104,6 +104,16 @@ namespace S7_cli
     [Verb("compileAllConnections", HelpText = "Compiles all stations' connections")]
     class CompileAllConnectionsOptions : ProjectOptions { }
 
+    [Verb("downloadAllConnections", HelpText = "Downloads all stations' connections")]
+    class DownloadAllConnectionsOptions : ProjectOptions { }
+
+    [Verb("exportAllStations", HelpText = "Export all stations' data to text files")]
+    class ExportAllStationsOptions : ProjectOptions
+    {
+        [Option("outputdir", Required = true, HelpText = "Output directory")]
+        public string outputDir { get; set; }
+    }
+
     /* Commands that require --project and --program options */
 
     [Verb("importSymbols", HelpText = "Import program symbols from a file")]

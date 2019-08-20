@@ -91,14 +91,22 @@ namespace S7_cli
                         cmd.exportSources(opts.project, opts.program, opts.sources.Split(','), opts.outputDir))
                     .WithParsed<ExportAllSourcesOptions>(opts =>
                         cmd.exportAllSources(opts.project, opts.program, opts.outputDir))
+                    
+                    .WithParsed<ExportAllStationsOptions>(opts =>
+                        cmd.exportAllStations(opts.project, opts.outputDir))
+                    
                     .WithParsed<ExportProgramStructureOptions>(opts =>
                         cmd.exportProgramStructure(opts.project, opts.program, opts.output))
                     .WithParsed<CompileStationOptions>(opts =>
                         cmd.compileStation(opts.project, opts.station))
+
                     .WithParsed<CompileAllConnectionsOptions>(opts =>
                         cmd.compileAllConnections(opts.project))
                     .WithParsed<CompileAllStationsOptions>(opts =>
                         cmd.compileAllStations(opts.project))
+                    .WithParsed<DownloadAllConnectionsOptions>(opts =>
+                        cmd.downloadAllConnections(opts.project))
+
                     .WithParsed<DownloadSystemDataOptions>(opts =>
                         cmd.downloadSystemData(opts.project, opts.program, opts.force == "y"))
                     .WithParsed<DownloadBlocksOptions>(opts =>
@@ -109,6 +117,7 @@ namespace S7_cli
                         cmd.startCPU(opts.project, opts.program))
                     .WithParsed<StopCpuOptions>(opts =>
                         cmd.stopCPU(opts.project, opts.program))
+
                     .WithParsed<DownloadStationOptions>(opts =>
                         cmd.downloadStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y",
                             opts.moduleName, opts.force == "y"))
