@@ -107,7 +107,7 @@ namespace S7_cli
         /// </summary>
         /// <returns>A Dictionary of { "project name", "project path" }</returns>
         //public Dictionary<string, string> getListOfAvailableProjects()
-        public List<KeyValuePair<string, string>> getListOfAvailableProjects()
+        public IList<KeyValuePair<string, string>> getListOfAvailableProjects()
         {
             //Dictionary<string, string> availableProjects = new Dictionary<string, string>();
             List<KeyValuePair<string, string>> availableProjects = new List<KeyValuePair<string, string>>();

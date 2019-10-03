@@ -698,7 +698,7 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
+            IList<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
                 // TODO: Evaluate return value
@@ -732,7 +732,7 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
+            IList<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
                 s7project.startStation(station.Name, moduleName);
@@ -765,7 +765,7 @@ namespace S7_cli
             if (this.openProject(projectPathOrName) == null)
                 return;
 
-            List<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
+            IList<IS7Station> stations = s7project.getStations(stationName, stationType, allStations);
             foreach (IS7Station station in stations)
             {
                 s7project.stopStation(station.Name, moduleName);
@@ -997,5 +997,16 @@ namespace S7_cli
             // TO ADD - setting status (not sure yet!)
         }
 
+
+        public void getListOfConnections(string projectPathOrName)
+        {
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            if (s7project.listConnections() == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+        }
     }
 }

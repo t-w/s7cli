@@ -22,6 +22,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Automation;
 using System.Collections.Generic;
+using System.Net;
+using System.Globalization;
 
 using SimaticLib;
 using S7HCOM_XLib;
@@ -370,7 +372,7 @@ namespace S7_cli
                     IS7Modules modules = rack.Modules;
                     foreach (IS7Module module in modules)
                     {
-                        List<IS7Module> submodules = getListChildModules(module);
+                        IList<IS7Module> submodules = getListChildModules(module);
                         foreach (IS7Module submodule in submodules)
                         {
                             S7Module6 module6 = (S7Module6)submodule;
@@ -642,126 +644,6 @@ namespace S7_cli
             return allPrograms.ToArray();
         }
 
-        /// <summary>
-        /// Returns list of all stations, or a set of stations filtered by name or type
-        /// </summary>
-        /// <param name="name">name of target station</param>
-        /// <param name="type">Type of target stations</param>
-        /// <param name="all">Whether to return all stations</param>
-        /// <returns>List of stations</returns>
-        public List<IS7Station> getStations(string name = "", string type = "", bool all = false)
-        {
-            List<IS7Station> output = new List<IS7Station>();
-            bool filterName = !string.IsNullOrEmpty(name);
-            bool filterType = !string.IsNullOrEmpty(type);
-
-            if (all)
-            {
-                foreach (IS7Station station in this.simaticProject.Stations)
-                {
-                    output.Add(station);
-                }
-            }
-            else if (filterName)
-            {
-                try
-                {
-                    IS7Station station = this.simaticProject.Stations[name];
-                    if (filterType && station.Type.ToString() == type)
-                        output.Add(station);
-                }
-                catch (SystemException exc)
-                {
-                    Logger.log_error($"Could not find station {name}: {exc}");
-                }
-            }
-            else
-            {
-                foreach (IS7Station station in this.simaticProject.Stations)
-                {
-                    if (filterType && station.Type.ToString() != type)
-                        continue;
-                    output.Add(station);
-                }
-            }
-            return output;
-        }
-
-        /// <summary>
-        /// Recursively obtains the list of child modules, given a root module
-        /// </summary>
-        /// <param name="parentModule"></param>
-        /// <returns></returns>
-        public List<IS7Module> getListChildModules(IS7Module rootModule)
-        {
-            List<IS7Module> output = new List<IS7Module>();
-            output.Add(rootModule);
-            foreach (IS7Module module in rootModule.Modules)
-            {
-                output.AddRange(getListChildModules(module));
-            }
-            return output;
-        }
-
-        public IS7Program[] getPrograms()
-        {
-            List<IS7Program> output = new List<IS7Program>();
-            S7Programs programs = this.simaticProject.Programs;
-            foreach (IS7Program program in programs)
-            {
-                output.Add(program);
-            }
-            return output.ToArray();
-        }
-
-        /// <summary>
-        /// Returns array of program objects associated with project stations
-        /// </summary>
-        /// <note>
-        /// Some additional programs may exist which cannot be acessed by stations,
-        /// yet can still be obtained via `this.simaticProject.Programs`
-        /// </note>
-        /// <param name="parentStation">Name of program's parent station</param>
-        /// <param name="parentModule">Name of program's parent module</param>
-        /// <returns>Array of program objects</returns>
-        public IS7Program[] getStationPrograms(string parentStation = "", string parentModule = "")
-        {
-            List<IS7Program> output = new List<IS7Program>();
-            bool filterStation = !string.IsNullOrEmpty(parentStation);
-            bool filterModule = !string.IsNullOrEmpty(parentModule);
-            S7Programs programs = this.simaticProject.Programs;
-
-            foreach (IS7Station station in simaticProject.Stations)
-            {
-                if (filterStation && station.Name != parentStation)
-                    continue;
-                foreach (IS7Rack rack in station.Racks)
-                {
-                    foreach (IS7Module rootModule in rack.Modules)
-                    {
-                        List<IS7Module> childModules = getListChildModules(rootModule);
-                        foreach (IS7Module module in childModules)
-                        {
-                            if (filterModule && module.Name != parentModule)
-                                continue;
-                            try
-                            {
-                                IS7Program program = programs[module];
-                                Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name} ({program.ModuleState})");
-                                output.Insert(0, program);
-                            }
-                            catch (SystemException exc)
-                            {
-                                Logger.log_error($"Module {module.Name} has no child program: {exc}");
-                            }
-                        }
-                    }
-                }
-            }
- 
-            return output.ToArray();
-        }
-
         /*
          * Station management
          */
@@ -773,7 +655,7 @@ namespace S7_cli
         /// <returns>0 on success, 1 otherwise</returns>
         public int startStation(string station, string module)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
+            IList<IS7Program> programs = getStationPrograms(parentStation: station, parentModule: module);
             IS7Station5 station5 = this.simaticProject.Stations[station];
 
             foreach (IS7Program program in programs)
@@ -807,7 +689,7 @@ namespace S7_cli
         /// <returns>0 on success, 1 otherwise</returns>
         public int stopStation(string station, string module)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
+            IList<IS7Program> programs = getStationPrograms(parentStation: station, parentModule: module);
             foreach (IS7Program program in programs)
             {
                 try
@@ -838,7 +720,7 @@ namespace S7_cli
         /// <returns>0 on success, 1 otherwise</returns>
         public int downloadStation(string station, string module, bool force = false)
         {
-            IS7Program[] programs = getStationPrograms(parentStation: station, parentModule: module);
+            IList<IS7Program> programs = getStationPrograms(parentStation: station, parentModule: module);
 
             foreach (IS7Program program in programs)
             {
@@ -903,11 +785,10 @@ namespace S7_cli
 
         public string[] getListOfStations()
         {
-            // 
             List<string> stations = new List<string>();
             foreach (IS7Station station in this.simaticProject.Stations)
             {
-                stations.Add(station.Name);
+                stations.Add($"{station.Name} of type {station.Type.ToString()}");
             }
             return stations.ToArray();
         }
@@ -929,8 +810,7 @@ namespace S7_cli
             return exists;
         }
 
-
-
+        
         public int importSymbols(string symbolsPath, string programName = "S7 Program(1)")
         {
             if (!checkProjectOpened())
@@ -942,11 +822,12 @@ namespace S7_cli
             return this.programs[programName].importSymbols(symbolsPath);
         }
 
-
-        /* returned value
-         * 0    - success
-         * != 0 - failure
-         */
+        /// <summary>
+        /// Exports symbol table to file
+        /// </summary>
+        /// <param name="symbolsOutputFile">Path to output symbol table file</param>
+        /// <param name="programName">Name of target program</param>
+        /// <returns>0 on success, error code otherwise</returns>
         public int exportSymbols(string symbolsOutputFile, string programName = "S7 Program(1)")
         {
             if (!isProjectOpened()) {
@@ -1115,6 +996,235 @@ namespace S7_cli
             }
 
             return this.programs[programName].exportProgramStructure(ExportFileName, ExportDuplicateCalls , ColumnFlags );
+        }
+
+
+        // Connection related commands
+
+        /// <summary>
+        /// Lists connection attributes
+        /// </summary>
+        /// <param name="conn">Connection object</param>
+        /// <returns></returns>
+        public int listConnectionAttributes(S7Conn conn)
+        {
+            String attrName;
+            object attrVal;
+
+            try
+            {
+                if (conn.GetFirstAttribute(out attrName, out attrVal) == 0)
+                {
+                    return 1;
+                }
+                do
+                {
+                    Logger.log_result($"Connection {conn.Name} Attribute[{attrName}]={attrVal}");
+                }
+                while (conn.GetNextAttribute(out attrName, out attrVal) > 0);
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error($"Cannot access attribute in {conn.Name}: {exc}");
+                return 1;
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// List connection details 
+        /// </summary>
+        /// <returns>0 on success, 1 otherwise</returns>
+        public int listConnections()
+        {
+            if (!checkProjectOpened())
+            {
+                Logger.log_error("Error: Project not opened - aborting station compilation!\n");
+                return 1;
+            }
+
+            IList<IS7Conn> connections = getConnections();
+            foreach (IS7Conn conn in connections)
+            {
+                S7Conn s7Conn = (S7Conn)conn;
+                listConnectionAttributes(s7Conn);
+            }
+            return 0;
+
+            //if (module6.IPAddress != null)
+            //{
+            //    IPAddress ip_addr = new IPAddress(long.Parse(module6.IPAddress, NumberStyles.AllowHexSpecifier));
+            //    Logger.log_result($"Module {module6.Name} with IP {ip_addr}");
+            //}
+        }
+
+        // Utilities for navigating project
+
+        /// <summary>
+        /// Returns list of all stations, or a set of stations filtered by name or type
+        /// </summary>
+        /// <param name="name">name of target station</param>
+        /// <param name="type">Type of target stations</param>
+        /// <param name="all">Whether to return all stations</param>
+        /// <returns>List of stations</returns>
+        public IList<IS7Station> getStations(string name = "", string type = "", bool all = false)
+        {
+            List<IS7Station> output = new List<IS7Station>();
+            bool filterName = !string.IsNullOrEmpty(name);
+            bool filterType = !string.IsNullOrEmpty(type);
+
+            if (all)
+            {
+                foreach (IS7Station station in this.simaticProject.Stations)
+                {
+                    output.Add(station);
+                }
+            }
+            else if (filterName)
+            {
+                try
+                {
+                    IS7Station station = this.simaticProject.Stations[name];
+                    if (filterType && station.Type.ToString() == type)
+                        output.Add(station);
+                }
+                catch (SystemException exc)
+                {
+                    Logger.log_error($"Could not find station {name}: {exc}");
+                }
+            }
+            else
+            {
+                foreach (IS7Station station in this.simaticProject.Stations)
+                {
+                    if (filterType && station.Type.ToString() != type)
+                        continue;
+                    output.Add(station);
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Recursively obtains the list of child modules, given a root module
+        /// </summary>
+        /// <param name="parentModule"></param>
+        /// <returns></returns>
+        public IList<IS7Module> getListChildModules(IS7Module rootModule)
+        {
+            List<IS7Module> output = new List<IS7Module>();
+            output.Add(rootModule);
+            foreach (IS7Module module in rootModule.Modules)
+            {
+                output.AddRange(getListChildModules(module));
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Returns list of all programs
+        /// </summary>
+        /// <returns>List with all programs</returns>
+        public IList<IS7Program> getPrograms()
+        {
+            IList<IS7Program> output = new List<IS7Program>();
+            S7Programs programs = this.simaticProject.Programs;
+            foreach (IS7Program program in programs)
+            {
+                output.Add(program);
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Returns array of program objects associated with project stations
+        /// </summary>
+        /// <note>
+        /// Some additional programs may exist which cannot be acessed by stations,
+        /// yet can still be obtained via `this.simaticProject.Programs`
+        /// </note>
+        /// <param name="parentStation">Name of program's parent station</param>
+        /// <param name="parentModule">Name of program's parent module</param>
+        /// <returns>List of program objects</returns>
+        public IList<IS7Program> getStationPrograms(string parentStation = "", string parentModule = "")
+        {
+            IList<IS7Program> output = new List<IS7Program>();
+            bool filterStation = !string.IsNullOrEmpty(parentStation);
+            bool filterModule = !string.IsNullOrEmpty(parentModule);
+            S7Programs programs = this.simaticProject.Programs;
+
+            foreach (IS7Station station in simaticProject.Stations)
+            {
+                if (filterStation && station.Name != parentStation)
+                    continue;
+                foreach (IS7Rack rack in station.Racks)
+                {
+                    foreach (IS7Module rootModule in rack.Modules)
+                    {
+                        IList<IS7Module> childModules = getListChildModules(rootModule);
+                        foreach (IS7Module module in childModules)
+                        {
+                            if (filterModule && module.Name != parentModule)
+                                continue;
+                            try
+                            {
+                                IS7Program program = programs[module];
+                                Logger.log_debug($"Added {station.Name}::{module.Name}::{program.Name} ({program.ModuleState})");
+                                output.Insert(0, program);
+                            }
+                            catch (SystemException exc)
+                            {
+                                Logger.log_error($"Module {module.Name} has no child program: {exc}");
+                            }
+                        }
+                    }
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Returns list of connections that match given filters 
+        /// </summary>
+        /// <param name="name">Target connection name</param>
+        /// <param name="type">Type of target connection</param>
+        /// <param name="module">Parent module of target connection</param>
+        /// <param name="station">Parent station of target connection</param>
+        /// <returns></returns>
+        public IList<IS7Conn> getConnections(string name = "", string type = "", string module = "", string station = "")
+        {
+            IList<IS7Conn> output = new List<IS7Conn>();
+            bool filterName = !string.IsNullOrEmpty(name);
+            bool filterType = !string.IsNullOrEmpty(name);
+            bool filterModule = !string.IsNullOrEmpty(module);
+
+            IS7Stations stations = this.simaticProject.Stations;
+            foreach (IS7Station s7Station in stations)
+            {
+                IS7Racks racks = s7Station.Racks;
+                foreach (IS7Rack rack in racks)
+                {
+                    IS7Modules modules = rack.Modules;
+                    List<IS7Module> allModules = new List<IS7Module>();
+                    foreach (IS7Module s7Module in modules)
+                    {
+                        allModules.AddRange(getListChildModules(s7Module));
+                    }
+                    foreach (IS7Module s7module in allModules)
+                    {
+                        if (filterModule && s7module.Name != module) continue;
+
+                        S7Module6 module6 = (S7Module6)s7module;
+                        foreach (S7Conn conn in module6.Conns)
+                        {
+                            if (filterName && conn.Name.ToString() != name) continue;
+                            if (filterType && conn.Type.ToString() != type) continue;
+                            output.Add(conn);
+                        }
+                    }
+                }
+            }
+            return output;
         }
     }
 }
