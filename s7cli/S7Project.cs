@@ -1085,7 +1085,7 @@ namespace S7_cli
                 try
                 {
                     IS7Station station = this.simaticProject.Stations[name];
-                    if (filterType && station.Type.ToString() == type)
+                    if (filterType && station.Type.ToString() == type || !filterType)
                         output.Add(station);
                 }
                 catch (SystemException exc)
@@ -1101,6 +1101,10 @@ namespace S7_cli
                         continue;
                     output.Add(station);
                 }
+            }
+            if (output.Count == 0)
+            {
+                Logger.log_warning($"No station found: name={name} type={type}");
             }
             return output;
         }
@@ -1164,8 +1168,7 @@ namespace S7_cli
                         IList<IS7Module> childModules = getListChildModules(rootModule);
                         foreach (IS7Module module in childModules)
                         {
-                            if (filterModule && module.Name != parentModule)
-                                continue;
+                            if (filterModule && module.Name != parentModule) continue;
                             try
                             {
                                 IS7Program program = programs[module];
@@ -1180,6 +1183,11 @@ namespace S7_cli
                     }
                 }
             }
+            if (output.Count == 0)
+            {
+                Logger.log_warning($"No program found: station={parentStation} module={parentModule}");
+            }
+            return output;
             return output;
         }
 
@@ -1195,7 +1203,7 @@ namespace S7_cli
         {
             IList<IS7Conn> output = new List<IS7Conn>();
             bool filterName = !string.IsNullOrEmpty(name);
-            bool filterType = !string.IsNullOrEmpty(name);
+            bool filterType = !string.IsNullOrEmpty(type);
             bool filterModule = !string.IsNullOrEmpty(module);
 
             IS7Stations stations = this.simaticProject.Stations;
@@ -1223,6 +1231,10 @@ namespace S7_cli
                         }
                     }
                 }
+            }
+            if (output.Count == 0)
+            {
+                Logger.log_warning($"No connection found: name={name} type={type} station={station} module={module}");
             }
             return output;
         }
