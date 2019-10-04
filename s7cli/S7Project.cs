@@ -1047,15 +1047,97 @@ namespace S7_cli
             foreach (IS7Conn conn in connections)
             {
                 S7Conn s7Conn = (S7Conn)conn;
+                Logger.log_result($"Connection {conn.Name} of type {conn.Type}");
                 listConnectionAttributes(s7Conn);
             }
             return 0;
+        }
 
-            //if (module6.IPAddress != null)
-            //{
-            //    IPAddress ip_addr = new IPAddress(long.Parse(module6.IPAddress, NumberStyles.AllowHexSpecifier));
-            //    Logger.log_result($"Module {module6.Name} with IP {ip_addr}");
-            //}
+        /// <summary>
+        /// Returns IP address from hexadecimal string representation of address.
+        /// Assumes big-endianness
+        /// </summary>
+        /// <param name="hex">Hex input string</param>
+        /// <returns>IP Adress object</returns>
+        public IPAddress hexToAddress(string hex)
+        {
+            string address = uint.Parse(hex, NumberStyles.AllowHexSpecifier).ToString();
+            return IPAddress.Parse(address);
+        }
+
+        /// <summary>
+        /// Returns hexadecimal string representation of IP Address.
+        /// Assumes big-endianness
+        /// </summary>
+        /// <param name="address">Input IP Address object</param>
+        /// <returns>Hex string with IP address</returns>
+        public string addressToHex(IPAddress address)
+        {
+            byte[] bytes = address.GetAddressBytes();
+            string hex = "";
+            foreach (byte val in bytes) hex += $"{val:x2}";
+            return hex;
+        }
+
+        /// <summary>
+        /// Updates network interface and affected connections
+        /// </summary>
+        /// <param name="module">Target module name</param>
+        /// <param name="station">Target module parent station name</param>
+        /// <param name="ipAddress">New IP address</param>
+        /// <param name="subnetMask">New subnetwork mask</param>
+        /// <param name="updateConnections">Whether to fix existing connections</param>
+        /// <returns></returns>
+        public int updateInterface(string module = "", string station="",
+            string ipAddress = "", string subnetMask = "",
+            bool updateConnections = true)
+        {
+            IList<IS7Module> modules = getModules(name: module, station: station);
+
+            Logger.log_debug("Updating module network interface configuration");
+
+            if (modules.Count == 0) return 1;
+            S7Module6 targetModule = (S7Module6)modules[0];
+
+            // Automatic save seems to break this command, changes are not saved
+            simaticapi.setAutomaticSave(false);
+
+            bool setIp = !string.IsNullOrEmpty(ipAddress);
+            bool setSubnet = !string.IsNullOrEmpty(subnetMask);
+
+            IPAddress curIp = null, curSubnet = null;
+            try
+            {
+                Logger.log_debug($"Module {targetModule.Name}");
+                curIp = hexToAddress(targetModule.IPAddress);
+                Logger.log_debug($"   IP Address={curIp}");
+                curSubnet = hexToAddress(targetModule.SubnetMask);
+                Logger.log_debug($"   Subnet Mask={curSubnet}");
+            }
+            catch (Exception exc)
+            {
+                Logger.log_error($"Module {targetModule.Name} has invalid network configuration:\n{exc}");
+            }
+
+            if (setIp)
+            {
+                IPAddress newIp = IPAddress.Parse(ipAddress);
+                targetModule.IPAddress = addressToHex(newIp);
+                Logger.log_debug($"Set IP to {ipAddress} ({targetModule.IPAddress})");
+            }
+            if (setSubnet)
+            {
+                IPAddress newSubnet = IPAddress.Parse(subnetMask);
+                targetModule.SubnetMask = addressToHex(newSubnet);
+                Logger.log_debug($"Setting Subnet Mask to {subnetMask} ({targetModule.SubnetMask})");
+            }
+
+            if (updateConnections)
+            {
+
+            }
+
+            return 0;
         }
 
         // Utilities for navigating project
