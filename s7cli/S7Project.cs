@@ -1075,7 +1075,7 @@ namespace S7_cli
         {
             byte[] bytes = address.GetAddressBytes();
             string hex = "";
-            foreach (byte val in bytes) hex += $"{val:x2}";
+            foreach (byte val in bytes) hex += $"{val:X2}";
             return hex;
         }
 
@@ -1105,14 +1105,15 @@ namespace S7_cli
             bool setIp = !string.IsNullOrEmpty(ipAddress);
             bool setSubnet = !string.IsNullOrEmpty(subnetMask);
 
-            IPAddress curIp = null, curSubnet = null;
+            string curIp = "";
+            IPAddress newIp = null, newSubnet = null;
+
             try
             {
                 Logger.log_debug($"Module {targetModule.Name}");
-                curIp = hexToAddress(targetModule.IPAddress);
-                Logger.log_debug($"   IP Address={curIp}");
-                curSubnet = hexToAddress(targetModule.SubnetMask);
-                Logger.log_debug($"   Subnet Mask={curSubnet}");
+                curIp = targetModule.IPAddress;
+                Logger.log_debug($"   IP Address={hexToAddress(targetModule.IPAddress)}");
+                Logger.log_debug($"   Subnet Mask={hexToAddress(targetModule.SubnetMask)}");
             }
             catch (Exception exc)
             {
@@ -1121,20 +1122,39 @@ namespace S7_cli
 
             if (setIp)
             {
-                IPAddress newIp = IPAddress.Parse(ipAddress);
+                newIp = IPAddress.Parse(ipAddress);
                 targetModule.IPAddress = addressToHex(newIp);
                 Logger.log_debug($"Set IP to {ipAddress} ({targetModule.IPAddress})");
             }
             if (setSubnet)
             {
-                IPAddress newSubnet = IPAddress.Parse(subnetMask);
+                newSubnet = IPAddress.Parse(subnetMask);
                 targetModule.SubnetMask = addressToHex(newSubnet);
                 Logger.log_debug($"Setting Subnet Mask to {subnetMask} ({targetModule.SubnetMask})");
             }
 
             if (updateConnections)
             {
-
+                Logger.log_debug("Updating connections affected by change.");
+                IList<IS7Conn> connections = getConnections(type: "S7_CONNECTION");
+                foreach(IS7Conn conn in connections)
+                {
+                    S7Conn s7Conn = (S7Conn)conn;
+                    try
+                    {
+                        if (setIp &&
+                            string.Equals(s7Conn.Attribute["REMOTE_ADDRESS"], curIp, StringComparison.OrdinalIgnoreCase))
+                        {
+                            string hex = addressToHex(newIp);
+                            s7Conn.Attribute["REMOTE_ADDRESS"] = hex;
+                            Logger.log_debug($"Updated {s7Conn.Name} IP Address to {hex}");
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        Logger.log_error($"Error updating connections:\n{exc}");
+                    }
+                }
             }
 
             return 0;
