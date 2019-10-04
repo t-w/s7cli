@@ -1188,6 +1188,43 @@ namespace S7_cli
                 Logger.log_warning($"No program found: station={parentStation} module={parentModule}");
             }
             return output;
+        }
+
+        /// <summary>
+        /// Returns list of modules that match given filters 
+        /// </summary>
+        /// <param name="name">Target module name</param>
+        /// <param name="station">Parent station of target connection</param>
+        /// <returns></returns>
+        public IList<IS7Module> getModules(string name = "", string station = "")
+        {
+            IList<IS7Module> output = new List<IS7Module>();
+            bool filterName = !string.IsNullOrEmpty(name);
+            bool filterType = !string.IsNullOrEmpty(name);
+
+            IList<IS7Station> stations = getStations(name: station);
+            foreach (IS7Station s7Station in stations)
+            {
+                IS7Racks racks = s7Station.Racks;
+                foreach (IS7Rack rack in racks)
+                {
+                    IS7Modules modules = rack.Modules;
+                    List<IS7Module> allModules = new List<IS7Module>();
+                    foreach (IS7Module s7Module in modules)
+                    {
+                        allModules.AddRange(getListChildModules(s7Module));
+                    }
+                    foreach (IS7Module s7module in allModules)
+                    {
+                        if (filterName && s7module.Name != name) continue;
+                        output.Add(s7module);
+                    }
+                }
+            }
+            if (output.Count == 0)
+            {
+                Logger.log_warning($"No module found: name={name} station={station}");
+            }
             return output;
         }
 
