@@ -86,6 +86,10 @@ namespace S7_cli
             }
         }
 
+        public void setAutomaticSave(bool enabled)
+        {
+            simatic.AutomaticSave = enabled? 1 : 0;
+        }
 
         public static SimaticAPI Instance
         {

@@ -56,14 +56,14 @@ namespace S7_cli
         {
             // only console output
             if (level >= level_debug)
-                log("Debug: " + info + "\n");
+                log("Debug: " + info);
         }
 
         public static void log_warning(string info)
         {
             // only console output
             if (level >= level_warning)
-                log("Warning: " + info + "\n");
+                log("Warning: " + info);
         }
 
         public static void log_error(string info)
