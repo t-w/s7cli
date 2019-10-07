@@ -88,7 +88,26 @@ namespace S7_cli
 
         public void setAutomaticSave(bool enabled)
         {
-            simatic.AutomaticSave = enabled? 1 : 0;
+            if (simatic != null)
+            {
+                simatic.AutomaticSave = enabled ? 1 : 0;
+            }
+            else
+            {
+                Logger.log_error("Cannot set Automatic Save! Simatic variable is null!");
+            }
+        }
+
+        public void save()
+        {
+            if (simatic != null)
+            {
+                simatic.Save();
+            }
+            else
+            {
+                Logger.log_error("Cannot save project! Simatic variable is null!");
+            }
         }
 
         public static SimaticAPI Instance
