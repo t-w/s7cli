@@ -38,7 +38,7 @@ namespace S7_cli
     /// <summary>
     /// Options for every command that requires a station to be specified
     /// </summary>
-    class StationOptions :ProjectOptions
+    class StationOptions : ProjectOptions
     {
         [Option("stationname", HelpText = "Name of target station", SetName = "target")]
         public string stationName { get; set; }

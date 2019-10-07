@@ -63,6 +63,7 @@ namespace S7_cli
                         cmd.importConfig(opts.project, opts.config))
                     .WithParsed<ExportConfigOptions>(opts =>
                         cmd.exportConfig(opts.project, opts.station, opts.config))
+                    
                     .WithParsed<ListProgramsOptions>(opts =>
                         cmd.getListOfPrograms(opts.project))
                     .WithParsed<ListStationsOptions>(opts =>

@@ -103,6 +103,7 @@ namespace S7_cli
             if (simatic != null)
             {
                 simatic.Save();
+                Logger.log_debug("Saved project");
             }
             else
             {
