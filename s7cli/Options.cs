@@ -250,6 +250,19 @@ namespace S7_cli
 
     /* Experimental features */
 
+    [Verb("updateNetworkInterface", HelpText = "EXPERIMENTAL: Reconfigures a module's network interface")]
+    class updateNetworkInterfaceOptions : ProjectOptions
+    {
+        [Option("station", Required = true, HelpText = "Name of parent station")]
+        public string station { get; set; }
+        [Option("module", Required = true, HelpText = "Name of target module")]
+        public string module { get; set; }
+        [Option("ip", HelpText = "New IP Address (e.g. 127.0.0.1)")]
+        public string ipAddress { get; set; }
+        [Option("subnet", HelpText = "New Subnet Mask (e.g. 255.255.255.0)")]
+        public string subnetMask { get; set; }
+    }
+
     [Verb("exportProgramStructure", HelpText = "EXPERIMENTAL: Exports the block calling structure into a DIF file")]
     class ExportProgramStructureOptions : ProgramOptions
     {

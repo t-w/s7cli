@@ -1008,5 +1008,19 @@ namespace S7_cli
             else
                 S7CommandStatus.set_status(S7CommandStatus.failure);
         }
+
+
+        public void updateNetworkInterface(string projectPathOrName,
+            string station, string module, string ipAddress, string subnetMask)
+        {
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            if (s7project.updateInterface(station: station, module: module,
+                ipAddress: ipAddress, subnetMask: subnetMask) == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+        }
     }
 }

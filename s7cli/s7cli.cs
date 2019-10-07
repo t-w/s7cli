@@ -130,6 +130,10 @@ namespace S7_cli
                     .WithParsed<StartStationOptions>(opts =>
                         cmd.startStation(opts.project, opts.stationName, opts.stationType, opts.allStations == "y",
                             opts.moduleName))
+
+                    .WithParsed<updateNetworkInterfaceOptions>(opts =>
+                        cmd.updateNetworkInterface(opts.project, opts.station, opts.module, opts.ipAddress, opts.subnetMask))
+
                     .WithNotParsed(errors => parseErrors = errors.ToList());
             }
             catch (S7ProjectNotOpenException e)
