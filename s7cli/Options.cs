@@ -116,6 +116,9 @@ namespace S7_cli
         public string outputDir { get; set; }
     }
 
+    [Verb("listConnections", HelpText = "Prints connection details")]
+    class listConnectionsOptions : ProjectOptions { }
+
     /* Commands that require --project and --program options */
 
     [Verb("importSymbols", HelpText = "Import program symbols from a file")]

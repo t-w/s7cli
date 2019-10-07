@@ -69,6 +69,9 @@ namespace S7_cli
                         cmd.getListOfStations(opts.project))
                     .WithParsed<ListContainersOptions>(opts =>
                         cmd.getListOfContainers(opts.project))
+                    .WithParsed<listConnectionsOptions>(opts =>
+                        cmd.getListOfConnections(opts.project))
+
                     .WithParsed<ImportSymbolsOptions>(opts =>
                         cmd.importSymbols(opts.project, opts.symbols, opts.program, opts.conflictOk == "y"))
                     .WithParsed<ExportSymbolsOptions>(opts =>
