@@ -1082,24 +1082,26 @@ namespace S7_cli
         /// <summary>
         /// Updates network interface and affected connections
         /// </summary>
+        /// <remarks>
+        /// Since this method requires the project to be saved at critical moments,
+        /// if the application crashes it can break the target project
+        /// </remarks>
         /// <param name="module">Target module name</param>
         /// <param name="station">Target module parent station name</param>
         /// <param name="ipAddress">New IP address</param>
         /// <param name="subnetMask">New subnetwork mask</param>
-        /// <param name="updateConnections">Whether to fix existing connections</param>
         /// <returns></returns>
         public int updateInterface(string module = "", string station="",
-            string ipAddress = "", string subnetMask = "",
-            bool updateConnections = true)
+            string ipAddress = "", string subnetMask = "")
         {
             IList<IS7Module> modules = getModules(name: module, station: station);
-
+            
             Logger.log_debug("Updating module network interface configuration");
 
             if (modules.Count == 0) return 1;
             S7Module6 targetModule = (S7Module6)modules[0];
 
-            // Automatic save seems to break this command, changes are not saved
+            // Automatic save takes care of updating affected connections
             simaticapi.setAutomaticSave(false);
 
             bool setIp = !string.IsNullOrEmpty(ipAddress);
@@ -1112,50 +1114,47 @@ namespace S7_cli
             {
                 Logger.log_debug($"Module {targetModule.Name}");
                 curIp = targetModule.IPAddress;
-                Logger.log_debug($"   IP Address={hexToAddress(targetModule.IPAddress)}");
-                Logger.log_debug($"   Subnet Mask={hexToAddress(targetModule.SubnetMask)}");
+                Logger.log_debug($"   IP Address={hexToAddress(targetModule.IPAddress)} ({targetModule.IPAddress})");
+                Logger.log_debug($"   Subnet Mask={hexToAddress(targetModule.SubnetMask)} ({targetModule.SubnetMask})");
             }
             catch (Exception exc)
             {
                 Logger.log_error($"Module {targetModule.Name} has invalid network configuration:\n{exc}");
             }
 
+            Logger.log_debug("Unlinking module from its subnets");
+            IList<IS7Subnet> subnets = new List<IS7Subnet>();
+            foreach (IS7Subnet subnet in targetModule.Subnets)
+            {
+                subnets.Add(subnet);
+                Logger.log_debug($"   Unlinking {targetModule.Name} from {subnet.Name}");
+                targetModule.UnlinkSubnet(subnet);
+            }
+
+            simaticapi.save();
+
             if (setIp)
             {
                 newIp = IPAddress.Parse(ipAddress);
                 targetModule.IPAddress = addressToHex(newIp);
                 Logger.log_debug($"Set IP to {ipAddress} ({targetModule.IPAddress})");
+                simaticapi.save();
             }
             if (setSubnet)
             {
                 newSubnet = IPAddress.Parse(subnetMask);
                 targetModule.SubnetMask = addressToHex(newSubnet);
                 Logger.log_debug($"Setting Subnet Mask to {subnetMask} ({targetModule.SubnetMask})");
+                simaticapi.save();
             }
 
-            if (updateConnections)
+            Logger.log_debug("Re-linking module to its subnets");
+            foreach (IS7Subnet subnet in subnets)
             {
-                Logger.log_debug("Updating connections affected by change.");
-                IList<IS7Conn> connections = getConnections(type: "S7_CONNECTION");
-                foreach(IS7Conn conn in connections)
-                {
-                    S7Conn s7Conn = (S7Conn)conn;
-                    try
-                    {
-                        if (setIp &&
-                            string.Equals(s7Conn.Attribute["REMOTE_ADDRESS"], curIp, StringComparison.OrdinalIgnoreCase))
-                        {
-                            string hex = addressToHex(newIp);
-                            s7Conn.Attribute["REMOTE_ADDRESS"] = hex;
-                            Logger.log_debug($"Updated {s7Conn.Name} IP Address to {hex}");
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        Logger.log_error($"Error updating connections:\n{exc}");
-                    }
-                }
+                Logger.log_debug($"   Re-linking {targetModule.Name} to {subnet.Name}");
+                targetModule.LinkSubnet(subnet);
             }
+            simaticapi.save();
 
             return 0;
         }
