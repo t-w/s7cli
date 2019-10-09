@@ -85,7 +85,6 @@
     <Compile Include="S7ProgramSources.cs" />
     <Compile Include="SimaticProgram.cs" />
     <Compile Include="SimaticAPI.cs" />
-    <Compile Include="Option_parser.cs" />
     <Compile Include="S7Command.cs" />
     <Compile Include="s7cli.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
