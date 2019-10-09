@@ -39,6 +39,7 @@ namespace S7_cli
             show_logo();
             Console.Write("\n\n");
 
+            S7CommandStatus.set_status(S7CommandStatus.success);
             if (OptionParser.parse(args) != 0)
                 S7CommandStatus.set_status(S7CommandStatus.failure);
 
@@ -47,6 +48,7 @@ namespace S7_cli
             return status;
 
             // TODO: Remove following code; possibly add usage examples, per verb
+
 
             //siemensPLCProject project = new siemensPLCProject("D:\\controls\\apps\\sector56\\plc\\mirror56");
 
