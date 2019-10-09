@@ -14,26 +14,29 @@ namespace UnitTests_s7cli
             string [] args = { };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
 
-            args = new string [] { "whatever" };
-            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
-
+            // Invalid verb
+            args = new string [] { "invalidVerb" };
+            Assert.AreEqual(1, S7_cli.s7cli.Main(args));
+            // Valid help flag
             args = new string[] { "--help" };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
-
+            // Invalid help flag
             args = new string[] { "-h" };
-            Assert.AreEqual(0, S7_cli.s7cli.Main(args));
-
-
-            args = new string[] { "whatever", "--help" };
-            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
-
-            args = new string[] { "whatever", "-h" };
-            Assert.AreNotEqual(0, S7_cli.s7cli.Main(args));
-
+            Assert.AreEqual(1, S7_cli.s7cli.Main(args));
+            // Invalid verb
+            args = new string[] { "invalidVerb", "--help" };
+            Assert.AreEqual(1, S7_cli.s7cli.Main(args));
+            // Invalid verb, invalid help flag
+            args = new string[] { "invalidVerb", "-h" };
+            Assert.AreEqual(1, S7_cli.s7cli.Main(args));
+            // Valid verb, valid help flag, missing arguments
             args = new string[] { "createProject", "--help" };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
-
+            // Valid verb, invalid help flag
             args = new string[] { "createProject", "-h" };
+            Assert.AreEqual(1, S7_cli.s7cli.Main(args));
+            // Valid version flag
+            args = new string[] { "--version" };
             Assert.AreEqual(0, S7_cli.s7cli.Main(args));
         }
     }
