@@ -8,6 +8,11 @@ namespace S7_cli
 {
     class OptionParser
     {
+        /// <summary>
+        /// Parses command-line arguments and runs respective commands
+        /// </summary>
+        /// <param name="args">Command-line args</param>
+        /// <returns>0 on success, 1 otherwise</returns>
         public static int parse(string[] args)
         {
             var parseErrors = new List<CommandLine.Error>();
