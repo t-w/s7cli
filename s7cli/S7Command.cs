@@ -1022,5 +1022,17 @@ namespace S7_cli
             else
                 S7CommandStatus.set_status(S7CommandStatus.failure);
         }
+
+        public void renameStationOptions(string projectPathOrName,
+            string target, string name)
+        {
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            if (s7project.renameStation(curName: target, newName: name) == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+        }
     }
 }

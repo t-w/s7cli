@@ -263,6 +263,15 @@ namespace S7_cli
         public string subnetMask { get; set; }
     }
 
+    [Verb("renameStation", HelpText = "EXPERIMENTAL: Renames a target station")]
+    class renameStationOptions : ProjectOptions
+    {
+        [Option("target", Required = true, HelpText = "Name of target station")]
+        public string target { get; set; }
+        [Option("name", Required = true, HelpText = "New name for target station")]
+        public string name { get; set; }
+    }
+
     [Verb("exportProgramStructure", HelpText = "EXPERIMENTAL: Exports the block calling structure into a DIF file")]
     class ExportProgramStructureOptions : ProgramOptions
     {

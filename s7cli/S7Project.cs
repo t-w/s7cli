@@ -1101,7 +1101,7 @@ namespace S7_cli
             if (modules.Count == 0) return 1;
             S7Module6 targetModule = (S7Module6)modules[0];
 
-            // Automatic save takes care of updating affected connections
+            // Automatic save 
             simaticapi.setAutomaticSave(false);
 
             bool setIp = !string.IsNullOrEmpty(ipAddress);
@@ -1156,6 +1156,25 @@ namespace S7_cli
             }
             simaticapi.save();
 
+            return 0;
+        }
+
+        public int renameStation(string curName, string newName = "")
+        {
+            simaticapi.setAutomaticSave(false);
+            Logger.log_debug($"Renaming station {curName} to {newName}");
+            try
+            {
+                IS7Station targetStation = this.simaticProject.Stations[curName];
+                targetStation.Name = newName;
+            }
+            catch (Exception exc)
+            {
+                Logger.log_error($"Could not find station {curName}: {exc}");
+                return 1;
+            }
+
+            simaticapi.save();
             return 0;
         }
 
