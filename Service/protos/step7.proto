@@ -1,0 +1,91 @@
+﻿syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "step7";
+option java_outer_classname = "Step7";
+option objc_class_prefix = "S7";
+
+package step7service;
+
+service Step7 {
+  // Creates and registers an empty STEP 7 project
+  rpc CreateProject (CreateProjectRequest) returns (StatusReply) {}
+
+  // Import sources from a library into project
+  rpc ImportLibSources (ImportLibRequest) returns (StatusReply) {}
+  // Import blocks from a library into project
+  rpc ImportLibBlocks (ImportLibRequest) returns (StatusReply) {}
+  // Import symbols from an sdf file into project
+  rpc ImportSymbols (ImportSymbolsRequest) returns (StatusReply) {}
+  // Import sources from a directory into a project
+  rpc ImportSourcesDir (ImportSourcesDirRequest) returns (StatusReply) {}
+  
+  // Compile specified source code module(s)
+  rpc CompileSources (CompileSourcesRequest) returns (StatusReply) {}
+
+  // Gets list of programs in a STEP 7 project
+  rpc GetListOfPrograms (ProjectRequest) returns (ListReply) {}
+}
+
+message ProjectRequest {
+  // Project name or path to project
+  string project = 1;
+}
+
+message CreateProjectRequest {
+  // Project name
+  string projectName = 1;
+  // Project directory
+  string projectDir = 2;
+}
+
+message ImportLibRequest {
+  // Project name or directory
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Library name
+  string libraryName = 3;
+  // Target program in library project
+  string libraryProgram = 4;
+  // Force overwrite existing sources in project
+  bool force = 5;
+}
+
+message ImportSymbolsRequest {
+  // Project name or directory
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Symbol table file
+  string symbols = 3;
+}
+
+message ImportSourcesDirRequest {
+  // Project name or directory
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Path to directory with sources to import
+  string sourcesDir = 3;
+  // Force overwrite existing sources in project
+  bool force = 4;
+}
+
+message CompileSourcesRequest {
+  // Project name or directory
+  string project = 1;
+  // Program name
+  string program = 2;
+  // List of name of sources to compile
+  repeated string sources = 3;
+}
+
+message StatusReply {
+  int32 exitCode = 1;
+}
+
+message ListReply {
+  StatusReply status = 1;
+  repeated string listItem = 2;
+}
