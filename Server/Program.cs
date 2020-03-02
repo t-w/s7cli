@@ -7,11 +7,16 @@ namespace Step7Server
 {
     class Step7Impl : Step7.Step7Base
     {
-        public override Task<StatusReply> CreateProject(CreateProjectRequest req, ServerCallContext context)
+        private StatusReply CreateProjectImpl(CreateProjectRequest req)
         {
             var command = new S7_cli.S7Command();
             command.createProject(req.ProjectName, req.ProjectDir);
-            return Task.FromResult(new StatusReply { ExitCode = 0 });
+            return new StatusReply { ExitCode = 0 };
+        }
+
+        public override Task<StatusReply> CreateProject(CreateProjectRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(CreateProjectImpl(req));
         }
 
         public override Task<StatusReply> ImportLibSources(ImportLibRequest req, ServerCallContext context)
