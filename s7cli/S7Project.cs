@@ -115,9 +115,9 @@ namespace S7_cli
             // checking if directory path is not taken
             if (Directory.Exists(projectPath))
             {
-                Logger.log_error("Error: Cannot create the project because the folder " + projectPath + " already exists!\n");
-                Logger.log_error("Error: The project not created! Exiting program!\n");
-                Environment.Exit(1);
+                var errorMessage = $"Cannot create project: {projectPath} already exists!";
+                Logger.log_error(errorMessage);
+                throw new S7ProjectNotOpenException(errorMessage);
             }
             else
             {

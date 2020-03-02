@@ -65,12 +65,19 @@ namespace S7_cli
                                    string        dir,
                                    S7ProjectType type )
         {
-            s7project = new S7Project(name, dir, type);
-            if (s7project.isProjectOpened())
+            bool projectIsOpen = false;
+            try
+            {
+                s7project = new S7Project(name, dir, type);
+                projectIsOpen = s7project.isProjectOpened();           
+            }
+            catch (S7ProjectNotOpenException) {}
+
+            if (projectIsOpen)
                 S7CommandStatus.set_status(S7CommandStatus.success);
             else
                 S7CommandStatus.set_status(S7CommandStatus.failure);
-            return s7project.isProjectOpened();
+            return projectIsOpen;
         }
 
         public bool createProject( string name,
