@@ -4,3 +4,23 @@ packages/
 */bin/
 */obj/
 .vs/
+
+# Python
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+# Python virtual environment
+venv/*
+# IDE project settings
+.idea/*
+# Devel package
+*.egg-info
+# Documentation
+docs/_*
+docs/html
+# Build and distribution
+build/*
+dist/*
+# Coverage report
+.coverage
