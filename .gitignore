@@ -1,4 +1,6 @@
+# Csharp / VisualStudio 
+
 packages/
-*/bin/Debug/
+*/bin/
 */obj/
 .vs/
