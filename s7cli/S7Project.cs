@@ -97,7 +97,7 @@ namespace S7_cli
             // checking if the project dir path ends with "\"
             if (!projectDirPath.EndsWith("\\"))
             {
-                projectDirPath = projectDirPath + "\\";
+                projectDirPath += "\\";
             }
 
             // concatenating real project dir path
@@ -119,18 +119,16 @@ namespace S7_cli
                 Logger.log_error(errorMessage);
                 throw new S7ProjectNotOpenException(errorMessage);
             }
-            else
+
+            try
             {
-                try
-                {
-                    simaticProject = simatic.Projects.Add(projectName, projectDirPath, projectType);
-                }
-                catch (SystemException exc)
-                {
-                    Logger.log_error("Error in S7Project(): " + exc.Message + "\n");
-                    // should we set simaticProject to null here?
-                    return;
-                }
+                simaticProject = simatic.Projects.Add(projectName, projectDirPath, projectType);
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error("Error in S7Project(): " + exc.Message + "\n");
+                // should we set simaticProject to null here?
+                return;
             }
 
             this.updatePrograms();
