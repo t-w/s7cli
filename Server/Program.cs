@@ -49,10 +49,9 @@ namespace Step7Server
 
         private StatusReply CompileSourcesImpl(CompileSourcesRequest req)
         {
-            string[] sources = new string[] { };
+            var sources = new string[req.Sources.Count];
             req.Sources.CopyTo(sources, 0);
             var command = new S7_cli.S7Command();
-            Console.WriteLine(sources.ToString());
             command.compileSources(req.Project, req.Program, sources);
             return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
         }
