@@ -25,7 +25,12 @@ service Step7 {
 
   // Gets list of programs in a STEP 7 project
   rpc GetListOfPrograms (ProjectRequest) returns (ListReply) {}
+    
+  // Removes blocks from a project
+  rpc RemoveBlocks (RemoveBlocksRequest) returns (StatusReply) {}
 }
+
+// Request messages
 
 message ProjectRequest {
   // Project name or path to project
@@ -81,7 +86,19 @@ message CompileSourcesRequest {
   repeated string sources = 3;
 }
 
+message RemoveBlocksRequest {
+  // Project name or directory
+  string project = 1;
+  // Program name
+  string program = 2;
+  // List of name of blocks to remove
+  repeated string blocks = 3;
+}
+
+// Reply messages
+
 message StatusReply {
+  // Request exit code
   int32 exitCode = 1;
 }
 

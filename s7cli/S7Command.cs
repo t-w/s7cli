@@ -512,6 +512,26 @@ namespace S7_cli
             S7CommandStatus.set_status(S7CommandStatus.success);
         }
 
+        public void removeBlocks( string projectPathOrName,
+                                  string projectProgramName,
+                                  string[] blocks)
+        {
+            if (this.openProject(projectPathOrName) == null)
+                return;
+
+            if (!s7project.programExists(projectProgramName, true))
+            {
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+                return;
+            }
+
+            foreach (string block in blocks)
+                s7project.removeBlock(projectProgramName, block);
+            S7CommandStatus.set_status(S7CommandStatus.success);
+        }
+
+
+
         public void downloadSystemData( string projectPathOrName,
                                         string projectProgramName,
                                         bool   force = false )
