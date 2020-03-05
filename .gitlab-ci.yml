@@ -27,6 +27,6 @@ build_job:
 test_job:
   stage: test
   script:
-    - '& "$env:VSTEST_PATH" /UnitTests_s7cli/bin/Release/UnitTests_s7cli.dll'
+    - '& "$env:VSTEST_PATH" \UnitTests_s7cli\bin\Release\UnitTests_s7cli.dll'
   dependencies:
     - build_job
