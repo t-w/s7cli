@@ -1,6 +1,7 @@
 variables:
   NUGET_PATH: 'C:\Tools\Nuget\nuget.exe'
   MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
+  PYTHON_VENV_PATH: 'C:\Tools\venv\Scripts\activate.ps1'
 
 stages:
   - build
@@ -10,7 +11,12 @@ build_job:
   script:
     - '& "$env:NUGET_PATH" restore'
     - '& "$env:MSBUILD_PATH" /p:Configuration=Release /clp:ErrorsOnly'
+    # Build gRPC stubs for Python client in examples directory
+    - '& "$env:PYTHON_VENV_PATH"'
+    - python -m grpc_tools.protoc ./Service/protos/step7.proto -I ./Service/protos
+      --python_out=./examples/python --grpc_python_out=./examples/python
   artifacts:
     paths:
       - '.\s7cli\bin\Release\'
       - '.\Server\bin\Release\'
+      - '.\examples\python\'
