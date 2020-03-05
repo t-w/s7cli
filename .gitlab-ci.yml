@@ -2,9 +2,11 @@ variables:
   NUGET_PATH: 'C:\Tools\Nuget\nuget.exe'
   MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
   PYTHON_VENV_PATH: 'C:\Tools\venv\Scripts\activate.ps1'
+  VSTEST_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
 
 stages:
   - build
+  - test
 
 build_job:
   stage: build
@@ -20,3 +22,8 @@ build_job:
       - '.\s7cli\bin\Release\'
       - '.\Server\bin\Release\'
       - '.\examples\python\'
+
+test_job:
+  stage: test
+  script:
+    - '& "$env:VSTEST_PATH" .\UnitTests_s7cli\bin\Release\UnitTests_s7cli.dll'
