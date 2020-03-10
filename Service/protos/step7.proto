@@ -7,6 +7,7 @@ option objc_class_prefix = "S7";
 
 package step7service;
 
+
 service Step7 {
   // Creates and registers an empty STEP 7 project
   rpc CreateProject (CreateProjectRequest) returns (StatusReply) {}
@@ -28,6 +29,11 @@ service Step7 {
     
   // Removes blocks from a project
   rpc RemoveBlocks (RemoveBlocksRequest) returns (StatusReply) {}
+
+  // Compile all stations hardware configuration
+  rpc CompileHw (CompileHwRequest) returns (StatusReply) {}
+  // Download to all stations
+  rpc Download (DownloadRequest) returns (StatusReply) {}
 }
 
 // Request messages
@@ -94,6 +100,17 @@ message RemoveBlocksRequest {
   // List of name of blocks to remove
   repeated string blocks = 3;
 }
+
+message CompileHwRequest {
+  // Project name or directory
+  string project = 1;
+}
+
+message DownloadRequest {
+  // Project name or directory
+  string project = 1;
+}
+
 
 // Reply messages
 

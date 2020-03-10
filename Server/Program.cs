@@ -65,6 +65,20 @@ namespace Step7Server
             return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
         }
 
+        private StatusReply CompileHwImpl(CompileHwRequest req)
+        {
+            var command = new S7_cli.S7Command();
+            command.compileAllStations(req.Project);
+            return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
+        }
+
+        private StatusReply DownloadImpl(DownloadRequest req)
+        {
+            var command = new S7_cli.S7Command();
+            command.downloadStation(projectPathOrName: req.Project, stationName: "", stationType: "", allStations: true, force: true);
+            return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
+        }
+
         // Public command interface using Tasks
 
         public override Task<StatusReply> CreateProject(CreateProjectRequest req, ServerCallContext context)
@@ -100,6 +114,16 @@ namespace Step7Server
         public override Task<StatusReply> RemoveBlocks(RemoveBlocksRequest req, ServerCallContext context)
         {
             return Task.FromResult(RemoveBlocksImpl(req));
+        }
+
+        public override Task<StatusReply> CompileHw(CompileHwRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(CompileHwImpl(req));
+        }
+
+        public override Task<StatusReply> Download(DownloadRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(DownloadImpl(req));
         }
     }
 
