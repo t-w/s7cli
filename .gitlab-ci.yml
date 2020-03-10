@@ -12,7 +12,7 @@ build_job:
   stage: build
   script:
     - '& "$env:NUGET_PATH" restore'
-    - '& "$env:MSBUILD_PATH" /p:Configuration=Release /clp:ErrorsOnly'
+    - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /clp:ErrorsOnly'
     # Build gRPC stubs for Python client in examples directory
     - '& "$env:PYTHON_VENV_PATH"'
     - python -m grpc_tools.protoc ./Service/protos/step7.proto -I ./Service/protos
