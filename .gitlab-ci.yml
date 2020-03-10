@@ -21,7 +21,7 @@ build_job:
     paths:
       - '.\s7cli\bin\x86\Release\'
       - '.\Server\bin\x86\Release\'
-      - '.\UnitTests_s7cli\x86\bin\Release\'
+      - '.\UnitTests_s7cli\bin\x86\Release\'
       - '.\examples\python\'
 
 test_job:
