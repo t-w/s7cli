@@ -11,6 +11,8 @@ package step7service;
 service Step7 {
   // Creates and registers an empty STEP 7 project
   rpc CreateProject (CreateProjectRequest) returns (StatusReply) {}
+  // Registers existing STEP 7 project
+  rpc RegisterProject (RegisterProjectRequest) returns (StatusReply) {}
 
   // Import sources from a library into project
   rpc ImportLibSources (ImportLibRequest) returns (StatusReply) {}
@@ -48,6 +50,11 @@ message CreateProjectRequest {
   string projectName = 1;
   // Project directory
   string projectDir = 2;
+}
+
+message RegisterProjectRequest {
+  // Project directory
+  string projectDir = 1;
 }
 
 message ImportLibRequest {

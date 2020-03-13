@@ -19,6 +19,13 @@ namespace Step7Server
             return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
         }
 
+        private StatusReply RegisterProjectImpl(RegisterProjectRequest req)
+        {
+            var command = new S7_cli.S7Command();
+            command.registerProject(req.ProjectDir);
+            return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
+        }
+
         private StatusReply ImportLibSourcesImpl(ImportLibRequest req)
         {
             var command = new S7_cli.S7Command();
@@ -84,6 +91,11 @@ namespace Step7Server
         public override Task<StatusReply> CreateProject(CreateProjectRequest req, ServerCallContext context)
         {
             return Task.FromResult(CreateProjectImpl(req));
+        }
+
+        public override Task<StatusReply> RegisterProject(RegisterProjectRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(RegisterProjectImpl(req));
         }
 
         public override Task<StatusReply> ImportLibSources(ImportLibRequest req, ServerCallContext context)

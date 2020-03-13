@@ -86,6 +86,15 @@ namespace S7_cli
             return createProject(name, dir, S7ProjectType.S7Project);
         }
 
+        public void registerProject(string dir)
+        {
+            int result = S7Project.registerProject(dir);
+            if (result == 0)
+                S7CommandStatus.set_status(S7CommandStatus.success);
+            else
+                S7CommandStatus.set_status(S7CommandStatus.failure);
+        }
+
         public bool createLibrary( string name,
                                    string dir )
         {

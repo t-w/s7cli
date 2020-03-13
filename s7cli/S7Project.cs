@@ -68,7 +68,6 @@ namespace S7_cli
 
         /*
          * Constructors
-         * TODO: Review API; Add separate ways to register and create new project
          */
 
         //public plcProject(string Name)
@@ -135,6 +134,20 @@ namespace S7_cli
             this.updatePrograms();
         }
 
+        public static int registerProject(string projectDirPath)
+        {
+            Simatic simatic = SimaticAPI.Instance.getSimatic();
+            try
+            {
+                simatic.Projects.Add(projectDirPath);
+            }
+            catch (SystemException exc)
+            {
+                Logger.log_error($"Could not register project in {projectDirPath}: {exc}");
+                return 1;
+            }
+            return 0;
+        }
 
         /*
          * Private methods
