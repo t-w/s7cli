@@ -113,6 +113,14 @@ namespace S7_cli
                 projectPath = projectDirPath + projectName;
             }
 
+            // checking if directory path is not taken
+            if (Directory.Exists(projectPath))
+            {
+                var errorMessage = $"Cannot create project: {projectPath} already exists!";
+                Logger.log_error(errorMessage);
+                throw new S7ProjectNotOpenException(errorMessage);
+            }
+
             try
             {
                 simaticProject = simatic.Projects.Add(projectName, projectDirPath, projectType);
