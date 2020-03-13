@@ -22,7 +22,7 @@ namespace Step7Server
         private StatusReply RegisterProjectImpl(RegisterProjectRequest req)
         {
             var command = new S7_cli.S7Command();
-            command.registerProject(req.ProjectDir);
+            command.registerProject(req.ProjectFilePath);
             return new StatusReply { ExitCode = S7_cli.S7CommandStatus.get_status() };
         }
 

@@ -134,6 +134,10 @@ namespace S7_cli
             this.updatePrograms();
         }
 
+        /// <summary>
+        /// Registers existing STEP 7 project given the path to its .s7p file
+        /// </summary>
+        /// <param name="projectFilePath">Path to STEP 7 project .s7p file</param>
         public static int registerProject(string projectDirPath)
         {
             Simatic simatic = SimaticAPI.Instance.getSimatic();
@@ -143,7 +147,7 @@ namespace S7_cli
             }
             catch (SystemException exc)
             {
-                Logger.log_error($"Could not register project in {projectDirPath}: {exc}");
+                Logger.log_error($"Could not register project from .s7p in {projectDirPath}: {exc}");
                 return 1;
             }
             return 0;

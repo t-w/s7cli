@@ -53,8 +53,8 @@ message CreateProjectRequest {
 }
 
 message RegisterProjectRequest {
-  // Project directory
-  string projectDir = 1;
+  // Path to STEP 7 project file .s7p
+  string projectFilePath = 1;
 }
 
 message ImportLibRequest {

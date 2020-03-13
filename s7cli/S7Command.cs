@@ -86,9 +86,13 @@ namespace S7_cli
             return createProject(name, dir, S7ProjectType.S7Project);
         }
 
-        public void registerProject(string dir)
+        /// <summary>
+        /// Registers existing STEP 7 project given the path to its .s7p file
+        /// </summary>
+        /// <param name="projectFilePath">Path to STEP 7 project .s7p file</param>
+        public void registerProject(string projectFilePath)
         {
-            int result = S7Project.registerProject(dir);
+            int result = S7Project.registerProject(projectFilePath);
             if (result == 0)
                 S7CommandStatus.set_status(S7CommandStatus.success);
             else
