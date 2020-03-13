@@ -68,6 +68,7 @@ namespace S7_cli
 
         /*
          * Constructors
+         * TODO: Review API; Add separate ways to register and create new project
          */
 
         //public plcProject(string Name)
@@ -110,14 +111,6 @@ namespace S7_cli
             else
             {
                 projectPath = projectDirPath + projectName;
-            }
-
-            // checking if directory path is not taken
-            if (Directory.Exists(projectPath))
-            {
-                var errorMessage = $"Cannot create project: {projectPath} already exists!";
-                Logger.log_error(errorMessage);
-                throw new S7ProjectNotOpenException(errorMessage);
             }
 
             try
