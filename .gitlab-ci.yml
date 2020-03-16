@@ -11,8 +11,6 @@ stages:
 build_job:
   stage: build
   script:
-    - echo $CI_JOB_ID
-    - echo $CI_JOB_TAG 
     # Generate correct shared assembly version configuration
     - '& "$env:PYTHON_VENV_PATH"'
     - python .\scripts\version.py -f .\SharedAssemblyInfo.cs
