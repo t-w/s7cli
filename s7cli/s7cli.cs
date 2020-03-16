@@ -71,9 +71,7 @@ namespace S7_cli
         static public string get_version()
         {
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
-            // TODO: Use major revision notation and always display minor revision
-            string minor_revision = (version.MinorRevision > 0) ? $".{version.MinorRevision}" : "";
-            return $"{version.Major}.{version.Minor}{minor_revision}";
+            return $"{version.Major}.{version.Minor}.{version.Revision}";
         }
 
         /// <summary>

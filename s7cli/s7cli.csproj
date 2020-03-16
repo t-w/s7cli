@@ -105,6 +105,9 @@
     <Reference Include="UIAutomationClient" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="OptionParser.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="S7cli_Status.cs" />
