@@ -13,7 +13,7 @@ build_job:
   script:
     # Generate correct shared assembly version configuration
     - '& "$env:PYTHON_VENV_PATH"'
-    - python .\scripts\version.py .\SharedAssemblyInfo.cs
+    - python .\scripts\version.py -f .\SharedAssemblyInfo.cs
     # Build solution
     - '& "$env:NUGET_PATH" restore'
     - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /clp:ErrorsOnly'
