@@ -25,6 +25,8 @@ build_job:
       - '.\s7cli\bin\x86\Release\'
       - '.\Server\bin\x86\Release\'
       - '.\UnitTests_s7cli\bin\x86\Release\'
+      - '.\S7Lib\bin\x86\Release\'
+      - '.\UnitTestS7Lib\bin\x86\Release\'
       - '.\examples\python\'
 
 test_job:
