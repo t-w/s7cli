@@ -154,7 +154,7 @@ namespace Step7Server
 
             Console.WriteLine("Step7 server listening on port " + Port);
             Console.WriteLine("Press any key to stop the server...");
-            Console.ReadKey();
+            Console.Read();
 
             server.ShutdownAsync().Wait();
         }
