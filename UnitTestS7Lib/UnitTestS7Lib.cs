@@ -31,6 +31,16 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestCreateProjectTwice()
+        {
+            var rv = Api.CreateProject("testProj", workspaceDir);
+            Assert.AreEqual(0, rv);
+            rv = Api.CreateProject("testProj", workspaceDir);
+            Assert.AreEqual(-1, rv);
+            Api.RemoveProject("testProj");
+        }
+
+        [TestMethod]
         public void TestRemoveInvalidProject()
         {
             var rv = Api.RemoveProject("invalid");

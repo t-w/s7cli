@@ -19,6 +19,18 @@ namespace S7Lib
                 .WriteTo.Console().CreateLogger();            
         }
     
+        private static bool projectExists(string projectName)
+        {
+            var api = new Simatic();
+            try
+            {
+                var project = api.Projects[projectName];
+                return true;
+            }
+            catch (System.Runtime.InteropServices.COMException) { }
+            return false;
+        }
+
         public static int CreateProject(string projectName, string projectDir)
         {
             var api = new Simatic();
@@ -28,6 +40,13 @@ namespace S7Lib
             {
                 log.Error($"Could not create project {projectName} in {projectDir}: " +
                           $"Name can have at most 8 characters");
+                return -1;
+            }
+
+            if (projectExists(projectName))
+            {
+                log.Error($"Could not create project {projectName} in {projectDir}: " +
+                          $"Project exists");
                 return -1;
             }
 
