@@ -13,13 +13,13 @@ namespace S7Lib
 {
     public static class Api
     {
-        private static Serilog.Core.Logger CreateLog()
+        public static Serilog.Core.Logger CreateLog()
         {
              return new LoggerConfiguration().MinimumLevel.Debug()
                 .WriteTo.Console().CreateLogger();            
         }
     
-        private static bool projectExists(string projectName)
+        private static bool ProjectExists(string projectName)
         {
             var api = new Simatic();
             try
@@ -49,7 +49,7 @@ namespace S7Lib
                 return -1;
             }
 
-            if (projectExists(projectName))
+            if (ProjectExists(projectName))
             {
                 log.Error($"Could not create project {projectName} in {projectDir}: " +
                           $"Project exists");
@@ -106,9 +106,53 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could remove create project {projectName}:", exc);
+                log.Error($"Could not remove project {projectName}:", exc);
                 return -1;
             }
+            return 0;
+        }
+
+        private static List<string> GetSourcesFromDir(string sourcesDir)
+        {
+            var sourceFiles = new List<string>();
+            string[] supportedExtensions = { "*.SCL", "*.AWL", "*.INP", "*.GR7" };
+            foreach (string ext in supportedExtensions)
+                sourceFiles.AddRange(
+                    System.IO.Directory.GetFiles(sourcesDir, ext,
+                        System.IO.SearchOption.TopDirectoryOnly));
+            return sourceFiles;
+        }
+
+        /// <summary>
+        /// Import sources from a directory into a project
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="sourcesDir">Directory from which to import sources</param>
+        /// <param name="force">Force overwrite existing sources in project</param>
+        /// <returns></returns>
+        public static int ImportSourcesDir(string project, string program, string sourcesDir, bool force=true)
+        {
+            var api = new Simatic();
+            var log = CreateLog();
+
+            var sourceFiles = GetSourcesFromDir(sourcesDir);
+            S7SWItems sourcesParent;
+            try
+            {
+                sourcesParent = api.Projects[project].Programs[program].Next["Sources"].Next;
+            }
+            catch (Exception exc)
+            {
+                log.Error($"Could not access program {program} in project {project}:", exc);
+                return -1;
+            }
+
+            foreach (var source in sourceFiles)
+            {
+                S7Source.ImportSource(parent: sourcesParent, sourceFilePath: source);
+            }
+
             return 0;
         }
     }
