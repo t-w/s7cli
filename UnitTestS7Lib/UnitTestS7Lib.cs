@@ -24,6 +24,17 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestRegisterProject()
+        {
+            var rv = Api.CreateProject("testProj", workspaceDir);
+            Assert.AreEqual(0, rv);
+            var s7ProjFilePath = Path.Combine(workspaceDir, @"testProj\testProj.s7p");
+            rv = Api.RegisterProject(s7ProjFilePath);
+            Assert.AreEqual(0, rv);
+            Api.RemoveProject("testProj");
+        }
+
+        [TestMethod]
         public void TestCreateInvalidProject()
         {
             var rv = Api.CreateProject("testProject", workspaceDir);
@@ -41,9 +52,16 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestRegisterInvalidProject()
+        {
+            var rv = Api.RegisterProject(".!");
+            Assert.AreEqual(-1, rv);
+        }
+
+        [TestMethod]
         public void TestRemoveInvalidProject()
         {
-            var rv = Api.RemoveProject("invalid");
+            var rv = Api.RemoveProject(".!");
             Assert.AreEqual(-1, rv);
         }
     }
