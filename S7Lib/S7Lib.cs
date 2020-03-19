@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog;
 
 using SimaticLib;
@@ -13,6 +10,26 @@ namespace S7Lib
 {
     public static class Api
     {
+        /// <summary>
+        /// Returns new Simatic API handle
+        /// </summary>
+        /// <remarks>
+        /// Regarding automaticSave, as per official documentation:
+        /// If enabled, the changes are saved immediately, especially for all operations that change structure
+        /// (for methods such as Add, Copy, or Remove, with which objects are added or deleted)
+        /// as well as for name changes.
+        /// </remarks>
+        /// <param name="serverMode">UnattandedServerMode surpress GUI messages</param>
+        /// <param name="automaticSave">Save project automatically</param>
+        /// <returns></returns>
+        public static Simatic CreateApi(bool serverMode=true, bool automaticSave=true)
+        {
+            var api = new Simatic();
+            api.UnattendedServerMode = serverMode;
+            api.AutomaticSave = automaticSave? 1 : 0;
+            return api;
+        }
+
         public static Serilog.Core.Logger CreateLog()
         {
              return new LoggerConfiguration().MinimumLevel.Debug()
@@ -21,7 +38,7 @@ namespace S7Lib
     
         private static bool ProjectExists(string projectName)
         {
-            var api = new Simatic();
+            var api = CreateApi();
             try
             {
                 var project = api.Projects[projectName];
@@ -39,7 +56,7 @@ namespace S7Lib
         /// <returns>0 on success, -1 otherwise</returns>
         public static int CreateProject(string projectName, string projectDir)
         {
-            var api = new Simatic();
+            var api = CreateApi();
             var log = CreateLog();
 
             if (projectName.Length > 8)
@@ -75,7 +92,7 @@ namespace S7Lib
         /// <returns>0 on success, -1 otherwise</returns>
         public static int RegisterProject(string projectFilePath)
         {
-            var api = new Simatic();
+            var api = CreateApi();
             var log = CreateLog();
 
             try
@@ -94,10 +111,10 @@ namespace S7Lib
         /// Removes STEP 7 project and deletes all of its files
         /// </summary>
         /// <param name="projectName">Project name</param>
-        /// <returns></returns>
+        /// <returns>0 on success, -1 otherwise</returns>
         public static int RemoveProject(string projectName)
         {
-            var api = new Simatic();
+            var api = CreateApi();
             var log = CreateLog();
 
             try
@@ -130,10 +147,10 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         /// <param name="sourcesDir">Directory from which to import sources</param>
         /// <param name="force">Force overwrite existing sources in project</param>
-        /// <returns></returns>
+        /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportSourcesDir(string project, string program, string sourcesDir, bool force=true)
         {
-            var api = new Simatic();
+            var api = CreateApi();
             var log = CreateLog();
 
             var sourceFiles = GetSourcesFromDir(sourcesDir);
