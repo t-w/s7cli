@@ -82,6 +82,7 @@ namespace S7Lib
                 log.Error($"Could not create project {projectName} in {projectDir}:", exc);
                 return -1;
             }
+            log.Debug($"Created empty project {projectName} in {projectDir}");
             return 0;
         }
 
@@ -175,6 +176,29 @@ namespace S7Lib
             }
 
             return 0;
+        }
+
+        static public int CreateProgram(string project, string programName)
+        {
+            var log = Api.CreateLog();
+            var api = Api.CreateApi();
+
+            try
+            {
+                api.Projects[project].Programs.Add(programName, Type: S7ProgramType.S7);
+            }
+            catch (Exception exc)
+            {
+                log.Error($"Could not create S7 program {programName} in {project}: ", exc);
+                return -1;
+            }
+            log.Debug($"Created S7 program {programName} in {project}");
+            return 0;
+        }
+
+        static public int CompileSource(string project, string program, string source)
+        {
+            return S7ProgramSource.CompileSource(project, program, source);
         }
     }
 }
