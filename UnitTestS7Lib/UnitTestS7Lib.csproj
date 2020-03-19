@@ -72,11 +72,14 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="TestSource.cs" />
     <Compile Include="TestProject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="resources\sources\FB1_Flowchart1.AWL" />
+    <None Include="resources\sources\FC20_BIC_Signal_Reset.SCL" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\S7Lib\S7Lib.csproj">

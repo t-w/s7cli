@@ -1,0 +1,191 @@
+//Author: Robert Harrison
+
+FUNCTION FC20   :   VOID
+
+VAR_TEMP
+CircuitNumber   :   INT;
+Auxillary       :   ARRAY[1..54] OF BOOL;
+Essential       :   ARRAY[1..54] OF BOOL;
+ThisCircuitStep :   ARRAY[1..54] OF INT;
+BIC_Auxillary_T :   BOOL;
+BIC_Essential_T :   BOOL;
+END_VAR
+
+VAR_OUTPUT
+BIC_Auxillary   :   BOOL;
+BIC_Essential   :   BOOL;
+END_VAR
+
+
+
+
+//we want to reset the BIC signals
+//Essential only circuits with Par_BD set
+//Auxillary all circuits
+
+//Auxillary circuits
+//We need the circuit to be used and to be in step 2 to get this circuit ok_to_reset,
+//or circuit not used.
+//Collate all the circuits through an AND, on the result of this AND reset the BIC signal.
+
+//Essential circuits
+//We need the circuit to be used and to be in step 2 to get this circuit ok_to_reset,
+//or circuit not used, or Par_BD is not set.
+//Collate all the circuits through an AND, on the result of this AND reset the BIC signal.
+
+//look at all the circuits
+FOR CircuitNumber := 1 TO 54 BY 1 DO
+    CASE CircuitNumber OF
+    //A circuits
+    1:  ThisCircuitStep[CircuitNumber] := DB20.Step_number;
+    2:  ThisCircuitStep[CircuitNumber] := DB21.Step_number;
+    3:  ThisCircuitStep[CircuitNumber] := DB22.Step_number;
+    
+    //B1 circuits
+    4:  ThisCircuitStep[CircuitNumber] := DB23.Step_number;
+    5:  ThisCircuitStep[CircuitNumber] := DB24.Step_number;
+    6:  ThisCircuitStep[CircuitNumber] := DB25.Step_number;
+    7:  ThisCircuitStep[CircuitNumber] := DB26.Step_number;
+    8:  ThisCircuitStep[CircuitNumber] := DB27.Step_number;
+    9:  ThisCircuitStep[CircuitNumber] := DB28.Step_number;
+    10:  ThisCircuitStep[CircuitNumber] := DB29.Step_number;
+    11:  ThisCircuitStep[CircuitNumber] := DB30.Step_number;
+    12:  ThisCircuitStep[CircuitNumber] := DB31.Step_number;
+    13:  ThisCircuitStep[CircuitNumber] := DB32.Step_number;
+    14:  ThisCircuitStep[CircuitNumber] := DB33.Step_number;
+    15:  ThisCircuitStep[CircuitNumber] := DB34.Step_number;
+    16:  ThisCircuitStep[CircuitNumber] := DB35.Step_number;
+    17:  ThisCircuitStep[CircuitNumber] := DB36.Step_number;
+    18:  ThisCircuitStep[CircuitNumber] := DB37.Step_number;
+    19:  ThisCircuitStep[CircuitNumber] := DB38.Step_number;
+    20:  ThisCircuitStep[CircuitNumber] := DB39.Step_number;
+    21:  ThisCircuitStep[CircuitNumber] := DB40.Step_number;
+    22:  ThisCircuitStep[CircuitNumber] := DB41.Step_number;
+    23:  ThisCircuitStep[CircuitNumber] := DB42.Step_number;
+    24:  ThisCircuitStep[CircuitNumber] := DB43.Step_number;
+    25:  ThisCircuitStep[CircuitNumber] := DB44.Step_number;
+    26:  ThisCircuitStep[CircuitNumber] := DB45.Step_number;
+    27:  ThisCircuitStep[CircuitNumber] := DB46.Step_number;
+    28:  ThisCircuitStep[CircuitNumber] := DB47.Step_number;
+    29:  ThisCircuitStep[CircuitNumber] := DB48.Step_number;
+    30:  ThisCircuitStep[CircuitNumber] := DB49.Step_number;
+    31:  ThisCircuitStep[CircuitNumber] := DB50.Step_number;
+    32:  ThisCircuitStep[CircuitNumber] := DB51.Step_number;
+    33:  ThisCircuitStep[CircuitNumber] := DB52.Step_number;
+    34:  ThisCircuitStep[CircuitNumber] := DB53.Step_number;
+    35:  ThisCircuitStep[CircuitNumber] := DB54.Step_number;
+    36:  ThisCircuitStep[CircuitNumber] := DB55.Step_number;
+    37:  ThisCircuitStep[CircuitNumber] := DB56.Step_number;
+    
+    //B2 circuits
+    //As we have two PC_Permits for a B2, we need also to check that both are given 
+    //before enabling the BIC signals
+    //The PC_Permit signals are reverse logic, thetrefore false = PC_Permit given
+    38:  IF DB57.DBX2.0 = false AND DB57.DBX2.1 = false THEN
+            ThisCircuitStep[CircuitNumber] := DB57.Step_number;
+         ELSE
+            ThisCircuitStep[CircuitNumber] := -1;
+         END_IF;
+                 
+    39:  IF DB58.DBX2.0 = false AND DB58.DBX2.1 = false THEN
+            ThisCircuitStep[CircuitNumber] := DB58.Step_number;
+         ELSE
+            ThisCircuitStep[CircuitNumber] := -1;
+         END_IF;
+       
+    40:  IF DB59.DBX2.0 = false AND DB59.DBX2.1 = false THEN
+            ThisCircuitStep[CircuitNumber] := DB59.Step_number;
+         ELSE
+            ThisCircuitStep[CircuitNumber] := -1;
+         END_IF;
+       
+    41:  IF DB60.DBX2.0 = false AND DB60.DBX2.1 = false THEN
+            ThisCircuitStep[CircuitNumber] := DB60.Step_number;
+         ELSE
+            ThisCircuitStep[CircuitNumber] := -1;
+         END_IF;
+       
+    42:  IF DB61.DBX2.0 = false AND DB61.DBX2.1 = false THEN
+            ThisCircuitStep[CircuitNumber] := DB61.Step_number;
+         ELSE
+            ThisCircuitStep[CircuitNumber] := -1;
+         END_IF;
+       
+    //C circuits
+    43:  ThisCircuitStep[CircuitNumber] := DB62.Step_number;
+    44:  ThisCircuitStep[CircuitNumber] := DB63.Step_number;
+    45:  ThisCircuitStep[CircuitNumber] := DB64.Step_number;
+    46:  ThisCircuitStep[CircuitNumber] := DB65.Step_number;
+    47:  ThisCircuitStep[CircuitNumber] := DB66.Step_number;
+    48:  ThisCircuitStep[CircuitNumber] := DB67.Step_number;
+    49:  ThisCircuitStep[CircuitNumber] := DB68.Step_number;
+    50:  ThisCircuitStep[CircuitNumber] := DB69.Step_number;
+    51:  ThisCircuitStep[CircuitNumber] := DB70.Step_number;
+    52:  ThisCircuitStep[CircuitNumber] := DB71.Step_number;
+    53:  ThisCircuitStep[CircuitNumber] := DB72.Step_number;
+    54:  ThisCircuitStep[CircuitNumber] := DB73.Step_number;
+    END_CASE;
+
+    
+    //Auxillary circuits
+    //IF DB_Config.Circuit_OK[CircuitNumber] = true THEN
+    //    IF ThisCircuitStep[CircuitNumber] = 2 THEN
+    //        Auxillary[CircuitNumber] := true;
+    //    ELSE
+    //        Auxillary[CircuitNumber] := false;
+    //    END_IF;
+    //ELSE
+    //    Auxillary[CircuitNumber] := true;
+    //END_IF;
+    Auxillary[CircuitNumber] := false;
+    IF DB_Config.Circuit_OK[CircuitNumber] = true AND DB_Config.Par_BD_Aux[CircuitNumber] = true AND ThisCircuitStep[CircuitNumber] = 2 THEN
+        Auxillary[CircuitNumber] := true;
+    END_IF;
+    IF DB_Config.Circuit_OK[CircuitNumber] = true AND DB_Config.Par_BD_Aux[CircuitNumber] = false THEN
+        Auxillary[CircuitNumber] := true;
+    END_IF;
+    IF DB_Config.Circuit_OK[CircuitNumber] = false THEN
+        Auxillary[CircuitNumber] := true;
+    END_IF;
+                
+    //Essential circuit
+    Essential[CircuitNumber] := false;
+    IF DB_Config.Circuit_OK[CircuitNumber] = true AND DB_Config.Par_BD[CircuitNumber] = true AND ThisCircuitStep[CircuitNumber] = 2 THEN
+        Essential[CircuitNumber] := true;
+    END_IF;
+    IF DB_Config.Circuit_OK[CircuitNumber] = true AND DB_Config.Par_BD[CircuitNumber] = false THEN
+        Essential[CircuitNumber] := true;
+    END_IF;
+    IF DB_Config.Circuit_OK[CircuitNumber] = false THEN
+        Essential[CircuitNumber] := true;
+    END_IF;
+    
+          
+    //IF DB_Config.Circuit_OK[CircuitNumber] = true THEN
+    //    IF DB_Config.Par_BD[CircuitNumber] = true THEN
+    //        IF ThisCircuitStep[CircuitNumber] = 2 THEN
+     //           Essential[CircuitNumber] := true;
+     //       ELSE
+     //           Essential[CircuitNumber] := false;
+     //       END_IF;
+     //   END_IF;
+    //ELSE
+    //    Essential[CircuitNumber] := true;
+    //END_IF;
+END_FOR;
+
+BIC_Essential_T := true;
+BIC_Auxillary_T := true;
+FOR CircuitNumber := 1 TO 54 BY 1 DO
+    IF NOT Auxillary[CircuitNumber] THEN
+        BIC_Auxillary_T := false;
+    END_IF;
+    IF NOT Essential[CircuitNumber] THEN
+        BIC_Essential_T := false;
+    END_IF;
+END_FOR;
+BIC_Essential := BIC_Essential_T;
+BIC_Auxillary := BIC_Auxillary_T;
+
+
+END_FUNCTION    

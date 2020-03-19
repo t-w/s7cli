@@ -1,0 +1,261 @@
+FUNCTION_BLOCK "Flowchart1"
+TITLE =S7GRAPH V5.0 FB -- interlocks_4\s7_400_fev03\CPU 414-2 DP\Progra
+//Managing the Flowchart for Electrical Circuits of HW Int A (Cl.DEHAVAY and Er. 
+//VEYRUNES)
+//Modifications: Robert Harrison
+AUTHOR : CERN
+NAME : Class1
+VERSION : 0.1
+CODE_VERSION1
+
+
+VAR_INPUT
+  Give_Permit : BOOL ;	
+  Operator_Request : BOOL ;	
+  GoTo_Initialising : BOOL ;	
+  Powering_Failure : BOOL ;	
+  PC_Discharge_Request : BOOL ;	
+  PC_Connected : BOOL ;	
+  Software_Signal : BOOL ;	
+  Quench_Status : BOOL ;	
+  QS_Connected : BOOL ;	
+  PAR_BD : BOOL ;	
+  PAR_PS : BOOL ;	
+  Operator_FA_Request : BOOL ;	
+  Operator_Dis_Request : BOOL ;	
+  PAR_BD_Aux : BOOL ;	
+END_VAR
+VAR_OUTPUT
+  PC_Permit1 : BOOL ;	
+  PC_Permit2 : BOOL ;	
+  PIC_Discharge_Request : BOOL ;	
+  PC_Fast_Abort : BOOL ;	
+END_VAR
+VAR
+  FP1 : BOOL ;	
+  FP2 : BOOL ;	
+  OK_PERMIT : BOOL ;	
+  OK_SUPERVISION : BOOL ;	
+  Step_number : INT ;	
+  FA_OneShot : BOOL ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =Memo Step
+//Remember step
+
+      A     #Software_Signal; //Front Positif detection
+      FP    #FP1; 
+      =     #OK_SUPERVISION; 
+
+      A     #Give_Permit; //Front Positif detection
+      FP    #FP2; 
+      =     #OK_PERMIT; 
+
+      L     #Step_number; //Case of step
+      JL    OVER; 
+      JU    SUI0; //If Initial step
+      JU    SUI1; //If Step 1(Initialising)
+      JU    SUI2; //If Step 2(Circuit Powering Permitted)
+      JU    SUI3; //If Step 3(Slow Power Abort)
+      JU    SUI4; //If Step 4(Fast Power Abort)
+      JU    SUI5; //If Step 5 (Reset Output)
+OVER: BEU   ; 
+
+NETWORK
+TITLE =Condition Graph
+//Access next or actual step
+
+SUI0: A     #GoTo_Initialising; //Condition of supervision
+      JC    INIT; //If true jump to INIT
+      JU    BEGI; //Jump to BEGI
+
+SUI1: A     #OK_PERMIT; //Condition of supervision
+      AN    #Powering_Failure; //Condition INPUT
+      AN    #PC_Discharge_Request; //Condition Discharge_Request
+      AN    #Quench_Status; //Condition INPUT
+      AN    #Operator_FA_Request; //supervision Fast Abort request
+      AN    #Operator_Dis_Request; 
+      A     #PC_Connected; //Condition of supervision
+      A     #QS_Connected; //Condition of supervision
+      JC    CPP; //If true jump to CPP
+      JU    INIT; //Jump to INIT
+
+SUI2: O     #Quench_Status; //Condition INPUT
+      O     #PC_Discharge_Request; //Condition Discharge_Request
+      O     "Powering_Subsector_OFF"; //Condition Flag
+      O     #Operator_FA_Request; //supervision Fast Abort request
+      O     #Operator_Dis_Request; 
+      JC    FPA; //If true jump to FPA
+      O     #Powering_Failure; //Condition INPUT
+      O     #Operator_Request; //Condition of supervision
+      O     "Global_SPA"; 
+      JC    SPA1; //If true jump to SPA
+      JU    CPP; //Jump to CPP
+
+SUI3: O     #Quench_Status; //Condition INPUT
+      O     #PC_Discharge_Request; //Condition Discharge_Request
+      O     "Powering_Subsector_OFF"; //Condition Flag
+      O     #Operator_FA_Request; //supervision Fast Abort request
+      O     #Operator_Dis_Request; 
+      JC    FPA; //If true jump to FPA
+      AN    #Quench_Status; //Condition INPUT
+      AN    #PC_Discharge_Request; //Condition Discharge_Request
+      A     #OK_SUPERVISION; //Condition of supervision
+      JC    INIT; //If true jump to INIT
+      JU    SPA1; //Jump to SPA
+
+SUI4: A     #OK_SUPERVISION; //Condition of supervision
+      JC    RO; //If true jump to RO
+      JU    FPA; //Jump to FPA
+
+SUI5: AN    #Quench_Status; //Condition INPUT
+      AN    #PC_Discharge_Request; //Condition Discharge_Request
+      AN    #Operator_FA_Request; //supervision Fast Abort request
+      AN    #Operator_Dis_Request; 
+      JC    INIT; //If true jump to INIT
+      A(    ; 
+      O     #Quench_Status; //Condition INPUT
+      O     #PC_Discharge_Request; //Condition Discharge_Request 
+      O     #Operator_FA_Request; //supervision Fast Abort request
+      O     #Operator_Dis_Request; 
+      )     ; 
+      A     "Tempo_relais"; //Tempo permettant aux relais de bien coller
+      JC    FPA; //If true jump to FPA
+      JU    RO; //Jump to RO
+
+NETWORK
+TITLE =Test Mode
+//Initial step
+BEGI: L     0; 
+      T     #Step_number; //Go to Step 1(Initialising)
+
+      S     #PC_Permit1; //put the real world PC_Permit to off
+
+      BEU   ; //END Graph
+
+NETWORK
+TITLE =Initialising
+//Step 1
+INIT: L     1; 
+      T     #Step_number; //Set Step 1(Initialising)
+      SET   ; 
+      S     #PC_Permit1; //Reset Permit
+      R     #PIC_Discharge_Request; //Reset PIC_Discharge_Request
+      R     #PC_Fast_Abort; //Reset Fast_Abort
+      R     #FA_OneShot; 
+
+
+      BEU   ; //END Graph
+
+NETWORK
+TITLE =Circuit Powering Permitted
+//Step 2
+CPP:  L     2; 
+      T     #Step_number; //Set Step 2(Circuit Powering Permitted)
+      SET   ; 
+      R     #PC_Permit1; //Set Permit
+      BEU   ; //END Graph
+
+NETWORK
+TITLE =Slow Power Abort
+//Step 3
+SPA1: L     3; 
+      T     #Step_number; //Set Step 3(Slow Power Abort)
+
+      SET   ; 
+      S     #PC_Permit1; //Reset Permit
+
+      AN    #PAR_BD_Aux; 
+      JC    Aux1; 
+      SET   ; 
+      R     "Auxiliary_Circuits_OK"; //Reset Flag
+//Aux1: NOP   0
+
+Aux1: AN    #PAR_BD; 
+      JC    BD1; 
+      SET   ; 
+      R     "Essential_Circuits_OK"; //Reset Flag
+BD1:  BEU   ; //END Graph
+
+
+NETWORK
+TITLE =Fast Power Abort
+//Step 4
+FPA:  L     4; 
+      T     #Step_number; //Set Step 4(Fast Power Abort)
+      SET   ; 
+      S     #PC_Permit1; //Reset Permit
+      S     #PC_Fast_Abort; //Set Fast_Abort
+
+//make the discharge conditional, only react with a Powering Subsector Off
+//never react when there are other causes for a FPA
+//      SET   
+//      UN    #Quench_Status              //Condition INPUT
+//      UN    #PC_Discharge_Request       //Condition Discharge_Request
+//      UN    #Operator_FA_Request        //supervision Fast Abort request
+//      U(    
+//      O     #Operator_Dis_Request
+//      O     "Powering_Subsector_OFF"    //Condition Flag
+//      )     
+
+//Test this decision once on entry, Once we have established the state of the Discharge output
+//it cannot change, this is to stop the Quench input glitch when re-established causing the discharge loop to open.
+      AN    #FA_OneShot; 
+      AN    #Quench_Status; 
+      AN    #PC_Discharge_Request; //Condition Discharge_Request
+      S     #PIC_Discharge_Request; //Set PIC_Discharge_Request
+      SET   ; 
+      S     #FA_OneShot; 
+
+
+
+
+
+
+//      O     #PAR_BD
+//      O     #PAR_PS
+//      SPB   BDPS
+//      BEA                               //END Graph
+//BDPS: UN    #PAR_BD
+//      SPB   DB2
+//      SET   
+//      R     "Essential_Circuits_OK"     //Reset Flag
+//DB2:  UN    #PAR_PS
+//      SPB   PS1
+//      SET   
+//      S     "Powering_Subsector_OFF"    //Set Flag
+//      R     "Essential_Circuits_OK"     //Reset Flag
+//PS1:  BEA                               //END Graph
+
+      AN    #PAR_BD_Aux; 
+      JC    Aux2; 
+      SET   ; 
+      R     "Auxiliary_Circuits_OK"; //Reset Flag
+
+Aux2: AN    #PAR_BD; 
+      JC    Ess1; 
+      SET   ; 
+      R     "Essential_Circuits_OK"; //Reset Flag
+
+Ess1: AN    #PAR_PS; 
+      JC    PS1; 
+      SET   ; 
+      S     "Powering_Subsector_OFF"; //Set Flag
+      R     "Essential_Circuits_OK"; //Reset Flag
+      R     "Auxiliary_Circuits_OK"; //Reset Flag
+PS1:  BEU   ; 
+
+
+
+NETWORK
+TITLE =Reset Output
+
+RO:   L     5; 
+      T     #Step_number; //Set Step 5(Reset Output)
+      SET   ; 
+      R     #PC_Fast_Abort; //Reset Fast_Abort 
+      R     #PIC_Discharge_Request; //Reset PIC_Discharge_Request
+      BEU   ; 
+END_FUNCTION_BLOCK
+
