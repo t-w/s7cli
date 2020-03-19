@@ -5,7 +5,7 @@ using S7Lib;
 namespace UnitTestS7Lib
 {
     [TestClass]
-    public class Project
+    public class TestProject
     {
         static string workspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
 
