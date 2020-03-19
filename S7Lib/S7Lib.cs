@@ -147,9 +147,9 @@ namespace S7Lib
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
         /// <param name="sourcesDir">Directory from which to import sources</param>
-        /// <param name="force">Force overwrite existing sources in project</param>
+        /// <param name="overwrite">Force overwrite existing sources in project</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportSourcesDir(string project, string program, string sourcesDir, bool force=true)
+        public static int ImportSourcesDir(string project, string program, string sourcesDir, bool overwrite=true)
         {
             var api = CreateApi();
             var log = CreateLog();
@@ -168,7 +168,7 @@ namespace S7Lib
 
             foreach (var source in sourceFiles)
             {
-                if (S7ProgramSource.ImportSource(parent: sourcesParent, sourceFilePath: source) != 0)
+                if (S7ProgramSource.ImportSource(parent: sourcesParent, sourceFilePath: source, overwrite: overwrite) != 0)
                 {
                     log.Error($"Could not import {source} into project {project}");
                     return -1;

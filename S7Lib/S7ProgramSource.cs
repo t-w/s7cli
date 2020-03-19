@@ -15,21 +15,53 @@ namespace S7Lib
         /// <param name="parent">Parent S7SWItem container object</param>
         /// <param name="sourceFilePath">Path to source file</param>
         /// <param name="sourceType">SW object type</param>
+        /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportSource(S7SWItems parent, string sourceFilePath,
-            S7SWObjType sourceType = S7SWObjType.S7Source)
+            S7SWObjType sourceType = S7SWObjType.S7Source, bool overwrite = true)
         {
             var log = Api.CreateLog();
-            string sourceName = System.IO.Path.GetFileNameWithoutExtension(sourceFilePath);
-            try    
+            string sourceName = Path.GetFileNameWithoutExtension(sourceFilePath);
+
+            IS7SWItem source = null;
+            // Check if source is already present
+            try
+            {
+                source = parent[sourceName];
+            }
+            catch (Exception) { }
+
+            if (source != null && !overwrite)
+            {
+                log.Error($"Could not import {sourceName} from {sourceFilePath}: " +
+                          $"Source with the same name exists.");
+                return -1;
+            }
+            else if (source != null && overwrite)
+            {
+                log.Debug($"{sourceName} already exists. Overwriting.");
+                try
+                {
+                    parent.Remove(sourceName);
+                }
+                catch (Exception exc)
+                {
+                    log.Error($"Could not remove existing source {sourceName}: ", exc);
+                    return -1;
+                }
+            }
+
+            try
             {
                 var item = parent.Add(sourceName, sourceType, sourceFilePath);
             }
             catch (Exception exc)
             {
-                log.Error($"Could not import source {sourceName} from {sourceFilePath}: ", exc);
+                log.Error($"Could not import source {sourceName} ({sourceType}) " +
+                          $"from {sourceFilePath}: ", exc);
                 return -1;
             }
+            log.Debug($"Imported source {sourceName} ({sourceType}) from {sourceFilePath}");
             return 0;
         }
 

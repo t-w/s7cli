@@ -13,12 +13,24 @@ namespace UnitTestS7Lib
         static string awlSource = "FB1_Flowchart1";
         static string sclSource = "FC20_BIC_Signal_Reset";
 
+        [ClassCleanup]
+        public static void RemoveTestProject()
+        {
+            Api.RemoveProject("testProj");
+        }
+
         [TestMethod]
         public void TestImportSclSource()
         {
             Api.CreateProject("testProj", workspaceDir);
             Api.CreateProgram("testProj", "testProgram");
             var rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir);
+            Assert.AreEqual(0, rv);
+            // Import existing sources fails if overwrite is set to false
+            rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir, overwrite: false);
+            Assert.AreEqual(-1, rv);
+            // Import existing sources succeeds if overwrite is set to true
+            rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir, overwrite: true);
             Assert.AreEqual(0, rv);
             Api.RemoveProject("testProj");
         }
