@@ -167,7 +167,7 @@ namespace S7Lib
 
             foreach (var source in sourceFiles)
             {
-                if (S7Source.ImportSource(parent: sourcesParent, sourceFilePath: source) != 0)
+                if (S7ProgramSource.ImportSource(parent: sourcesParent, sourceFilePath: source) != 0)
                 {
                     log.Error($"Could not import {source} into project {project}");
                     return -1;
