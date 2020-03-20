@@ -271,9 +271,61 @@ namespace S7Lib
             return 0;
         }
 
+        /// <summary>
+        /// Compile source
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="sourceName">Source name</param>
+        /// <returns>0 on success, -1 otherwise</returns>
         static public int CompileSource(string project, string program, string source)
         {
             return S7ProgramSource.CompileSource(project, program, source);
+        }
+
+        /// <summary>
+        /// Import blocks from a directory into a project
+        /// </summary>
+        /// <param name="library">Source library name</param>
+        /// <param name="project">Destination project name</param>
+        /// <param name="libProgram">Source library program name</param>
+        /// <param name="projProgram">Destination program name</param>
+        /// <param name="overwrite">Force overwrite existing sources in destination project</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ImportLibBlocksDir(string library, string libProgram,
+            string project, string projProgram, bool overwrite = true)
+        {
+            var api = CreateApi();
+            var log = CreateLog();
+
+            S7SWItems libBlocksParent, projBlocksParent;
+            try
+            {
+                libBlocksParent = api.Projects[library].Programs[libProgram].Next["Blocks"].Next;
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access blocks in program {libProgram} in library {library}");
+                return -1;
+            }
+            try
+            {
+                projBlocksParent = api.Projects[project].Programs[projProgram].Next["Blocks"].Next;
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access blocks in program {projProgram} in project {project}");
+                return -1;
+            }
+
+            if (S7ProgramSource.ImportLibBlocks(libParent: libBlocksParent, projParent: projBlocksParent, overwrite) != 0)
+            {
+                log.Error($"Could not import blocks from {library}:{libProgram} into {project}:{projProgram}");
+                return -1;
+            }
+
+            log.Debug($"Imported blocks from {library}:{libProgram} into {project}:{projProgram}");
+            return 0;
         }
     }
 }

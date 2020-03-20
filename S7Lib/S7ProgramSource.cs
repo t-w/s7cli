@@ -144,7 +144,7 @@ namespace S7Lib
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
         /// <param name="sourceName">Source name</param>
-        /// <returns></returns>
+        /// <returns>0 on success, -1 otherwise</returns>
         public static int CompileSource(string project, string program, string sourceName)
         {
             var api = Api.CreateApi();
@@ -295,6 +295,86 @@ namespace S7Lib
             {
                 log.Warning($"Compiled {src.Name} with {warnings} warning(s)");
                 return 0;
+            }
+            return 0;
+        }
+
+        // TODO: Reduce code duplication
+        /// <summary>
+        /// Copies S7Block to destination S7SWItems container
+        /// </summary>
+        /// <param name="source">Target block to copy</param>
+        /// <param name="destination">Target container onto which to copy block</param>
+        /// <param name="overwrite">Overwrite existing block if present</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        private static int CopyBlock(S7Block block, S7SWItems destination, bool overwrite = true)
+        {
+            var log = Api.CreateLog();
+            var blockName = block.Name;
+            var blockType = block.ConcreteType;
+
+            IS7SWItem destBlock = null;
+            // Check if block is already present
+            try
+            {
+                destBlock = destination[blockName];
+            }
+            catch (Exception) { }
+
+            if (block != null && !overwrite)
+            {
+                log.Error($"Could not import {blockName} from library: " +
+                          $"block with the same name exists.");
+                return -1;
+            }
+            else if (block != null && overwrite)
+            {
+                log.Debug($"{blockName} already exists. Overwriting.");
+                try
+                {
+                    destination.Remove(blockName);
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not remove existing block {blockName}");
+                    return -1;
+                }
+            }
+
+            try
+            {
+                var item = block.Copy(destination);
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not import block {blockName} ({blockType}) from library: ");
+                return -1;
+            }
+
+            log.Debug($"Imported block {blockName} ({blockType}) from library");
+            return 0;
+        }
+
+        /// <summary>
+        /// Import blocks from library into project 
+        /// </summary>
+        /// <param name="libParent">Source library container from which to copy block</param>
+        /// <param name="projParent">Target project container onto which to copy block</param>
+        /// <param name="overwrite">Overwrite existing source if present</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ImportLibBlocks(S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+        {
+            var log = Api.CreateLog();
+            foreach (S7Block libBlock in libParent)
+            {
+                // Note: "System data" blocks to not have SymbolicName attribute
+                if (libBlock.Name == "System data")
+                {
+                    log.Debug("Cannot copy System data block. Skipping."); 
+                    continue;
+                }
+                if (CopyBlock(libBlock, projParent, overwrite) != 0)
+                    return -1;
             }
             return 0;
         }
