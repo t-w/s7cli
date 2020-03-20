@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Serilog;
 
 using SimaticLib;
-using S7HCOM_XLib;
 
 
 namespace S7Lib
