@@ -275,7 +275,7 @@ namespace S7Lib
         /// </summary>
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
-        /// <param name="sourceName">Source name</param>
+        /// <param name="source">Source name</param>
         /// <returns>0 on success, -1 otherwise</returns>
         static public int CompileSource(string project, string program, string source)
         {
