@@ -65,6 +65,79 @@ namespace S7Lib
             return 0;
         }
 
+        // TODO: Reduce code duplication
+        /// <summary>
+        /// Copies S7Source to destination S7SWItems container
+        /// </summary>
+        /// <param name="source">Target source to copy</param>
+        /// <param name="destination">Target container onto which to copy source</param>
+        /// <param name="overwrite">Overwrite existing source if present</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        private static int CopySource(S7Source source, S7SWItems destination, bool overwrite = true)
+        {
+            var log = Api.CreateLog();
+            var sourceName = source.Name;
+            var sourceType = source.ConcreteType;
+
+            IS7SWItem destSource = null;
+            // Check if source is already present
+            try
+            {
+                destSource = destination[sourceName];
+            }
+            catch (Exception) { }
+
+            if (source != null && !overwrite)
+            {
+                log.Error($"Could not import {sourceName} from library: " +
+                          $"Source with the same name exists.");
+                return -1;
+            }
+            else if (source != null && overwrite)
+            {
+                log.Debug($"{sourceName} already exists. Overwriting.");
+                try
+                {
+                    destination.Remove(sourceName);
+                }
+                catch (Exception exc)
+                {
+                    log.Error($"Could not remove existing source {sourceName}: ", exc);
+                    return -1;
+                }
+            }
+
+            try
+            {
+                var item = source.Copy(destination);
+            }
+            catch (Exception exc)
+            {
+                log.Error($"Could not import source {sourceName} ({sourceType}) " +
+                          $"from library: ", exc);
+                return -1;
+            }
+            log.Debug($"Imported source {sourceName} ({sourceType}) from library");
+            return 0;
+        }
+
+        /// <summary>
+        /// Import sources from library into project 
+        /// </summary>
+        /// <param name="libParent">Source library container from which to copy source</param>
+        /// <param name="projParent">Target project container onto which to copy source</param>
+        /// <param name="overwrite">Overwrite existing source if present</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ImportLibSources(S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+        {
+            foreach (S7Source libSource in libParent)
+            {
+                if (CopySource(libSource, projParent, overwrite) != 0)
+                    return -1;
+            }
+            return 0;
+        }
+
         /// <summary>
         /// Compile source
         /// </summary>
