@@ -24,6 +24,20 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestCreateRemoveLibrary()
+        {
+            var rv = Api.CreateProject("testLib", workspaceDir);
+            Assert.AreEqual(0, rv);
+            var s7ProjFilePath = Path.Combine(workspaceDir, @"testLib\testLib.s7p");
+            var projectExists = File.Exists(s7ProjFilePath);
+            Assert.IsTrue(projectExists);
+            rv = Api.RemoveProject("testLib");
+            Assert.AreEqual(0, rv);
+            projectExists = File.Exists(s7ProjFilePath);
+            Assert.IsFalse(projectExists);
+        }
+
+        [TestMethod]
         public void TestRegisterProject()
         {
             var rv = Api.CreateProject("testProj", workspaceDir);

@@ -49,12 +49,13 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Create new empty STEP 7 project
+        /// Internal function to create STEP 7 project or library
         /// </summary>
         /// <param name="projectName">Project name (max 8 characters)</param>
         /// <param name="projectDir">Path to project's parent directory</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int CreateProject(string projectName, string projectDir)
+        /// <returns>0 on success, -1 otherwise</returns>
+        private static int CreateProjectImpl(string projectName, string projectDir, S7ProjectType projectType)
         {
             var api = CreateApi();
             var log = CreateLog();
@@ -75,7 +76,7 @@ namespace S7Lib
 
             try
             {
-                api.Projects.Add(Name: projectName, ProjectRootDir: projectDir);
+                api.Projects.Add(Name: projectName, ProjectRootDir: projectDir, Type: projectType);
             }
             catch (Exception exc)
             {
@@ -84,6 +85,28 @@ namespace S7Lib
             }
             log.Debug($"Created empty project {projectName} in {projectDir}");
             return 0;
+        }
+
+        /// <summary>
+        /// Create new empty STEP 7 project
+        /// </summary>
+        /// <param name="projectName">Project name (max 8 characters)</param>
+        /// <param name="projectDir">Path to project's parent directory</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int CreateProject(string projectName, string projectDir)
+        {
+            return CreateProjectImpl(projectName, projectDir, S7ProjectType.S7Project);
+        }
+
+        /// <summary>
+        /// Create new empty STEP 7 library
+        /// </summary>
+        /// <param name="projectName">Library name (max 8 characters)</param>
+        /// <param name="projectDir">Path to library's parent directory</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int CreateLibrary(string projectName, string projectDir)
+        {
+            return CreateProjectImpl(projectName, projectDir, S7ProjectType.S7Library);
         }
 
         /// <summary>
