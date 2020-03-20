@@ -80,9 +80,10 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not create project {projectName} in {projectDir}:", exc);
+                log.Error(exc, $"Could not create project {projectName} in {projectDir}");
                 return -1;
             }
+
             log.Debug($"Created empty project {projectName} in {projectDir}");
             return 0;
         }
@@ -125,9 +126,11 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not register existing project in {projectFilePath}:", exc);
+                log.Error(exc, $"Could not register existing project in {projectFilePath}");
                 return -1;
             }
+
+            log.Debug($"Registered existing project from {projectFilePath}");
             return 0;
         }
 
@@ -147,9 +150,11 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not remove project {projectName}:", exc);
+                log.Error(exc, $"Could not remove project {projectName}");
                 return -1;
             }
+
+            log.Debug($"Removed project {projectName}");
             return 0;
         }
 
@@ -185,7 +190,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not access program {program} in project {project}:", exc);
+                log.Error(exc, $"Could not access sources in program {program} in project {project}");
                 return -1;
             }
 
@@ -198,6 +203,7 @@ namespace S7Lib
                 }
             }
 
+            log.Debug($"Imported sources to {project}:{program} for {sourcesDir}");
             return 0;
         }
 
@@ -223,7 +229,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not access program {libProgram} in library {library}:", exc);
+                log.Error(exc, $"Could not access sources in program {libProgram} in library {library}");
                 return -1;
             }
             try
@@ -232,7 +238,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not access program {projProgram} in project {project}:", exc);
+                log.Error(exc, $"Could not access sources in program {projProgram} in project {project}");
                 return -1;
             }
 
@@ -242,6 +248,7 @@ namespace S7Lib
                 return -1;
             }
 
+            log.Debug($"Imported sources from {library}:{libProgram} into {project}:{projProgram}");
             return 0;
         }
 
@@ -256,9 +263,10 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not create S7 program {programName} in {project}: ", exc);
+                log.Error(exc, $"Could not create S7 program {programName} in {project}");
                 return -1;
             }
+
             log.Debug($"Created S7 program {programName} in {project}");
             return 0;
         }

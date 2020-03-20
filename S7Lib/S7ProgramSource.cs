@@ -46,7 +46,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    log.Error($"Could not remove existing source {sourceName}: ", exc);
+                    log.Error(exc, $"Could not remove existing source {sourceName}");
                     return -1;
                 }
             }
@@ -57,10 +57,10 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not import source {sourceName} ({sourceType}) " +
-                          $"from {sourceFilePath}: ", exc);
+                log.Error(exc, $"Could not import source {sourceName} ({sourceType}) from {sourceFilePath}");
                 return -1;
             }
+
             log.Debug($"Imported source {sourceName} ({sourceType}) from {sourceFilePath}");
             return 0;
         }
@@ -102,7 +102,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    log.Error($"Could not remove existing source {sourceName}: ", exc);
+                    log.Error(exc, $"Could not remove existing source {sourceName}");
                     return -1;
                 }
             }
@@ -113,10 +113,10 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not import source {sourceName} ({sourceType}) " +
-                          $"from library: ", exc);
+                log.Error(exc, $"Could not import source {sourceName} ({sourceType}) from library: ");
                 return -1;
             }
+
             log.Debug($"Imported source {sourceName} ({sourceType}) from library");
             return 0;
         }
@@ -157,7 +157,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not find source {sourceName} in project {project} program {program}: ", exc);
+                log.Error(exc, $"Could not find source {sourceName} in project {project} program {program}");
                 return -1;
             }
 
@@ -177,7 +177,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Could not compile source {sourceName} in project {project} program {program}: ", exc);
+                log.Error(exc, $"Could not compile source {sourceName} in project {project} program {program}");
                 return -1;
             }
 
@@ -198,7 +198,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Error compiling {src.Name}: ", exc);
+                log.Error(exc, $"Error compiling {src.Name}");
                 return -1;
             }
 
@@ -250,7 +250,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error($"Error compiling {src.Name}: ", exc);
+                log.Error(exc, $"Error compiling {src.Name}");
                 if (!File.Exists(verbLogFile))
                 {
                     log.Error($"Compilation log file not found {verbLogFile}");
