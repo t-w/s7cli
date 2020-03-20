@@ -327,5 +327,28 @@ namespace S7Lib
             log.Debug($"Imported blocks from {library}:{libProgram} into {project}:{projProgram}");
             return 0;
         }
+
+        /// <summary>
+        /// Imports symbols into a program from a file
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="symbolFile">Path to symbol table file (usually .sdf)
+        ///     Supported extensions .asc, .dif, .sdf, .seq
+        /// </param>
+        /// <param name="flag">Symbol import flag (S7SymImportFlags)
+        ///     - 0, S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities
+        ///     - 1, S7SymImportOverwriteNameLeading - existing values with the same name are replaced. 
+        ///         The addresses are adjusted according to the specifications in the import file.
+        ///     - 2, S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
+        ///         Symbol names are adjusted to the specifications in the import file.
+        /// </param>
+        /// <param name="allowConflicts">Succeed (return 0) even if conflits are detected</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ImportSymbols(string project, string program, string symbolFile,
+            int flag = 0, bool allowConflicts = false)
+        {
+            return S7Symbols.ImportSymbols(project, program, symbolFile, flag, allowConflicts);
+        }
     }
 }
