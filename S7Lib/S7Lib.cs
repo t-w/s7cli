@@ -212,7 +212,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Import sources from a directory into a program
+        /// Import sources from a library into a program
         /// </summary>
         /// <param name="library">Source library name</param>
         /// <param name="project">Destination project name</param>
@@ -220,7 +220,7 @@ namespace S7Lib
         /// <param name="projProgram">Destination program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportLibSourcesDir(string library, string libProgram,
+        public static int ImportLibSources(string library, string libProgram,
             string project, string projProgram, bool overwrite = true)
         {
             var api = CreateApi();
