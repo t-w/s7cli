@@ -6,6 +6,8 @@ using Serilog;
 using SimaticLib;
 
 
+// TODO: Pass api and log to each function, for improved configurability?
+
 namespace S7Lib
 {
     /// <summary>
@@ -166,13 +168,13 @@ namespace S7Lib
             string[] supportedExtensions = { "*.SCL", "*.AWL", "*.INP", "*.GR7" };
             foreach (string ext in supportedExtensions)
                 sourceFiles.AddRange(
-                    System.IO.Directory.GetFiles(sourcesDir, ext,
-                        System.IO.SearchOption.TopDirectoryOnly));
+                    Directory.GetFiles(sourcesDir, ext,
+                        SearchOption.TopDirectoryOnly));
             return sourceFiles;
         }
 
         /// <summary>
-        /// Import sources from a directory into a project
+        /// Import sources from a directory into a program
         /// </summary>
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
@@ -210,7 +212,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Import sources from a directory into a project
+        /// Import sources from a directory into a program
         /// </summary>
         /// <param name="library">Source library name</param>
         /// <param name="project">Destination project name</param>
@@ -254,6 +256,77 @@ namespace S7Lib
             return 0;
         }
 
+        /// <summary>
+        /// Exports all sources from a program to a directory
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="sourcesDir">Directory to which to export sources</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ExportSources(string project, string program, string sourcesDir)
+        {
+            var api = CreateApi();
+            var log = CreateLog();
+
+            S7SWItems sourcesParent;
+            try
+            {
+                sourcesParent = api.Projects[project].Programs[program].Next["Sources"].Next;
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access sources in {project}:{program}");
+                return -1;
+            }
+
+            if (S7ProgramSource.ExportSources(sourcesParent, sourcesDir) != 0)
+            {
+                log.Error($"Could not export sources from {project}:{program} to {sourcesDir}");
+            }
+
+            log.Debug($"Exported {sourcesParent.Count} sources to {sourcesDir}");
+            return 0;
+        }
+
+        /// <summary>
+        /// Exports a source from a program to a directory
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="source">Source name</param>
+        /// <param name="sourcesDir">Directory to which to export sources</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ExportSource(string project, string program, string source, string sourcesDir)
+        {
+            var api = CreateApi();
+            var log = CreateLog();
+
+            S7Source sourceObj;
+            try
+            {
+                sourceObj = (S7Source) api.Projects[project].Programs[program].Next["Sources"].Next[source];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access source {source} in {project}:{program}");
+                return -1;
+            }
+
+            if (S7ProgramSource.ExportSource(sourceObj, sourcesDir) != 0)
+            {
+                log.Error($"Could not export source {source} from {project}:{program} to {sourcesDir}");
+            }
+
+            log.Debug($"Exported {source} to {sourcesDir}");
+            return 0;
+        }
+
+        /// <summary>
+        /// Creates a new empty S7 program
+        /// </summary>
+        /// <param name="project">Parent project name</param>
+        /// <param name="programName">Program name</param>
+        /// <returns></returns>
         static public int CreateProgram(string project, string programName)
         {
             var log = Api.CreateLog();

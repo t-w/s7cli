@@ -13,7 +13,7 @@ namespace S7Lib
     public static class S7ProgramSource
     {
         /// <summary>
-        /// Imports source into project
+        /// Imports source into program
         /// </summary>
         /// <param name="parent">Parent S7SWItem container object</param>
         /// <param name="sourceFilePath">Path to source file</param>
@@ -125,7 +125,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Import sources from library into project 
+        /// Imports sources from library into project 
         /// </summary>
         /// <param name="libParent">Source library container from which to copy source</param>
         /// <param name="projParent">Target project container onto which to copy source</param>
@@ -142,7 +142,50 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Compile source
+        /// Exports source to output directory
+        /// </summary>
+        /// <remarks>Output file will be named {sourceName}.{sourceType}</remarks>
+        /// <param name="source">S7Source object</param>
+        /// <param name="exportDir">Output directory</param>
+        /// <returns></returns>
+        public static int ExportSource(S7Source source, string exportDir)
+        {
+            var log = Api.CreateLog();
+            var sourceType = source.ConcreteType;
+            string outputFile = Path.Combine(exportDir, $"{source.Name}.{sourceType}");
+
+            try
+            {
+                source.Export(outputFile);
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not export source {source.Name} ({sourceType}) to {outputFile}");
+                return -1;
+            }
+
+            log.Debug($"Exported {source.Name} ({sourceType}) to {outputFile}");
+            return 0;
+        }
+
+        /// <summary>
+        /// Exports all sources from a program to a directory
+        /// </summary>
+        /// <param name="parent">Parent S7SWItem container object</param>
+        /// <param name="exportDir">Path to output source dir</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ExportSources(S7SWItems parent, string exportDir)
+        {
+            foreach (S7Source source in parent)
+            {
+                if (ExportSource(source, exportDir) != 0)
+                    return -1;
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Compiles source
         /// </summary>
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
@@ -188,7 +231,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Compile .SCL source
+        /// Compiles .SCL source
         /// </summary>
         /// <param name="src">STEP 7 source object</param>
         /// <returns>TODO: Improve return codes; for now 0 on success, -1 otherwise</returns>
@@ -227,7 +270,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Compile .AWL source
+        /// Compiles .AWL source
         /// </summary>
         /// <param name="src">STEP 7 source object</param>
         /// <returns>TODO: Improve return codes; for now 0 on success, -1 otherwise</returns>
@@ -359,7 +402,7 @@ namespace S7Lib
         }
 
         /// <summary>
-        /// Import blocks from library into project 
+        /// Imports blocks from library into project 
         /// </summary>
         /// <param name="libParent">Source library container from which to copy block</param>
         /// <param name="projParent">Target project container onto which to copy block</param>
