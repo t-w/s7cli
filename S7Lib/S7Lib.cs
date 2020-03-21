@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using Serilog;
 
@@ -334,7 +335,7 @@ namespace S7Lib
         /// </summary>
         /// <param name="project">Project name</param>
         /// <param name="program">Program name</param>
-        /// <param name="symbolFile">Path to symbol table file (usually .sdf)
+        /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
         /// <param name="flag">Symbol import flag (S7SymImportFlags)
@@ -349,7 +350,47 @@ namespace S7Lib
         public static int ImportSymbols(string project, string program, string symbolFile,
             int flag = 0, bool allowConflicts = false)
         {
+            // TODO: Check file exists
             return S7Symbols.ImportSymbols(project, program, symbolFile, flag, allowConflicts);
+        }
+
+        /// <summary>
+        /// Exports symbols from program from into a file
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="symbolFile">Path to output symbol table file (usually .sdf)
+        ///     Supported extensions .asc, .dif, .sdf, .seq
+        /// </param>
+        /// <param name="overwrite">Overwrite output file if it exists</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ExportSymbols(string project, string program, string symbolFile,
+            bool overwrite = false)
+        {
+            var log = CreateLog();
+
+            string exportDir = Path.GetDirectoryName(symbolFile);
+            if (!Directory.Exists(exportDir))
+            {
+                log.Error($"Could not export symbols from {project}:{program}: " +
+                          $"Output directory does not exist {exportDir}");
+                return -1;
+            }
+
+            // TODO: Ensure output has supported extension?
+
+            if (File.Exists(symbolFile) && !overwrite)
+            {
+                log.Error($"Could not export symbols from {project}:{program}: " +
+                          $"Output file exists {symbolFile}");
+                return -1;
+            }
+            else if (File.Exists(symbolFile))
+            {
+                log.Information($"Overwriting {symbolFile}");
+            }
+
+            return S7Symbols.ImportSymbols(project, program, symbolFile);
         }
     }
 }

@@ -79,7 +79,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not access program {program} in project {project}");
+                log.Error(exc, $"Could not access {project}:{program}");
                 return -1;
             }
 
@@ -90,7 +90,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not access program {program} symbol table");
+                log.Error(exc, $"Could not access symbol table in {project}:{program}");
                 return -1;
             }
 
@@ -101,7 +101,8 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not access program {program} symbol table");
+                log.Error(exc, $"Could not import symbol table into {project}:{program} " +
+                               $"from {symbolFile}");
                 return -1;
             }
 
@@ -115,6 +116,48 @@ namespace S7Lib
 
             if (!allowConflicts && conflicts > 0)
                 return -1;
+            return 0;
+        }
+
+        public static int ExportSymbols(string project, string program, string symbolFile)
+        {
+            var api = Api.CreateApi();
+            var log = Api.CreateLog();
+
+            S7Program target;
+            try
+            {
+                target = (S7Program)api.Projects[project].Programs[program];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access {project}:{program}");
+                return -1;
+            }
+
+            S7SymbolTable symbolTable;
+            try
+            {
+                symbolTable = (S7SymbolTable)target.SymbolTable;
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access symbol table in {project}:{program}");
+                return -1;
+            }
+
+            try
+            {
+                symbolTable.Export(symbolFile);
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not export symbols from {project}:{program} " +
+                               $"to {symbolFile}");
+                return -1;
+            }
+
+            log.Debug($"Imported symbols from {project}:{program} to {symbolFile}");
             return 0;
         }
     }
