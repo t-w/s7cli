@@ -7,6 +7,9 @@ using SimaticLib;
 
 namespace S7Lib
 {
+    /// <summary>
+    /// Provides a static interface for Simatic STEP 7 API
+    /// </summary>
     public static class Api
     {
         /// <summary>
@@ -20,7 +23,7 @@ namespace S7Lib
         /// </remarks>
         /// <param name="serverMode">UnattandedServerMode surpress GUI messages</param>
         /// <param name="automaticSave">Save project automatically</param>
-        /// <returns></returns>
+        /// <returns>Handle to Simatic API</returns>
         public static Simatic CreateApi(bool serverMode=true, bool automaticSave=true)
         {
             var api = new Simatic();
@@ -52,7 +55,6 @@ namespace S7Lib
         /// </summary>
         /// <param name="projectName">Project name (max 8 characters)</param>
         /// <param name="projectDir">Path to project's parent directory</param>
-        /// <returns>0 on success, -1 otherwise</returns>
         /// <returns>0 on success, -1 otherwise</returns>
         private static int CreateProjectImpl(string projectName, string projectDir, S7ProjectType projectType)
         {

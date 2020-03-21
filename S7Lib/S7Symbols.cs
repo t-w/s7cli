@@ -7,7 +7,10 @@ using SimaticLib;
 
 namespace S7Lib
 {
-    static class S7Symbols
+    /// <summary>
+    /// Contains methods related to Symbol Table
+    /// </summary>
+    public static class S7Symbols
     {
         // Default path for symbol import report file
         static string reportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";

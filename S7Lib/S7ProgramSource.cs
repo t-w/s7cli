@@ -7,7 +7,10 @@ using SimaticLib;
 
 namespace S7Lib
 {
-    class S7ProgramSource
+    /// <summary>
+    /// Contains methods related to S7 program sources
+    /// </summary>
+    public static class S7ProgramSource
     {
         /// <summary>
         /// Imports source into project
