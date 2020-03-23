@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
 
 using SimaticLib;
 using S7HCOM_XLib;
@@ -27,10 +25,11 @@ namespace S7Lib
         /// <param name="rack">Rack name</param>
         /// <param name="module">Child module name</param>
         /// <returns>S7Program on success, null otherwise</returns>
-        private static S7Program getProgram(string project, string station, string rack, string module)
+        private static S7Program getProgram(S7Context ctx,
+            string project, string station, string rack, string module)
         {
-            var api = Api.CreateApi();
-            var log = Api.CreateLog();
+            var api = ctx.Api;
+            var log = ctx.Log;
 
             IS7Station6 stationObj;
             try
@@ -74,12 +73,12 @@ namespace S7Lib
         /// <param name="module">Child module name</param>
         /// <param name="overwrite">Force overwrite of online blocks</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int DownloadProgramBlocks(string project, string station,
-            string rack, string module, bool overwrite)
+        public static int DownloadProgramBlocks(S7Context ctx,
+            string project, string station, string rack, string module, bool overwrite)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
 
-            S7Program programObj = getProgram(project, station, rack, module);
+            S7Program programObj = getProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             var flag = overwrite ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk;
@@ -109,11 +108,12 @@ namespace S7Lib
         /// <param name="rack">Rack name</param>
         /// <param name="module">Child module name</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int StartProgram(string project, string station, string rack, string module)
+        public static int StartProgram(S7Context ctx,
+            string project, string station, string rack, string module)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
 
-            S7Program programObj = getProgram(project, station, rack, module);
+            S7Program programObj = getProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             try
@@ -148,11 +148,12 @@ namespace S7Lib
         /// <param name="rack">Rack name</param>
         /// <param name="module">Child module name</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int StopProgram(string project, string station, string rack, string module)
+        public static int StopProgram(S7Context ctx,
+            string project, string station, string rack, string module)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
 
-            S7Program programObj = getProgram(project, station, rack, module);
+            S7Program programObj = getProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             try

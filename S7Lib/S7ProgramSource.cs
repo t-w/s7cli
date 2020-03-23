@@ -20,10 +20,11 @@ namespace S7Lib
         /// <param name="sourceType">SW object type</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportSource(S7SWItems parent, string sourceFilePath,
-            S7SWObjType sourceType = S7SWObjType.S7Source, bool overwrite = true)
+        public static int ImportSource(S7Context ctx,
+            S7SWItems parent, string sourceFilePath, S7SWObjType sourceType = S7SWObjType.S7Source,
+            bool overwrite = true)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             string sourceName = Path.GetFileNameWithoutExtension(sourceFilePath);
 
             IS7SWItem source = null;
@@ -76,9 +77,10 @@ namespace S7Lib
         /// <param name="destination">Target container onto which to copy source</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        private static int CopySource(S7Source source, S7SWItems destination, bool overwrite = true)
+        private static int CopySource(S7Context ctx,
+            S7Source source, S7SWItems destination, bool overwrite = true)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             var sourceName = source.Name;
             var sourceType = source.ConcreteType;
 
@@ -131,11 +133,12 @@ namespace S7Lib
         /// <param name="projParent">Target project container onto which to copy source</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportLibSources(S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+        public static int ImportLibSources(S7Context ctx,
+            S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
         {
             foreach (S7Source libSource in libParent)
             {
-                if (CopySource(libSource, projParent, overwrite) != 0)
+                if (CopySource(ctx, libSource, projParent, overwrite) != 0)
                     return -1;
             }
             return 0;
@@ -148,9 +151,9 @@ namespace S7Lib
         /// <param name="source">S7Source object</param>
         /// <param name="exportDir">Output directory</param>
         /// <returns></returns>
-        public static int ExportSource(S7Source source, string exportDir)
+        public static int ExportSource(S7Context ctx, S7Source source, string exportDir)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             var sourceType = source.ConcreteType;
             string outputFile = Path.Combine(exportDir, $"{source.Name}.{sourceType}");
 
@@ -174,11 +177,11 @@ namespace S7Lib
         /// <param name="parent">Parent S7SWItem container object</param>
         /// <param name="exportDir">Path to output source dir</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ExportSources(S7SWItems parent, string exportDir)
+        public static int ExportSources(S7Context ctx, S7SWItems parent, string exportDir)
         {
             foreach (S7Source source in parent)
             {
-                if (ExportSource(source, exportDir) != 0)
+                if (ExportSource(ctx, source, exportDir) != 0)
                     return -1;
             }
             return 0;
@@ -191,10 +194,10 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         /// <param name="sourceName">Source name</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int CompileSource(string project, string program, string sourceName)
+        public static int CompileSource(S7Context ctx, string project, string program, string sourceName)
         {
-            var api = Api.CreateApi();
-            var log = Api.CreateLog();
+            var api = ctx.Api;
+            var log = ctx.Log;
             S7Source source;
 
             try
@@ -210,11 +213,11 @@ namespace S7Lib
             var sourceType = source.ConcreteType;
             if (sourceType == S7SourceType.S7SCL || sourceType == S7SourceType.S7SCLMake)
             {
-                return CompileSclSource(source);
+                return CompileSclSource(ctx, source);
             }
             else if (sourceType == S7SourceType.S7AWL)
             {
-                return CompileAwlSource(source);
+                return CompileAwlSource(ctx, source);
             }
 
             try
@@ -235,9 +238,9 @@ namespace S7Lib
         /// </summary>
         /// <param name="src">STEP 7 source object</param>
         /// <returns>TODO: Improve return codes; for now 0 on success, -1 otherwise</returns>
-        private static int CompileSclSource(S7Source src)
+        private static int CompileSclSource(S7Context ctx, S7Source src)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             try
             {
                 IS7SWItems items = src.Compile();
@@ -249,7 +252,7 @@ namespace S7Lib
             }
 
             // get status and close the SCL compiler
-            S7CompilerSCL compiler = new S7CompilerSCL();
+            S7CompilerSCL compiler = new S7CompilerSCL(ctx);
             log.Information($"SCL status buffer: {compiler.getSclStatusBuffer()}");
             string statusLine = compiler.getSclStatusLine();
             int errors = compiler.getErrorCount();
@@ -274,10 +277,10 @@ namespace S7Lib
         /// </summary>
         /// <param name="src">STEP 7 source object</param>
         /// <returns>TODO: Improve return codes; for now 0 on success, -1 otherwise</returns>
-        public static int CompileAwlSource(S7Source src)
+        public static int CompileAwlSource(S7Context ctx, S7Source src)
         {
-            var log = Api.CreateLog();
-            var api = Api.CreateApi();
+            var log = ctx.Log;
+            var api = ctx.Api;
 
             // special setting for STL compilation, CRG-1417
             // ("quiet" compilation with status written to a log file)
@@ -353,9 +356,10 @@ namespace S7Lib
         /// <param name="destination">Target container onto which to copy block</param>
         /// <param name="overwrite">Overwrite existing block if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        private static int CopyBlock(S7Block block, S7SWItems destination, bool overwrite = true)
+        private static int CopyBlock(S7Context ctx,
+            S7Block block, S7SWItems destination, bool overwrite = true)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             var blockName = block.Name;
             var blockType = block.ConcreteType;
 
@@ -408,9 +412,10 @@ namespace S7Lib
         /// <param name="projParent">Target project container onto which to copy block</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportLibBlocks(S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+        public static int ImportLibBlocks(S7Context ctx,
+            S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             foreach (S7Block libBlock in libParent)
             {
                 // Note: "System data" blocks to not have SymbolicName attribute
@@ -419,7 +424,7 @@ namespace S7Lib
                     log.Debug("Cannot copy System data block. Skipping."); 
                     continue;
                 }
-                if (CopyBlock(libBlock, projParent, overwrite) != 0)
+                if (CopyBlock(ctx, libBlock, projParent, overwrite) != 0)
                     return -1;
             }
             return 0;

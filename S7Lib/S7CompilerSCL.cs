@@ -41,15 +41,17 @@ namespace S7Lib
         // compiler status buffer
         List<string> statusBuffer;
 
+        public Serilog.Core.Logger Log;
 
         /// <summary>
         /// Constructor
         /// </summary>
         ///
-        public S7CompilerSCL()
+        public S7CompilerSCL(S7Context ctx)
         {
             nullptr = new IntPtr(0);
-            var log = Api.CreateLog();
+            Log = ctx.Log;
+            var log = Log;
 
             handle = WindowsAPI.FindWindow( "AfxMDIFrame42", null );
             if (handle.Equals(null))
@@ -102,7 +104,7 @@ namespace S7Lib
         /// </summary>
         void readSclStatusBuffer()
         {
-            var log = Api.CreateLog();
+            var log = Log;
 
             IntPtr listbox = getSclStatusListBox();
             int itemCount = WindowsAPI.SendMessage(listbox, WindowsAPI.LB_GETCOUNT, nullptr, nullptr);

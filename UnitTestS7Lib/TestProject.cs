@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S7Lib;
+using Serilog;
 
 namespace UnitTestS7Lib
 {
@@ -9,15 +10,23 @@ namespace UnitTestS7Lib
     {
         static string workspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
 
+        [ClassCleanup]
+        public static void RemoveTestProject()
+        {
+            var ctx = new S7Context();
+            Api.RemoveProject(ctx, "testProj");
+        }
+
         [TestMethod]
         public void TestCreateRemoveProject()
         {
-            var rv = Api.CreateProject("testProj", workspaceDir);
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProj", workspaceDir);
             Assert.AreEqual(0, rv);
             var s7ProjFilePath = Path.Combine(workspaceDir, @"testProj\testProj.s7p");
             var projectExists = File.Exists(s7ProjFilePath);
             Assert.IsTrue(projectExists);
-            rv = Api.RemoveProject("testProj");
+            rv = Api.RemoveProject(ctx, "testProj");
             Assert.AreEqual(0, rv);
             projectExists = File.Exists(s7ProjFilePath);
             Assert.IsFalse(projectExists);
@@ -26,12 +35,13 @@ namespace UnitTestS7Lib
         [TestMethod]
         public void TestCreateRemoveLibrary()
         {
-            var rv = Api.CreateProject("testLib", workspaceDir);
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testLib", workspaceDir);
             Assert.AreEqual(0, rv);
             var s7ProjFilePath = Path.Combine(workspaceDir, @"testLib\testLib.s7p");
             var projectExists = File.Exists(s7ProjFilePath);
             Assert.IsTrue(projectExists);
-            rv = Api.RemoveProject("testLib");
+            rv = Api.RemoveProject(ctx, "testLib");
             Assert.AreEqual(0, rv);
             projectExists = File.Exists(s7ProjFilePath);
             Assert.IsFalse(projectExists);
@@ -40,42 +50,47 @@ namespace UnitTestS7Lib
         [TestMethod]
         public void TestRegisterProject()
         {
-            var rv = Api.CreateProject("testProj", workspaceDir);
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProj", workspaceDir);
             Assert.AreEqual(0, rv);
             var s7ProjFilePath = Path.Combine(workspaceDir, @"testProj\testProj.s7p");
-            rv = Api.RegisterProject(s7ProjFilePath);
+            rv = Api.RegisterProject(ctx, s7ProjFilePath);
             Assert.AreEqual(0, rv);
-            Api.RemoveProject("testProj");
+            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestCreateInvalidProject()
         {
-            var rv = Api.CreateProject("testProject", workspaceDir);
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProject", workspaceDir);
             Assert.AreEqual(-1, rv);
         }
 
         [TestMethod]
         public void TestCreateProjectTwice()
         {
-            var rv = Api.CreateProject("testProj", workspaceDir);
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProj", workspaceDir);
             Assert.AreEqual(0, rv);
-            rv = Api.CreateProject("testProj", workspaceDir);
+            rv = Api.CreateProject(ctx, "testProj", workspaceDir);
             Assert.AreEqual(-1, rv);
-            Api.RemoveProject("testProj");
+            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestRegisterInvalidProject()
         {
-            var rv = Api.RegisterProject(".!");
+            var ctx = new S7Context();
+            var rv = Api.RegisterProject(ctx, ".!");
             Assert.AreEqual(-1, rv);
         }
 
         [TestMethod]
         public void TestRemoveInvalidProject()
         {
-            var rv = Api.RemoveProject(".!");
+            var ctx = new S7Context();
+            var rv = Api.RemoveProject(ctx, ".!");
             Assert.AreEqual(-1, rv);
         }
     }

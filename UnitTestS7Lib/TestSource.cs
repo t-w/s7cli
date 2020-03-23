@@ -16,47 +16,51 @@ namespace UnitTestS7Lib
         [ClassCleanup]
         public static void RemoveTestProject()
         {
-            Api.RemoveProject("testProj");
+            var ctx = new S7Context();
+            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestImportSclSource()
         {
-            Api.CreateProject("testProj", workspaceDir);
-            Api.CreateProgram("testProj", "testProgram");
-            var rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir);
+            var ctx = new S7Context();
+            Api.CreateProject(ctx, "testProj", workspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
+            var rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir);
             Assert.AreEqual(0, rv);
             // Import existing sources fails if overwrite is set to false
-            rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir, overwrite: false);
+            rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir, overwrite: false);
             Assert.AreEqual(-1, rv);
             // Import existing sources succeeds if overwrite is set to true
-            rv = Api.ImportSourcesDir("testProj", "testProgram", sourcesDir, overwrite: true);
+            rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir, overwrite: true);
             Assert.AreEqual(0, rv);
-            Api.RemoveProject("testProj");
+            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestCompileAwlSource()
         {
-            Api.CreateProject("testProj", workspaceDir);
-            Api.CreateProgram("testProj", "testProgram");
+            var ctx = new S7Context();
+            Api.CreateProject(ctx, "testProj", workspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
             // TODO: Only import .awl source
-            Api.ImportSourcesDir("testProj", "testProgram", sourcesDir);
-            var rv = Api.CompileSource("testProj", "testProgram", awlSource);
+            Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir);
+            var rv = Api.CompileSource(ctx, "testProj", "testProgram", awlSource);
             // Assert.AreEqual(0, rv);
-            Api.RemoveProject("testProj");
+            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestCompileSclSource()
         {
-            Api.CreateProject("testProj", workspaceDir);
-            Api.CreateProgram("testProj", "testProgram");
+            var ctx = new S7Context();
+            Api.CreateProject(ctx, "testProj", workspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
             // TODO: Only import .awl source
-            Api.ImportSourcesDir("testProj", "testProgram", sourcesDir);
-            var rv = Api.CompileSource("testProj", "testProgram", sclSource);
+            Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir);
+            var rv = Api.CompileSource(ctx, "testProj", "testProgram", sclSource);
             // Assert.AreEqual(0, rv);
-            Api.RemoveProject("testProj");
+            Api.RemoveProject(ctx, "testProj");
         }
 
     }

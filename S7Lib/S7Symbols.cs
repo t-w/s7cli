@@ -15,9 +15,9 @@ namespace S7Lib
         // Default path for symbol import report file
         static string reportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";
 
-        public static string ReadFile(string path)
+        public static string ReadFile(S7Context ctx, string path)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             if (File.Exists(path))
                 return File.ReadAllText(path);
             log.Warning($"File {path} not found");
@@ -32,11 +32,10 @@ namespace S7Lib
         /// <param name="warnings">Number of warnings during importation</param>
         /// <param name="conflicts">Number of symbol conflicts during importation</param>
         /// <returns>The total number of critical errors (sum of errors and conflicts)</returns>
-        private static string GetImportReport(ref int errors,
-                                              ref int warnings,
-                                              ref int conflicts)
+        private static string GetImportReport(S7Context ctx,
+            ref int errors, ref int warnings, ref int conflicts)
         {
-            string report = ReadFile(reportFilePath);
+            string report = ReadFile(ctx, reportFilePath);
             string[] split = report.Split('\n');
 
             int errorIndex = Array.FindIndex<string>(split, s => Regex.IsMatch(s, "^Error:.*"));
@@ -53,9 +52,9 @@ namespace S7Lib
         /// <summary>
         /// Close the Notepad window with importation log.
         /// </summary>
-        private static void CloseSymbolImportationLogWindow()
+        private static void CloseSymbolImportationLogWindow(S7Context ctx)
         {
-            var log = Api.CreateLog();
+            var log = ctx.Log;
             IntPtr handle = WindowsAPI.FindWindow(null, "sym_imp - Notepad");
             if (handle.Equals(null))
             {
@@ -65,11 +64,11 @@ namespace S7Lib
             WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
         }
 
-        public static int ImportSymbols(string project, string program, string symbolFile,
-            int flag = 0, bool allowConflicts = false)
+        public static int ImportSymbols(S7Context ctx,
+            string project, string program, string symbolFile, int flag = 0, bool allowConflicts = false)
         {
-            var api = Api.CreateApi();
-            var log = Api.CreateLog();
+            var api = ctx.Api;
+            var log = ctx.Log;
             var flags = (S7SymImportFlags)flag;
 
             S7Program target;
@@ -107,8 +106,8 @@ namespace S7Lib
             }
 
             int errors = -1, warnings = -1, conflicts = -1;
-            string report = GetImportReport(ref errors, ref warnings, ref conflicts);
-            CloseSymbolImportationLogWindow();
+            string report = GetImportReport(ctx, ref errors, ref warnings, ref conflicts);
+            CloseSymbolImportationLogWindow(ctx);
 
             log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{program}\n" +
                       $"Report {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s):\n" +
@@ -119,10 +118,11 @@ namespace S7Lib
             return 0;
         }
 
-        public static int ExportSymbols(string project, string program, string symbolFile)
+        public static int ExportSymbols(S7Context ctx,
+            string project, string program, string symbolFile)
         {
-            var api = Api.CreateApi();
-            var log = Api.CreateLog();
+            var api = ctx.Api;
+            var log = ctx.Log;
 
             S7Program target;
             try
