@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Serilog;
 
 using SimaticLib;
+using S7HCOM_XLib;
 
 
 // TODO: Pass api and log to each function, for improved configurability?
@@ -464,6 +465,46 @@ namespace S7Lib
             }
 
             return S7Symbols.ImportSymbols(project, program, symbolFile);
+        }
+
+        /// <summary>
+        /// Compiles the HW configuration for each of the stations in a project
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="allowFail">Return 0 even if unable to compile some station</param>
+        /// <returns></returns>
+        public static int compileAllStations(string project, bool allowFail = true)
+        {
+            var api = CreateApi();
+            var log = CreateLog();
+
+            IS7Stations stations;
+            try
+            {
+                stations = api.Projects[project].Stations;
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access stations in project {project}");
+                return -1;
+            }
+
+            foreach (var station in stations)
+            {
+                var stationObj = (S7Station5) station;
+                try
+                {
+                    stationObj.Compile();
+                    log.Debug($"Compiled HW config for {stationObj.Name}");
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not compile HW config for {stationObj.Name}");
+                    if (!allowFail) return -1;
+                }
+            }
+
+            return 0;
         }
     }
 }
