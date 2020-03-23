@@ -76,6 +76,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Online.cs" />
     <Compile Include="S7Symbols.cs" />
     <Compile Include="S7CompilerSCL.cs" />
     <Compile Include="S7ProgramSource.cs" />

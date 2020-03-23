@@ -100,5 +100,76 @@ namespace S7Lib
                       $"{project}:{station}:{rack}:{module}");
             return 0;
         }
+
+        /// <summary>
+        /// Starts/restarts a program
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="station">Station name</param>
+        /// <param name="rack">Rack name</param>
+        /// <param name="module">Child module name</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int StartProgram(string project, string station, string rack, string module)
+        {
+            var log = Api.CreateLog();
+
+            S7Program programObj = getProgram(project, station, rack, module);
+            if (programObj == null) return -1;
+
+            try
+            {
+                if (programObj.ModuleState != S7ModState.S7Run)
+                {
+                    programObj.NewStart();
+                }
+                else
+                {
+                    log.Debug($"{programObj.Name} is already in RUN mode. Restarting.");
+                    programObj.Restart();
+                }
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not start/restart {programObj.Name} " +
+                               $"{project}:{station}:{rack}:{module}");
+                return -1;
+            }
+
+            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode " +
+                      $"{project}:{station}:{rack}:{module}");
+            return 0;
+        }
+
+        /// <summary>
+        /// Stops a program
+        /// </summary>
+        /// <param name="project">Project name</param>
+        /// <param name="station">Station name</param>
+        /// <param name="rack">Rack name</param>
+        /// <param name="module">Child module name</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int StopProgram(string project, string station, string rack, string module)
+        {
+            var log = Api.CreateLog();
+
+            S7Program programObj = getProgram(project, station, rack, module);
+            if (programObj == null) return -1;
+
+            try
+            {
+                programObj.Stop();
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not stop {programObj.Name} " +
+                               $"{project}:{station}:{rack}:{module}");
+                return -1;
+            }
+
+            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode " +
+                      $"{project}:{station}:{rack}:{module}");
+            return 0;
+        }
     }
+
 }
