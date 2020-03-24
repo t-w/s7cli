@@ -5,6 +5,15 @@ namespace S7Lib
     /// <summary>
     /// Context in which to run static S7 Library functions
     /// </summary>
+    /// <remarks>
+    /// The context is required for running virtually every function in S7Lib.
+    /// It encapsulates the Simatic API handle and the logger objects.
+    /// The main reasons for this class are:
+    /// 1. Ensure a single instance of the API and log are used throughout a single command
+    ///     The objective is akin to the original singleton pattern implementation, with
+    ///     the advantage that it is much easier to manage the scope of these objects
+    /// 2. Allow a higher level abstraction to configure the API and log accordingly
+    /// </remarks>
     public class S7Context
     {
         /// <summary>
