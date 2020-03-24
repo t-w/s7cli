@@ -54,13 +54,8 @@ namespace UnitTestS7Lib
         public void TestCompileSclSource()
         {
             var ctx = new S7Context();
-            Api.CreateProject(ctx, "testProj", workspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
-            // TODO: Only import .awl source
-            Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir);
-            var rv = Api.CompileSource(ctx, "testProj", "testProgram", sclSource);
-            // Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
+            var rv = Api.CompileSource(ctx, "ZEN05_01_S7SCL__Measv06", "S7 Program", "Measv06");
+            Assert.AreEqual(0, rv);
         }
 
     }
