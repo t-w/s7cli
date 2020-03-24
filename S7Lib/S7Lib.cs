@@ -202,21 +202,12 @@ namespace S7Lib
             var sourceFiles = GetSourcesFromDir(sourcesDir);
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
-
-            S7SWItems sourcesParent;
-            try
-            {
-                sourcesParent = projectObj.Programs[program].Next["Sources"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access sources in program {program} in project {project}");
-                return -1;
-            }
+            var container = S7ProgramSource.GetSources(ctx, projectObj, program);
+            if (container == null) return -1;            
 
             foreach (var source in sourceFiles)
             {
-                if (S7ProgramSource.ImportSource(ctx, parent: sourcesParent, sourceFilePath: source, overwrite: overwrite) != 0)
+                if (S7ProgramSource.ImportSource(ctx, container: container, sourceFilePath: source, overwrite: overwrite) != 0)
                 {
                     log.Error($"Could not import {source} into project {project}");
                     return -1;
@@ -245,28 +236,12 @@ namespace S7Lib
             if (projectObj == null) return -1;
             var libraryObj = GetProject(ctx, library);
             if (libraryObj == null) return -1;
+            var libraryContainer = S7ProgramSource.GetSources(ctx, libraryObj, libProgram);
+            if (libraryContainer == null) return -1;
+            var projectContainer = S7ProgramSource.GetSources(ctx, projectObj, projProgram);
+            if (projectContainer == null) return -1;
 
-            S7SWItems libSourcesParent, projSourcesParent;
-            try
-            {
-                libSourcesParent = libraryObj.Programs[libProgram].Next["Sources"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access sources in program {libProgram} in library {library}");
-                return -1;
-            }
-            try
-            {
-                projSourcesParent = projectObj.Programs[projProgram].Next["Sources"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access sources in program {projProgram} in project {project}");
-                return -1;
-            }
-
-            if (S7ProgramSource.ImportLibSources(ctx, libParent: libSourcesParent, projParent: projSourcesParent, overwrite) != 0)
+            if (S7ProgramSource.ImportLibSources(ctx, libSources: libraryContainer, projSources: projectContainer, overwrite) != 0)
             {
                 log.Error($"Could not import sources from {library}:{libProgram} into {project}:{projProgram}");
                 return -1;
@@ -290,24 +265,15 @@ namespace S7Lib
 
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
-
-            S7SWItems sourcesParent;
-            try
-            {
-                sourcesParent = projectObj.Programs[program].Next["Sources"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access sources in {project}:{program}");
-                return -1;
-            }
-
-            if (S7ProgramSource.ExportSources(ctx, sourcesParent, sourcesDir) != 0)
+            var projectSources = S7ProgramSource.GetSources(ctx, projectObj, program);
+            if (projectSources == null) return -1;
+        
+            if (S7ProgramSource.ExportSources(ctx, projectSources, sourcesDir) != 0)
             {
                 log.Error($"Could not export sources from {project}:{program} to {sourcesDir}");
             }
 
-            log.Debug($"Exported {sourcesParent.Count} sources to {sourcesDir}");
+            log.Debug($"Exported {projectSources.Next.Count} sources to {sourcesDir}");
             return 0;
         }
 
@@ -326,17 +292,8 @@ namespace S7Lib
 
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
-
-            S7Source sourceObj;
-            try
-            {
-                sourceObj = (S7Source)projectObj.Programs[program].Next["Sources"].Next[source];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access source {source} in {project}:{program}");
-                return -1;
-            }
+            var sourceObj = S7ProgramSource.GetSource(ctx, projectObj, program, source);
+            if (sourceObj == null) return -1;
 
             if (S7ProgramSource.ExportSource(ctx, sourceObj, sourcesDir) != 0)
             {
@@ -404,28 +361,13 @@ namespace S7Lib
             if (libraryObj == null) return -1;
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
+            var libraryBlocks = S7ProgramSource.GetBlocks(ctx, libraryObj, libProgram);
+            if (libraryBlocks == null) return -1;
+            var projectBlocks = S7ProgramSource.GetBlocks(ctx, projectObj, projProgram);
+            if (projectBlocks == null) return -1;
 
-            S7SWItems libBlocksParent, projBlocksParent;
-            try
-            {
-                libBlocksParent = libraryObj.Programs[libProgram].Next["Blocks"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access blocks in program {libProgram} in library {library}");
-                return -1;
-            }
-            try
-            {
-                projBlocksParent = projectObj.Programs[projProgram].Next["Blocks"].Next;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access blocks in program {projProgram} in project {project}");
-                return -1;
-            }
-
-            if (S7ProgramSource.ImportLibBlocks(ctx, libParent: libBlocksParent, projParent: projBlocksParent, overwrite) != 0)
+            if (S7ProgramSource.ImportLibBlocks(ctx,
+                libBlocks: libraryBlocks, projBlocks: projectBlocks, overwrite) != 0)
             {
                 log.Error($"Could not import blocks from {library}:{libProgram} into {project}:{projProgram}");
                 return -1;
@@ -621,7 +563,7 @@ namespace S7Lib
                     log.Error(exc, $"Could not access program in project {project}");
                     continue;
                 }
-                log.Debug($"Listing containers for project {project}:{programObj.Name}");
+                log.Debug($"Listing containers for program {project}:{programObj.Name}");
                 // TODO: If the cast to S7Container is safe, remove try catch block                
                 foreach (var container in programObj.Next)
                 {

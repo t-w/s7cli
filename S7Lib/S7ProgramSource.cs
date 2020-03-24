@@ -12,16 +12,102 @@ namespace S7Lib
     /// </summary>
     public static class S7ProgramSource
     {
+        public static S7Container GetContainer(S7Context ctx, S7Project projectObj, string program, S7ContainerType type)
+        {
+            var log = ctx.Log;
+
+            foreach (var container in projectObj.Programs[program].Next)
+            {
+                try
+                {
+                    var containerObj = (S7Container)container;
+                    if (containerObj.ConcreteType == type)
+                    {
+                        return containerObj;
+                    }
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access container in {projectObj.Name}:{program}");
+                }
+            }
+            log.Error($"Could not find container of type {type} in {projectObj.Name}:{program}");
+            return null;
+        }
+
+        public static S7Container GetSources(S7Context ctx, S7Project projectObj, string program)
+        {
+            return GetContainer(ctx, projectObj, program, S7ContainerType.S7SourceContainer);
+        }
+
+        public static S7Container GetBlocks(S7Context ctx, S7Project projectObj, string program)
+        {
+            return GetContainer(ctx, projectObj, program, S7ContainerType.S7BlockContainer);
+        }
+
+
+        /// <summary>
+        /// Gets a S7Source object from a program
+        /// </summary>
+        /// <remarks>The source container may not be named "Sources"</remarks>
+        /// <param name="projectObj">S7Project object</param>
+        /// <param name="program">Program name</param>
+        /// <param name="source">Source name</param>
+        /// <returns></returns>
+        public static S7Source GetSource(S7Context ctx, S7Project projectObj, string program, string source)
+        {
+            var log = ctx.Log;
+            S7Source sourceObj = null;
+            var container = GetSources(ctx, projectObj, program);
+            if (container == null) return null;
+
+            try
+            {
+                sourceObj = (S7Source)container.Next[source];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not find source {source} in {projectObj.Name}:{program}");
+            }
+            return sourceObj;
+        }
+
+        /// <summary>
+        /// Gets a S7Block object from a program
+        /// </summary>
+        /// <remarks>The block container may not be named "Blocks"</remarks>
+        /// <param name="projectObj">S7Project object</param>
+        /// <param name="program">Program name</param>
+        /// <param name="block">Block name</param>
+        /// <returns></returns>
+        public static S7Block GetBlock(S7Context ctx, S7Project projectObj, string program, string block)
+        {
+            var log = ctx.Log;
+            S7Block blockObj = null;
+            var container = GetBlocks(ctx, projectObj, program);
+            if (container == null) return null;
+
+            try
+            {
+                blockObj = (S7Block)container.Next[block];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not find block {block} in {projectObj.Name}:{program}");
+            }
+            return blockObj;
+        }
+
         /// <summary>
         /// Imports source into program
         /// </summary>
-        /// <param name="parent">Parent S7SWItem container object</param>
+        /// <param name="container">Parent container object</param>
         /// <param name="sourceFilePath">Path to source file</param>
         /// <param name="sourceType">SW object type</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportSource(S7Context ctx,
-            S7SWItems parent, string sourceFilePath, S7SWObjType sourceType = S7SWObjType.S7Source,
+            S7Container container, string sourceFilePath, S7SWObjType sourceType = S7SWObjType.S7Source,
             bool overwrite = true)
         {
             var log = ctx.Log;
@@ -31,7 +117,7 @@ namespace S7Lib
             // Check if source is already present
             try
             {
-                source = parent[sourceName];
+                source = container.Next[sourceName];
             }
             catch (Exception) { }
 
@@ -46,7 +132,7 @@ namespace S7Lib
                 log.Debug($"{sourceName} already exists. Overwriting.");
                 try
                 {
-                    parent.Remove(sourceName);
+                    container.Next.Remove(sourceName);
                 }
                 catch (Exception exc)
                 {
@@ -57,7 +143,7 @@ namespace S7Lib
 
             try
             {
-                var item = parent.Add(sourceName, sourceType, sourceFilePath);
+                var item = container.Next.Add(sourceName, sourceType, sourceFilePath);
             }
             catch (Exception exc)
             {
@@ -78,7 +164,7 @@ namespace S7Lib
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         private static int CopySource(S7Context ctx,
-            S7Source source, S7SWItems destination, bool overwrite = true)
+            S7Source source, S7Container destination, bool overwrite = true)
         {
             var log = ctx.Log;
             var sourceName = source.Name;
@@ -88,7 +174,7 @@ namespace S7Lib
             // Check if source is already present
             try
             {
-                destSource = destination[sourceName];
+                destSource = destination.Next[sourceName];
             }
             catch (Exception) { }
 
@@ -103,7 +189,7 @@ namespace S7Lib
                 log.Debug($"{sourceName} already exists. Overwriting.");
                 try
                 {
-                    destination.Remove(sourceName);
+                    destination.Next.Remove(sourceName);
                 }
                 catch (Exception exc)
                 {
@@ -114,7 +200,7 @@ namespace S7Lib
 
             try
             {
-                var item = source.Copy(destination);
+                var item = source.Copy(destination.Next);
             }
             catch (Exception exc)
             {
@@ -129,16 +215,16 @@ namespace S7Lib
         /// <summary>
         /// Imports sources from library into project 
         /// </summary>
-        /// <param name="libParent">Source library container from which to copy source</param>
-        /// <param name="projParent">Target project container onto which to copy source</param>
+        /// <param name="libSources">Source library container from which to copy source</param>
+        /// <param name="projSources">Target project container onto which to copy source</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportLibSources(S7Context ctx,
-            S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+            S7Container libSources, S7Container projSources, bool overwrite = true)
         {
-            foreach (S7Source libSource in libParent)
+            foreach (S7Source libSource in libSources.Next)
             {
-                if (CopySource(ctx, libSource, projParent, overwrite) != 0)
+                if (CopySource(ctx, libSource, projSources, overwrite) != 0)
                     return -1;
             }
             return 0;
@@ -174,12 +260,12 @@ namespace S7Lib
         /// <summary>
         /// Exports all sources from a program to a directory
         /// </summary>
-        /// <param name="parent">Parent S7SWItem container object</param>
+        /// <param name="sources">Parent sources container object</param>
         /// <param name="exportDir">Path to output source dir</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ExportSources(S7Context ctx, S7SWItems parent, string exportDir)
+        public static int ExportSources(S7Context ctx, S7Container sources, string exportDir)
         {
-            foreach (S7Source source in parent)
+            foreach (S7Source source in sources.Next)
             {
                 if (ExportSource(ctx, source, exportDir) != 0)
                     return -1;
@@ -197,20 +283,11 @@ namespace S7Lib
         public static int CompileSource(S7Context ctx, string project, string program, string sourceName)
         {
             var log = ctx.Log;
-            S7Source source;
 
             var projectObj = Api.GetProject(ctx, project);
             if (projectObj == null) return -1;
-
-            try
-            {
-                source = (S7Source)projectObj.Programs[program].Next["Sources"].Next[sourceName];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not find source {sourceName} in project {project} program {program}");
-                return -1;
-            }
+            var source = GetSource(ctx, projectObj, program, sourceName);
+            if (source == null) return -1;
 
             var sourceType = source.ConcreteType;
             if (sourceType == S7SourceType.S7SCL || sourceType == S7SourceType.S7SCLMake)
@@ -359,7 +436,7 @@ namespace S7Lib
         /// <param name="overwrite">Overwrite existing block if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         private static int CopyBlock(S7Context ctx,
-            S7Block block, S7SWItems destination, bool overwrite = true)
+            S7Block block, S7Container destination, bool overwrite = true)
         {
             var log = ctx.Log;
             var blockName = block.Name;
@@ -369,7 +446,7 @@ namespace S7Lib
             // Check if block is already present
             try
             {
-                destBlock = destination[blockName];
+                destBlock = destination.Next[blockName];
             }
             catch (Exception) { }
 
@@ -384,7 +461,7 @@ namespace S7Lib
                 log.Debug($"{blockName} already exists. Overwriting.");
                 try
                 {
-                    destination.Remove(blockName);
+                    destination.Next.Remove(blockName);
                 }
                 catch (Exception exc)
                 {
@@ -410,15 +487,15 @@ namespace S7Lib
         /// <summary>
         /// Imports blocks from library into project 
         /// </summary>
-        /// <param name="libParent">Source library container from which to copy block</param>
-        /// <param name="projParent">Target project container onto which to copy block</param>
+        /// <param name="libBlocks">Source library container from which to copy block</param>
+        /// <param name="projBlocks">Target project container onto which to copy block</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportLibBlocks(S7Context ctx,
-            S7SWItems libParent, S7SWItems projParent, bool overwrite = true)
+            S7Container libBlocks, S7Container projBlocks, bool overwrite = true)
         {
             var log = ctx.Log;
-            foreach (S7Block libBlock in libParent)
+            foreach (S7Block libBlock in libBlocks.Next)
             {
                 // Note: "System data" blocks to not have SymbolicName attribute
                 if (libBlock.Name == "System data")
@@ -426,7 +503,7 @@ namespace S7Lib
                     log.Debug("Cannot copy System data block. Skipping."); 
                     continue;
                 }
-                if (CopyBlock(ctx, libBlock, projParent, overwrite) != 0)
+                if (CopyBlock(ctx, libBlock, projBlocks, overwrite) != 0)
                     return -1;
             }
             return 0;
