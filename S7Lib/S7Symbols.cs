@@ -121,13 +121,15 @@ namespace S7Lib
         public static int ExportSymbols(S7Context ctx,
             string project, string program, string symbolFile)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var projectObj = Api.GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             S7Program target;
             try
             {
-                target = (S7Program)api.Projects[project].Programs[program];
+                target = (S7Program)projectObj.Programs[program];
             }
             catch (Exception exc)
             {

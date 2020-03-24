@@ -190,19 +190,21 @@ namespace S7Lib
         /// <summary>
         /// Compiles source
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="sourceName">Source name</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int CompileSource(S7Context ctx, string project, string program, string sourceName)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
             S7Source source;
 
+            var projectObj = Api.GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
             try
             {
-                source = (S7Source) api.Projects[project].Programs[program].Next["Sources"].Next[sourceName];
+                source = (S7Source)projectObj.Programs[program].Next["Sources"].Next[sourceName];
             }
             catch (Exception exc)
             {
@@ -352,7 +354,7 @@ namespace S7Lib
         /// <summary>
         /// Copies S7Block to destination S7SWItems container
         /// </summary>
-        /// <param name="source">Target block to copy</param>
+        /// <param name="block">Target block to copy</param>
         /// <param name="destination">Target container onto which to copy block</param>
         /// <param name="overwrite">Overwrite existing block if present</param>
         /// <returns>0 on success, -1 otherwise</returns>

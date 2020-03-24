@@ -28,6 +28,41 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Obtains a project object, from the path to its .s7p project file or its name
+        /// </summary>
+        /// <remarks>
+        /// Project names are not guaranteed to be unique.
+        /// However, the path to .s7p project file is, and is therefore preferred as a projectId
+        /// </remarks>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <returns>S7Project object on success, null otherwise</returns>
+        public static S7Project GetProject(S7Context ctx, string project)
+        {
+            var api = ctx.Api;
+            var log = ctx.Log;
+            S7Project projectObj = null;
+
+            try
+            {
+                // Detect if a path was provided
+                if (Path.HasExtension(project))
+                {
+                    projectObj = (S7Project)api.Projects.Add(Name: project);
+                }
+                else
+                {
+                    projectObj = (S7Project)api.Projects[project];
+                }
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not get project {project}");
+            }
+
+            return projectObj;
+        }
+
+        /// <summary>
         /// Internal function to create STEP 7 project or library
         /// </summary>
         /// <param name="projectName">Project name (max 8 characters)</param>
@@ -48,6 +83,7 @@ namespace S7Lib
 
             if (ProjectExists(ctx, projectName))
             {
+                // Otherwise Add spawns a blocking GUI error message
                 log.Error($"Could not create project {projectName} in {projectDir}: " +
                           $"Project exists");
                 return -1;
@@ -116,24 +152,26 @@ namespace S7Lib
         /// <summary>
         /// Removes STEP 7 project and deletes all of its files
         /// </summary>
-        /// <param name="projectName">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int RemoveProject(S7Context ctx, string projectName)
+        public static int RemoveProject(S7Context ctx, string project)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             try
             {
-                api.Projects.Remove(Index: projectName);
+                projectObj.Remove();
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not remove project {projectName}");
+                log.Error(exc, $"Could not remove project {project}");
                 return -1;
             }
 
-            log.Debug($"Removed project {projectName}");
+            log.Debug($"Removed project {project}");
             return 0;
         }
 
@@ -151,7 +189,7 @@ namespace S7Lib
         /// <summary>
         /// Import sources from a directory into a program
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="sourcesDir">Directory from which to import sources</param>
         /// <param name="overwrite">Force overwrite existing sources in project</param>
@@ -159,14 +197,16 @@ namespace S7Lib
         public static int ImportSourcesDir(S7Context ctx,
             string project, string program, string sourcesDir, bool overwrite=true)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
 
             var sourceFiles = GetSourcesFromDir(sourcesDir);
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
             S7SWItems sourcesParent;
             try
             {
-                sourcesParent = api.Projects[project].Programs[program].Next["Sources"].Next;
+                sourcesParent = projectObj.Programs[program].Next["Sources"].Next;
             }
             catch (Exception exc)
             {
@@ -190,8 +230,8 @@ namespace S7Lib
         /// <summary>
         /// Import sources from a library into a program
         /// </summary>
-        /// <param name="library">Source library name</param>
-        /// <param name="project">Destination project name</param>
+        /// <param name="library">Source library id, path to .s7p (unique) or project name</param>
+        /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
         /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
@@ -199,13 +239,17 @@ namespace S7Lib
         public static int ImportLibSources(S7Context ctx,
             string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+            var libraryObj = GetProject(ctx, library);
+            if (libraryObj == null) return -1;
 
             S7SWItems libSourcesParent, projSourcesParent;
             try
             {
-                libSourcesParent = api.Projects[library].Programs[libProgram].Next["Sources"].Next;
+                libSourcesParent = libraryObj.Programs[libProgram].Next["Sources"].Next;
             }
             catch (Exception exc)
             {
@@ -214,7 +258,7 @@ namespace S7Lib
             }
             try
             {
-                projSourcesParent = api.Projects[project].Programs[projProgram].Next["Sources"].Next;
+                projSourcesParent = projectObj.Programs[projProgram].Next["Sources"].Next;
             }
             catch (Exception exc)
             {
@@ -235,20 +279,22 @@ namespace S7Lib
         /// <summary>
         /// Exports all sources from a program to a directory
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="sourcesDir">Directory to which to export sources</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ExportSources(S7Context ctx,
             string project, string program, string sourcesDir)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             S7SWItems sourcesParent;
             try
             {
-                sourcesParent = api.Projects[project].Programs[program].Next["Sources"].Next;
+                sourcesParent = projectObj.Programs[program].Next["Sources"].Next;
             }
             catch (Exception exc)
             {
@@ -268,7 +314,7 @@ namespace S7Lib
         /// <summary>
         /// Exports a source from a program to a directory
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="source">Source name</param>
         /// <param name="sourcesDir">Directory to which to export sources</param>
@@ -276,13 +322,15 @@ namespace S7Lib
         public static int ExportSource(S7Context ctx,
             string project, string program, string source, string sourcesDir)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             S7Source sourceObj;
             try
             {
-                sourceObj = (S7Source) api.Projects[project].Programs[program].Next["Sources"].Next[source];
+                sourceObj = (S7Source)projectObj.Programs[program].Next["Sources"].Next[source];
             }
             catch (Exception exc)
             {
@@ -302,17 +350,19 @@ namespace S7Lib
         /// <summary>
         /// Creates a new empty S7 program
         /// </summary>
-        /// <param name="project">Parent project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="programName">Program name</param>
         /// <returns></returns>
         static public int CreateProgram(S7Context ctx, string project, string programName)
         {
             var log = ctx.Log;
-            var api = ctx.Api;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             try
             {
-                api.Projects[project].Programs.Add(programName, Type: S7ProgramType.S7);
+                projectObj.Programs.Add(programName, Type: S7ProgramType.S7);
             }
             catch (Exception exc)
             {
@@ -327,7 +377,7 @@ namespace S7Lib
         /// <summary>
         /// Compile source
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="source">Source name</param>
         /// <returns>0 on success, -1 otherwise</returns>
@@ -339,8 +389,8 @@ namespace S7Lib
         /// <summary>
         /// Import blocks from a directory into a project
         /// </summary>
-        /// <param name="library">Source library name</param>
-        /// <param name="project">Destination project name</param>
+        /// <param name="library">Source library id, path to .s7p (unique) or project name</param>
+        /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
         /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
@@ -348,13 +398,17 @@ namespace S7Lib
         public static int ImportLibBlocksDir(S7Context ctx,
             string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+
+            var libraryObj = GetProject(ctx, library);
+            if (libraryObj == null) return -1;
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             S7SWItems libBlocksParent, projBlocksParent;
             try
             {
-                libBlocksParent = api.Projects[library].Programs[libProgram].Next["Blocks"].Next;
+                libBlocksParent = libraryObj.Programs[libProgram].Next["Blocks"].Next;
             }
             catch (Exception exc)
             {
@@ -363,7 +417,7 @@ namespace S7Lib
             }
             try
             {
-                projBlocksParent = api.Projects[project].Programs[projProgram].Next["Blocks"].Next;
+                projBlocksParent = projectObj.Programs[projProgram].Next["Blocks"].Next;
             }
             catch (Exception exc)
             {
@@ -384,7 +438,7 @@ namespace S7Lib
         /// <summary>
         /// Imports symbols into a program from a file
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
@@ -408,7 +462,7 @@ namespace S7Lib
         /// <summary>
         /// Exports symbols from program from into a file
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Program name</param>
         /// <param name="symbolFile">Path to output symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
@@ -447,18 +501,20 @@ namespace S7Lib
         /// <summary>
         /// Compiles the HW configuration for each of the stations in a project
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="allowFail">Return 0 even if unable to compile some station</param>
         /// <returns></returns>
         public static int compileAllStations(S7Context ctx, string project, bool allowFail = true)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+            
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
 
             IS7Stations stations;
             try
             {
-                stations = api.Projects[project].Stations;
+                stations = projectObj.Stations;
             }
             catch (Exception exc)
             {
