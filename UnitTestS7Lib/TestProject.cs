@@ -36,7 +36,16 @@ namespace UnitTestS7Lib
             //Assert.AreEqual(0, rv);
         }
 
-    [TestMethod]
+        [TestMethod]
+        public void TestListContainers()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListContainers(ctx, ref output, "AWP_Demo07");
+            //Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
         public void TestCreateRemoveProject()
         {
             var ctx = new S7Context();

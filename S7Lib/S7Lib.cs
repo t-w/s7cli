@@ -579,6 +579,7 @@ namespace S7Lib
             log.Debug($"Listing programs for project {project}");
             foreach (var program in projectObj.Programs)
             {
+                // TODO: If the cast to S7Program is safe, remove try catch block
                 try
                 {
                     var programObj = (S7Program)program;
@@ -590,6 +591,54 @@ namespace S7Lib
                     log.Error(exc, $"Could not access program in project {project}");
                 }
             }
+            return 0;
+        }
+
+        /// <summary>
+        /// Creates List with containers for each program in a given project
+        /// </summary>
+        /// TODO: Maybe include program name in output as well?
+        /// <param name="output">List with conteiner names</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ListContainers(S7Context ctx, ref List<string> output, string project)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
+            log.Debug($"Listing containers for project {project}");
+            foreach (var program in projectObj.Programs)
+            {
+                S7Program programObj;
+                // TODO: If the cast to S7Program is safe, remove try catch block
+                try
+                {
+                    programObj = (S7Program)program;
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access program in project {project}");
+                    continue;
+                }
+                log.Debug($"Listing containers for project {project}:{programObj.Name}");
+                // TODO: If the cast to S7Container is safe, remove try catch block                
+                foreach (var container in programObj.Next)
+                {
+                    S7Container containerObj;
+                    try
+                    {
+                        containerObj = (S7Container)container;
+                        output.Add(containerObj.Name);
+                        log.Debug($"Container {containerObj.Name}");
+                    }
+                    catch (Exception exc)
+                    {
+                        log.Error(exc, $"Could not access container in {programObj.Name}");
+                    }
+                }
+            }
+
             return 0;
         }
     }
