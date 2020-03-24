@@ -14,7 +14,7 @@ namespace S7Lib
     /// Provides a static interface for Simatic STEP 7 API
     /// </summary>
     public static class Api
-    {    
+    {
         private static bool ProjectExists(S7Context ctx, string projectName)
         {
             var api = ctx.Api;
@@ -195,7 +195,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in project</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportSourcesDir(S7Context ctx,
-            string project, string program, string sourcesDir, bool overwrite=true)
+            string project, string program, string sourcesDir, bool overwrite = true)
         {
             var log = ctx.Log;
 
@@ -507,7 +507,7 @@ namespace S7Lib
         public static int compileAllStations(S7Context ctx, string project, bool allowFail = true)
         {
             var log = ctx.Log;
-            
+
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
 
@@ -524,7 +524,7 @@ namespace S7Lib
 
             foreach (var station in stations)
             {
-                var stationObj = (S7Station5) station;
+                var stationObj = (S7Station5)station;
                 try
                 {
                     stationObj.Compile();
@@ -552,8 +552,9 @@ namespace S7Lib
             var api = ctx.Api;
             var log = ctx.Log;
 
+            log.Debug($"Listing registered projects");
             foreach (var project in api.Projects)
-            {                
+            {
                 var projectObj = (S7Project)project;
                 var kv = new KeyValuePair<string, string>(projectObj.Name, projectObj.LogPath);
                 output.Add(kv);
@@ -563,5 +564,33 @@ namespace S7Lib
             return 0;
         }
 
+        /// <summary>
+        /// Creates List with programs in a given project
+        /// </summary>
+        /// <param name="output">List with program names</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ListPrograms(S7Context ctx, ref List<string> output, string project)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
+            log.Debug($"Listing programs for project {project}");
+            foreach (var program in projectObj.Programs)
+            {
+                try
+                {
+                    var programObj = (S7Program)program;
+                    output.Add(programObj.Name);
+                    log.Debug($"Program {programObj.Name}");
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access program in project {project}");
+                }
+            }
+            return 0;
+        }
     }
 }

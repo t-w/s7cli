@@ -28,6 +28,15 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestListPrograms()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListPrograms(ctx, ref output, "AWP_Demo07");
+            //Assert.AreEqual(0, rv);
+        }
+
+    [TestMethod]
         public void TestCreateRemoveProject()
         {
             var ctx = new S7Context();
