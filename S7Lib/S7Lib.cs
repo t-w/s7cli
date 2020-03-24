@@ -537,6 +537,36 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Creates List with stations in a given project
+        /// </summary>
+        /// <param name="output">List with station names</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ListStations(S7Context ctx, ref List<string> output, string project)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
+            log.Debug($"Listing stations for project {project}");
+            foreach (var station in projectObj.Stations)
+            {
+                // TODO: If the cast to S7Station is safe, remove try catch block
+                try
+                {
+                    var stationObj = (S7Station)station;
+                    output.Add(stationObj.Name);
+                    log.Debug($"Station {stationObj.Name}");
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access station in project {project}");
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Creates List with containers for each program in a given project
         /// </summary>
         /// TODO: Maybe include program name in output as well?

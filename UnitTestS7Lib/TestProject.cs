@@ -33,7 +33,7 @@ namespace UnitTestS7Lib
             var ctx = new S7Context();
             var output = new List<string>();
             var rv = Api.ListPrograms(ctx, ref output, "AWP_Demo07");
-            //Assert.AreEqual(0, rv);
+            Assert.AreEqual(0, rv);
         }
 
         [TestMethod]
@@ -42,7 +42,16 @@ namespace UnitTestS7Lib
             var ctx = new S7Context();
             var output = new List<string>();
             var rv = Api.ListContainers(ctx, ref output, "AWP_Demo07");
-            //Assert.AreEqual(0, rv);
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestListStations()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListStations(ctx, ref output, "AWP_Demo07");
+            Assert.AreEqual(0, rv);
         }
 
         [TestMethod]
