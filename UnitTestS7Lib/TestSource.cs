@@ -41,13 +41,8 @@ namespace UnitTestS7Lib
         public void TestCompileAwlSource()
         {
             var ctx = new S7Context();
-            Api.CreateProject(ctx, "testProj", workspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
-            // TODO: Only import .awl source
-            Api.ImportSourcesDir(ctx, "testProj", "testProgram", sourcesDir);
-            var rv = Api.CompileSource(ctx, "testProj", "testProgram", awlSource);
-            // Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
+            var rv = Api.CompileSource(ctx, "AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
+            Assert.AreEqual(0, rv);
         }
 
         [TestMethod]
