@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S7Lib;
 using Serilog;
@@ -15,6 +16,15 @@ namespace UnitTestS7Lib
         {
             var ctx = new S7Context();
             Api.RemoveProject(ctx, "testProj");
+        }
+
+        [TestMethod]
+        public void TestListProjects()
+        {
+            var ctx = new S7Context();
+            var output = new List<KeyValuePair<string, string>>();
+            var rv = Api.ListProjects(ctx, ref output);
+            Assert.AreEqual(0, rv);
         }
 
         [TestMethod]

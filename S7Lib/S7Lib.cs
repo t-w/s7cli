@@ -483,5 +483,29 @@ namespace S7Lib
 
             return 0;
         }
+
+        // List commands
+
+        /// <summary>
+        /// Creates List with project name, project path key-value pairs
+        /// </summary>
+        /// <param name="output">List with project name, project path key-value pairs</param>
+        /// <returns>0 on success</returns>
+        public static int ListProjects(S7Context ctx, ref List<KeyValuePair<string, string>> output)
+        {
+            var api = ctx.Api;
+            var log = ctx.Log;
+
+            foreach (var project in api.Projects)
+            {                
+                var projectObj = (S7Project)project;
+                var kv = new KeyValuePair<string, string>(projectObj.Name, projectObj.LogPath);
+                output.Add(kv);
+                log.Debug($"Project {kv.Key} Path {kv.Value}");
+            }
+
+            return 0;
+        }
+
     }
 }
