@@ -163,6 +163,12 @@ namespace S7Cli
                         project: opt.Project, projProgram: opt.ProjProgram,
                         overwrite: opt.Overwrite);
                     break;
+                case ImportLibBlocksOptions opt:
+                    rv = Api.ImportLibBlocks(ctx,
+                        library: opt.Library, libProgram: opt.LibProgram,
+                        project: opt.Project, projProgram: opt.ProjProgram,
+                        overwrite: opt.Overwrite);
+                    break;
                 default:
                     break;
             }

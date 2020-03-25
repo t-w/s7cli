@@ -33,6 +33,21 @@ namespace S7Cli
         public string Program { get; set; }
     }
 
+    /// <summary>
+    /// Options for import sources/blocks from library commands
+    /// </summary>
+    class ImportFromLibraryOptions : Options
+    {
+        [Option("project", Required = true, HelpText = "Path to .s7p project file or project name")]
+        public string Project { get; set; }
+        [Option("library", Required = true, HelpText = "Path to .s7p library project file or library name")]
+        public string Library { get; set; }
+        [Option("projProgram", Required = true, HelpText = "Destination program name")]
+        public string ProjProgram { get; set; }
+        [Option("libProgram", Required = true, HelpText = "Source library program name")]
+        public string LibProgram { get; set; }
+    }
+
 
     // Commands
 
@@ -90,17 +105,16 @@ namespace S7Cli
     }
 
     [Verb("importLibSources", HelpText = "Import sources from a library into a program.")]
-    class ImportLibSourcesOptions : Options
+    class ImportLibSourcesOptions : ImportFromLibraryOptions
     {
-        [Option("project", Required = true, HelpText = "Path to .s7p project file or project name")]
-        public string Project { get; set; }
-        [Option("library", Required = true, HelpText = "Path to .s7p library project file or library name")]
-        public string Library { get; set; }
-        [Option("projProgram", Required = true, HelpText = "Destination program name")]
-        public string ProjProgram { get; set; }
-        [Option("libProgram", Required = true, HelpText = "Source library program name")]
-        public string LibProgram { get; set; }
         [Option("overwrite", HelpText = "Force overwrite existing sources in project")]
+        public bool Overwrite { get; set; }
+    }
+
+    [Verb("importLibBlocks", HelpText = "Import blocks from a library into a program.")]
+    class ImportLibBlocksOptions : ImportFromLibraryOptions
+    {
+        [Option("overwrite", HelpText = "Force overwrite existing blocks in project")]
         public bool Overwrite { get; set; }
     }
 

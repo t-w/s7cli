@@ -352,7 +352,7 @@ namespace S7Lib
         /// <param name="projProgram">Destination program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ImportLibBlocksDir(S7Context ctx,
+        public static int ImportLibBlocks(S7Context ctx,
             string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
             var log = ctx.Log;
