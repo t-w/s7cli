@@ -437,7 +437,7 @@ namespace S7Lib
                 log.Information($"Overwriting {symbolFile}");
             }
 
-            return S7Symbols.ImportSymbols(ctx, project, program, symbolFile);
+            return S7Symbols.ExportSymbols(ctx, project, program, symbolFile);
         }
 
         /// <summary>
