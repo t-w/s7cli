@@ -2,10 +2,11 @@
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             var parser = new OptionParser();
             parser.Parse(args);
+            return parser.ReturnValue;
         }
     }
 }
