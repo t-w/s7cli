@@ -92,9 +92,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\s7cli\s7cli.csproj">
+    <ProjectReference Include="..\S7Cli_Legacy\S7Cli_Legacy.csproj">
       <Project>{b5237990-9a39-46a1-901e-99a529c3488b}</Project>
-      <Name>s7cli</Name>
+      <Name>S7Cli_Legacy</Name>
     </ProjectReference>
     <ProjectReference Include="..\Service\Service.csproj">
       <Project>{d059cff9-de71-478a-b31c-b71346ff3e88}</Project>

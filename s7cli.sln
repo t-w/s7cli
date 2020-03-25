@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s7cli", "s7cli\s7cli.csproj", "{B5237990-9A39-46A1-901E-99A529C3488B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S7Cli_Legacy", "S7Cli_Legacy\S7Cli_Legacy.csproj", "{B5237990-9A39-46A1-901E-99A529C3488B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{89C74014-18D4-4742-A045-E0114276A318}"
 	ProjectSection(SolutionItems) = preProject
