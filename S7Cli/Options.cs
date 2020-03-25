@@ -95,7 +95,7 @@ namespace S7Cli
     [Verb("listContainers", HelpText = "List available containers in Simatic project/library.")]
     class ListContainersOptions : ProjectOptions { }
 
-    [Verb("importSourcesDir", HelpText = "Import source into a program.")]
+    [Verb("importSource", HelpText = "Import source into a program.")]
     class ImportSourceOptions : ProgramOptions
     {
         [Option("source", Required = true, HelpText = "Path to source file")]
@@ -143,12 +143,19 @@ namespace S7Cli
         public int Flag { get; set; }
     }
 
-    [Verb("exportSymbols", HelpText = "Export program symbols to a file")]
+    [Verb("exportSymbols", HelpText = "Export program symbols to a file.")]
     class ExportSymbolsOptions : ProgramOptions
     {
         [Option("symbolFile", Required = true,
             HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]
         public string SymbolFile { get; set; }
+    }
+
+    [Verb("compileSource", HelpText = "Compile source.")]
+    class CompileSourceOptions : ProgramOptions
+    {
+        [Option("source", Required = true, HelpText = "Source name")]
+        public string Source { get; set; }
     }
 
     /// <summary>

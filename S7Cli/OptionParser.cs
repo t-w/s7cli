@@ -180,6 +180,9 @@ namespace S7Cli
                 case ExportSymbolsOptions opt:
                     rv = Api.ExportSymbols(ctx, opt.Project, opt.Program, opt.SymbolFile);
                     break;
+                case CompileSourceOptions opt:
+                    rv = Api.CompileSource(ctx, opt.Project, opt.Program, opt.Source);
+                    break;
                 default:
                     break;
             }
