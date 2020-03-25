@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S7Lib;
+
 
 namespace UnitTestS7Lib
 {
@@ -10,8 +10,12 @@ namespace UnitTestS7Lib
     {
         static string workspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
         static string sourcesDir = Path.GetFullPath(@"..\..\..\resources\sources\");
-        static string awlSource = "FB1_Flowchart1";
-        static string sclSource = "FC20_BIC_Signal_Reset";
+
+        [ClassInitialize]
+        public static void CreateWorkspace(TestContext testContext)
+        {
+            Directory.CreateDirectory(workspaceDir);
+        }
 
         [ClassCleanup]
         public static void RemoveTestProject()
@@ -38,6 +42,17 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestExportSymbols()
+        {
+            var ctx = new S7Context();
+            var symbolFile = Path.Combine(workspaceDir, "awp_demo01.sdf");
+            var rv = Api.ExportSymbols(ctx, "AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
+            Assert.AreEqual(0, rv);
+            var symbolTableExists = File.Exists(symbolFile);
+            Assert.IsTrue(symbolTableExists);
+        }
+
+        [TestMethod]
         public void TestCompileAwlSource()
         {
             var ctx = new S7Context();
@@ -52,6 +67,5 @@ namespace UnitTestS7Lib
             var rv = Api.CompileSource(ctx, "ZEN05_01_S7SCL__Measv06", "S7 Program", "Measv06");
             Assert.AreEqual(0, rv);
         }
-
     }
 }
