@@ -169,6 +169,13 @@ namespace S7Cli
                         project: opt.Project, projProgram: opt.ProjProgram,
                         overwrite: opt.Overwrite);
                     break;
+                case ImportSymbolsOptions opt:
+                    rv = Api.ImportSymbols(ctx, opt.Project, opt.Program, opt.SymbolFile,
+                        flag: opt.Flag, allowConflicts: opt.AllowConflicts);
+                    break;
+                case ExportSymbolsOptions opt:
+                    rv = Api.ExportSymbols(ctx, opt.Project, opt.Program, opt.SymbolFile);
+                    break;
                 default:
                     break;
             }

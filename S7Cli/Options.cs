@@ -118,6 +118,30 @@ namespace S7Cli
         public bool Overwrite { get; set; }
     }
 
+    [Verb("importSymbols", HelpText = "Imports symbols into a program from a file")]
+    class ImportSymbolsOptions : ProgramOptions
+    {
+        [Option("symbolFile", Required = true,
+            HelpText = "Path to input symbol table file (.sdf, .asc, .dif, .seq)")]
+        public string SymbolFile { get; set; }
+        [Option("allowConflicts", HelpText = "Succeed even if conflits are detected")]
+        public bool AllowConflicts { get; set; }
+        [Option("flag", Default = 0,
+            HelpText = "Symbol import flag {0,1,2}:\n" +
+                       " 0 Symbols are imported even if present; may lead to ambiguities.\n" +
+                       " 1 Replace conflicting symbol names with new addresses.\n" +
+                       " 2 Replace conflicting addresses with new symbol names.")]
+        public int Flag { get; set; }
+    }
+
+    [Verb("exportSymbols", HelpText = "Export program symbols to a file")]
+    class ExportSymbolsOptions : ProgramOptions
+    {
+        [Option("symbolFile", Required = true,
+            HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]
+        public string SymbolFile { get; set; }
+    }
+
     /// <summary>
     /// Class for obtaining the types of each options class
     /// </summary>
