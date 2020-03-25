@@ -94,10 +94,25 @@ namespace S7Cli
         /// <summary>
         /// Sets general options
         /// </summary>
-        public void SetGeneralOptions(bool verbose)
+        private void SetGeneralOptions(bool verbose)
         {
             LogLevel.MinimumLevel = (verbose)?
                 LogEventLevel.Verbose : LogEventLevel.Information;
+        }
+
+        /// <summary>
+        /// Prompts user to confirm a portentially dangerous command
+        /// </summary>
+        /// <param name="message">Command description</param>
+        /// <returns></returns>
+        private bool Confirm(string message)
+        {
+            System.Console.WriteLine($"Are you sure you want to perform the following command:\n" +
+                                     $" - {message} (N/y) ?");
+            var line = System.Console.ReadLine();
+            if (line.ToLower() == "y") return true;
+            System.Console.WriteLine("Command cancelled. To confirm type 'y'");
+            return false;
         }
 
         private void RunCommand(object options)
@@ -113,15 +128,30 @@ namespace S7Cli
                     break;
                 case ListProgramsOptions opt:
                     var programs = new List<string>();
-                    rv = Api.ListPrograms(ctx, ref programs, opt.project);
+                    rv = Api.ListPrograms(ctx, ref programs, opt.Project);
                     break;
                 case ListContainersOptions opt:
                     var containers = new List<string>();
-                    rv = Api.ListContainers(ctx, ref containers, opt.project);
+                    rv = Api.ListContainers(ctx, ref containers, opt.Project);
                     break;
                 case ListStationsOptions opt:
                     var stations = new List<string>();
-                    rv = Api.ListStations(ctx, ref stations, opt.project);
+                    rv = Api.ListStations(ctx, ref stations, opt.Project);
+                    break;
+                case CreateProjectOptions opt:
+                    rv = Api.CreateProject(ctx, opt.ProjectName, opt.ProjectDir);
+                    break;
+                case CreateLibraryOptions opt:
+                    rv = Api.CreateLibrary(ctx, opt.ProjectName, opt.ProjectDir);
+                    break;
+                case RegisterProjectOptions opt:
+                    rv = Api.RegisterProject(ctx, opt.ProjectFilePath);
+                    break;
+                case RemoveProjectOptions opt:
+                    if (!opt.Force)
+                        if (!Confirm($"Remove project {opt.Project}"))
+                            break;
+                    rv = Api.RemoveProject(ctx, opt.Project);
                     break;
                 default:
                     break;
