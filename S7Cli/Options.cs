@@ -166,6 +166,13 @@ namespace S7Cli
         public IEnumerable<string> Sources { get; set; }
     }
 
+    [Verb("compileAllStations", HelpText = "Compile the HW configuration for each of the stations in a project.")]
+    class CompileAllStationsOptions : ProjectOptions
+    {
+        [Option("allowFail", HelpText = "Succeed even if unable to compile some station")]
+        public bool AllowFail { get; set; }
+    }
+
     /// <summary>
     /// Class for obtaining the types of each options class
     /// </summary>

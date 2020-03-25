@@ -188,7 +188,8 @@ namespace S7Cli
                         if (Api.CompileSource(ctx, opt.Project, opt.Program, source) != 0)
                             rv = -1;
                     break;
-                default:
+                case CompileAllStationsOptions opt:
+                    rv = Api.compileAllStations(ctx, opt.Project, opt.AllowFail);
                     break;
             }
             ReturnValue = rv;
