@@ -494,13 +494,13 @@ namespace S7Lib
             var api = ctx.Api;
             var log = ctx.Log;
 
-            log.Debug($"Listing registered projects");
+            log.Information($"Listing registered projects");
             foreach (var project in api.Projects)
             {
                 var projectObj = (S7Project)project;
                 var kv = new KeyValuePair<string, string>(projectObj.Name, projectObj.LogPath);
                 output.Add(kv);
-                log.Debug($"Project {kv.Key} Path {kv.Value}");
+                log.Information($"Project {kv.Key} Path {kv.Value}");
             }
 
             return 0;
@@ -518,7 +518,7 @@ namespace S7Lib
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
 
-            log.Debug($"Listing programs for project {project}");
+            log.Information($"Listing programs for project {project}");
             foreach (var program in projectObj.Programs)
             {
                 // TODO: If the cast to S7Program is safe, remove try catch block
@@ -526,7 +526,7 @@ namespace S7Lib
                 {
                     var programObj = (S7Program)program;
                     output.Add(programObj.Name);
-                    log.Debug($"Program {programObj.Name}");
+                    log.Information($"Program {programObj.Name}");
                 }
                 catch (Exception exc)
                 {
@@ -548,7 +548,7 @@ namespace S7Lib
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return -1;
 
-            log.Debug($"Listing stations for project {project}");
+            log.Information($"Listing stations for project {project}");
             foreach (var station in projectObj.Stations)
             {
                 // TODO: If the cast to S7Station is safe, remove try catch block
@@ -556,7 +556,7 @@ namespace S7Lib
                 {
                     var stationObj = (S7Station)station;
                     output.Add(stationObj.Name);
-                    log.Debug($"Station {stationObj.Name}");
+                    log.Information($"Station {stationObj.Name} ({stationObj.Type})");
                 }
                 catch (Exception exc)
                 {
@@ -593,7 +593,7 @@ namespace S7Lib
                     log.Error(exc, $"Could not access program in project {project}");
                     continue;
                 }
-                log.Debug($"Listing containers for program {project}:{programObj.Name}");
+                log.Information($"Listing containers for program {project}:{programObj.Name}");
                 // TODO: If the cast to S7Container is safe, remove try catch block                
                 foreach (var container in programObj.Next)
                 {
@@ -602,7 +602,7 @@ namespace S7Lib
                     {
                         containerObj = (S7Container)container;
                         output.Add(containerObj.Name);
-                        log.Debug($"Container {containerObj.Name} ({containerObj.ConcreteType})");
+                        log.Information($"Container {containerObj.Name} ({containerObj.ConcreteType})");
                     }
                     catch (Exception exc)
                     {
