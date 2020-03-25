@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S7Lib", "S7Lib\S7Lib.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestS7Lib", "UnitTestS7Lib\UnitTestS7Lib.csproj", "{A06E980C-3DD2-4E3C-812A-75F5A63DC85C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S7Cli", "S7Cli\S7Cli.csproj", "{2589A61E-B7A8-4586-ABAE-FA251F51B146}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -54,6 +56,10 @@ Global
 		{A06E980C-3DD2-4E3C-812A-75F5A63DC85C}.Debug|x86.Build.0 = Debug|x86
 		{A06E980C-3DD2-4E3C-812A-75F5A63DC85C}.Release|x86.ActiveCfg = Release|x86
 		{A06E980C-3DD2-4E3C-812A-75F5A63DC85C}.Release|x86.Build.0 = Release|x86
+		{2589A61E-B7A8-4586-ABAE-FA251F51B146}.Debug|x86.ActiveCfg = Debug|x86
+		{2589A61E-B7A8-4586-ABAE-FA251F51B146}.Debug|x86.Build.0 = Debug|x86
+		{2589A61E-B7A8-4586-ABAE-FA251F51B146}.Release|x86.ActiveCfg = Release|x86
+		{2589A61E-B7A8-4586-ABAE-FA251F51B146}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
