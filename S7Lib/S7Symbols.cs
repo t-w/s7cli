@@ -62,6 +62,7 @@ namespace S7Lib
                 return;
             }
             WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
+            log.Debug("Closed Notepad window with importation log");
         }
 
         public static int ImportSymbols(S7Context ctx,
@@ -159,7 +160,7 @@ namespace S7Lib
                 return -1;
             }
 
-            log.Debug($"Imported symbols from {project}:{program} to {symbolFile}");
+            log.Debug($"Exported symbols from {project}:{program} to {symbolFile}");
             return 0;
         }
     }

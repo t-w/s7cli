@@ -602,7 +602,7 @@ namespace S7Lib
                     {
                         containerObj = (S7Container)container;
                         output.Add(containerObj.Name);
-                        log.Debug($"Container {containerObj.Name}");
+                        log.Debug($"Container {containerObj.Name} ({containerObj.ConcreteType})");
                     }
                     catch (Exception exc)
                     {
