@@ -95,6 +95,15 @@ namespace S7Cli
     [Verb("listContainers", HelpText = "List available containers in Simatic project/library.")]
     class ListContainersOptions : ProjectOptions { }
 
+    [Verb("importSourcesDir", HelpText = "Import source into a program.")]
+    class ImportSourceOptions : ProgramOptions
+    {
+        [Option("source", Required = true, HelpText = "Path to source file")]
+        public string Source { get; set; }
+        [Option("overwrite", HelpText = "Force overwrite existing source in project.")]
+        public bool Overwrite { get; set; }
+    }
+
     [Verb("importSourcesDir", HelpText = "Import sources from a directory into a program.")]
     class ImportSourcesDirOptions : ProgramOptions
     {

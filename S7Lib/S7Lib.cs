@@ -187,6 +187,34 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Import source into a program
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="source">Path to source file</param>
+        /// <param name="overwrite">Force overwrite existing source in project</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ImportSource(S7Context ctx,
+            string project, string program, string source, bool overwrite = true)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+            var container = S7ProgramSource.GetSources(ctx, projectObj, program);
+            if (container == null) return -1;
+            
+            if (S7ProgramSource.ImportSource(ctx, container: container, sourceFilePath: source, overwrite: overwrite) != 0)
+            {
+                log.Error($"Could not import {source} into project {project}");
+                return -1;
+            }
+            
+            log.Debug($"Imported {source} to {project}:{program}");
+            return 0;
+        }
+
+        /// <summary>
         /// Import sources from a directory into a program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>

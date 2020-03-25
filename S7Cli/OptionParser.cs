@@ -153,6 +153,10 @@ namespace S7Cli
                             break;
                     rv = Api.RemoveProject(ctx, opt.Project);
                     break;
+                case ImportSourceOptions opt:
+                    rv = Api.ImportSource(ctx,
+                        opt.Project, opt.Program, opt.Source, opt.Overwrite);
+                    break;
                 case ImportSourcesDirOptions opt:
                     rv = Api.ImportSourcesDir(ctx,
                         opt.Project, opt.Program, opt.SourcesDir, opt.Overwrite);
