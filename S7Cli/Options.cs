@@ -36,7 +36,7 @@ namespace S7Cli
 
     // Commands
 
-    [Verb("createProject", HelpText = "Create new, empty project in specified location")]
+    [Verb("createProject", HelpText = "Create new, empty project in specified location.")]
     class CreateProjectOptions : Options
     {
         [Option("name", Required = true, HelpText = "Project name (max 8 characters)")]
@@ -45,7 +45,7 @@ namespace S7Cli
         public string ProjectDir { get; set; }
     }
 
-    [Verb("createLibrary", HelpText = "Create new, empty library in specified location")]
+    [Verb("createLibrary", HelpText = "Create new, empty library in specified location.")]
     class CreateLibraryOptions : Options
     {
         [Option("name", Required = true, HelpText = "Library name (max 8 characters)")]
@@ -54,34 +54,59 @@ namespace S7Cli
         public string ProjectDir { get; set; }
     }
 
-    [Verb("registerProject", HelpText = "Registers existing project")]
+    [Verb("registerProject", HelpText = "Register existing project.")]
     class RegisterProjectOptions : Options
     {
         [Option("projectFilePath", Required = true, HelpText = "Path to STEP 7 project .s7p file")]
         public string ProjectFilePath { get; set; }
     }
 
-    [Verb("removeProject", HelpText = "Remove project and delete all of its files")]
+    [Verb("removeProject", HelpText = "Remove project and delete all of its files.")]
     class RemoveProjectOptions : ProjectOptions
     {
         [Option("force", HelpText = "Force removal without confirmation")]
         public bool Force { get; set; }
     }
 
-    [Verb("listProjects", HelpText = "List registered Simatic projects")]
+    [Verb("listProjects", HelpText = "List registered Simatic projects.")]
     class ListProjectsOptions : Options { }
 
-    [Verb("listPrograms", HelpText = "List available programs in Simatic project/library")]
+    [Verb("listPrograms", HelpText = "List available programs in Simatic project/library.")]
     class ListProgramsOptions : ProjectOptions { }
 
-    [Verb("listStations", HelpText = "List available stations in Simatic project/library")]
+    [Verb("listStations", HelpText = "List available stations in Simatic project/library.")]
     class ListStationsOptions : ProjectOptions { }
 
-    [Verb("listContainers", HelpText = "List available containers in Simatic project/library")]
+    [Verb("listContainers", HelpText = "List available containers in Simatic project/library.")]
     class ListContainersOptions : ProjectOptions { }
 
+    [Verb("importSourcesDir", HelpText = "Import sources from a directory into a program.")]
+    class ImportSourcesDirOptions : ProgramOptions
+    {
+        [Option("sourcesDir", Required = true, HelpText = "Path to directory from which to import sources")]
+        public string SourcesDir { get; set; }
+        [Option("overwrite", HelpText = "Force overwrite existing sources in project.")]
+        public bool Overwrite { get; set; }
+    }
+
+    [Verb("importLibSources", HelpText = "Import sources from a library into a program.")]
+    class ImportLibSourcesOptions : Options
+    {
+        [Option("project", Required = true, HelpText = "Path to .s7p project file or project name")]
+        public string Project { get; set; }
+        [Option("library", Required = true, HelpText = "Path to .s7p library project file or library name")]
+        public string Library { get; set; }
+        [Option("projProgram", Required = true, HelpText = "Destination program name")]
+        public string ProjProgram { get; set; }
+        [Option("libProgram", Required = true, HelpText = "Source library program name")]
+        public string LibProgram { get; set; }
+        [Option("overwrite", HelpText = "Force overwrite existing sources in project")]
+        public bool Overwrite { get; set; }
+    }
+
     /// <summary>
-    /// Class for obtaining the types of each of the option classe\\\\\\\\\\y>
+    /// Class for obtaining the types of each options class
+    /// </summary>
     static class OptionTypes
     {
         public static Type[] Get()
