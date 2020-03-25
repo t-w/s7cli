@@ -1,4 +1,6 @@
 ﻿using Serilog;
+using Serilog.Core;
+
 
 namespace S7Lib
 {
@@ -23,7 +25,7 @@ namespace S7Lib
         /// <summary>
         /// Handle for Serilog logger
         /// </summary>
-        public Serilog.Core.Logger Log;
+        public Logger Log;
 
         // TODO: Review constructors
 
@@ -36,10 +38,10 @@ namespace S7Lib
         /// (for methods such as Add, Copy, or Remove, with which objects are added or deleted)
         /// as well as for name changes.
         /// </remarks>
-        /// <param name="_log">Configured logger object</param>
+        /// <param name="log">Configured logger object</param>
         /// <param name="serverMode">UnattandedServerMode surpress GUI messages</param>
         /// <param name="automaticSave">Save project automatically</param>
-        public S7Context(Serilog.Core.Logger log=null, bool serverMode = true, bool automaticSave = true)
+        public S7Context(Logger log = null, bool serverMode = true, bool automaticSave = true)
         {
             Api = new SimaticLib.Simatic
             {
@@ -52,8 +54,8 @@ namespace S7Lib
             Log = log;
         }
 
-        // TODO: Remove?
-        private Serilog.Core.Logger CreateConsoleLogger()
+        // Simple default console logger for testing purposes
+        private Logger CreateConsoleLogger()
         {
             return new LoggerConfiguration().MinimumLevel.Debug()
                .WriteTo.Console().CreateLogger();
