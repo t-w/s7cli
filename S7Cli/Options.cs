@@ -19,8 +19,28 @@ namespace S7Cli
         public string ServerMode { get; set; }
     }
 
-    [Verb("listProjects", HelpText = "List available Simatic projects")]
+    /// <summary>
+    /// Options for every command that requires a project to be opened
+    /// </summary>
+    class ProjectOptions : Options
+    {
+        [Option('p', "project", Required = true, HelpText = "Path to .s7p project file or project name")]
+        public string project { get; set; }
+    }
+
+    // Commands
+
+    [Verb("listProjects", HelpText = "List registered Simatic projects")]
     class ListProjectsOptions : Options { }
+
+    [Verb("listPrograms", HelpText = "List available programs in Simatic project/library")]
+    class ListProgramsOptions : ProjectOptions { }
+
+    [Verb("listStations", HelpText = "List available stations in Simatic project/library")]
+    class ListStationsOptions : ProjectOptions { }
+
+    [Verb("listContainers", HelpText = "List available containers in Simatic project/library")]
+    class ListContainersOptions : ProjectOptions { }
 
     /// <summary>
     /// Class for obtaining the types of each of the option classe\\\\\\\\\\y>

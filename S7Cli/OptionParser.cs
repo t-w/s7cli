@@ -108,8 +108,20 @@ namespace S7Cli
             switch (options)
             {
                 case ListProjectsOptions opt:
-                    var output = new List<KeyValuePair<string, string>>();
-                    rv = Api.ListProjects(ctx, ref output);
+                    var projects = new List<KeyValuePair<string, string>>();
+                    rv = Api.ListProjects(ctx, ref projects);
+                    break;
+                case ListProgramsOptions opt:
+                    var programs = new List<string>();
+                    rv = Api.ListPrograms(ctx, ref programs, opt.project);
+                    break;
+                case ListContainersOptions opt:
+                    var containers = new List<string>();
+                    rv = Api.ListContainers(ctx, ref containers, opt.project);
+                    break;
+                case ListStationsOptions opt:
+                    var stations = new List<string>();
+                    rv = Api.ListStations(ctx, ref stations, opt.project);
                     break;
                 default:
                     break;
