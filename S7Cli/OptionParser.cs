@@ -183,6 +183,11 @@ namespace S7Cli
                 case CompileSourceOptions opt:
                     rv = Api.CompileSource(ctx, opt.Project, opt.Program, opt.Source);
                     break;
+                case CompileSourcesOptions opt:
+                    foreach (string source in opt.Sources)
+                        if (Api.CompileSource(ctx, opt.Project, opt.Program, source) != 0)
+                            rv = -1;
+                    break;
                 default:
                     break;
             }

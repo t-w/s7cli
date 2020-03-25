@@ -158,6 +158,14 @@ namespace S7Cli
         public string Source { get; set; }
     }
 
+    [Verb("compileSources", HelpText = "Compile multiple sources.")]
+    class CompileSourcesOptions : ProgramOptions
+    {
+        [Option("sources", Required = true, Separator = ',',
+             HelpText = "Comma-separated source names")]
+        public IEnumerable<string> Sources { get; set; }
+    }
+
     /// <summary>
     /// Class for obtaining the types of each options class
     /// </summary>
