@@ -49,7 +49,7 @@ namespace UnitTestS7Lib
             Api.CreateProgram(ctx, "testProj", "testProgram");
             var rv = Api.ImportLibSources(ctx,
                 library: "AWP_Demo01", libProgram: "S7-Programm",
-                project: "testPro1", projProgram: "testProgram");
+                project: "testProj", projProgram: "testProgram");
             Assert.AreEqual(0, rv);
             Api.RemoveProject(ctx, "testProj");
         }
