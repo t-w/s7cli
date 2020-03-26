@@ -34,6 +34,21 @@ namespace S7Cli
     }
 
     /// <summary>
+    /// Options for every online command that requires a program to be specified
+    /// </summary>
+    class OnlineProgramOptions : ProjectOptions
+    {
+        [Option("station", Required = true, HelpText = "Station name")]
+        public string Station { get; set; }
+        [Option("rack", Required = true, HelpText = "Rack name")]
+        public string Rack { get; set; }
+        [Option("module", Required = true, HelpText = "Child module name")]
+        public string Module { get; set; }
+        [Option('f', "force", HelpText = "Run command without confirmation")]
+        public bool Force { get; set; }
+    }
+
+    /// <summary>
     /// Options for import sources/blocks from library commands
     /// </summary>
     class ImportFromLibraryOptions : Options
@@ -79,7 +94,7 @@ namespace S7Cli
     [Verb("removeProject", HelpText = "Remove project and delete all of its files.")]
     class RemoveProjectOptions : ProjectOptions
     {
-        [Option("force", HelpText = "Force removal without confirmation")]
+        [Option('f', "force", HelpText = "Force removal without confirmation")]
         public bool Force { get; set; }
     }
 
@@ -134,7 +149,7 @@ namespace S7Cli
         public bool Overwrite { get; set; }
     }
 
-    [Verb("importSymbols", HelpText = "Imports symbols into a program from a file")]
+    [Verb("importSymbols", HelpText = "Import symbols into a program from a file.")]
     class ImportSymbolsOptions : ProgramOptions
     {
         [Option("symbolFile", Required = true,
@@ -178,6 +193,19 @@ namespace S7Cli
     {
         [Option("allowFail", HelpText = "Succeed even if unable to compile some station")]
         public bool AllowFail { get; set; }
+    }
+
+    [Verb("startProgram", HelpText = "[ONLINE] Start/restart a program.")]
+    class StartProgramOptions : OnlineProgramOptions { }
+
+    [Verb("stopProgram", HelpText = "[ONLINE] Stop running a program.")]
+    class StopProgramOptions : OnlineProgramOptions { }
+
+    [Verb("downloadProgramBlocks", HelpText = "[ONLINE] Download all the blocks under an S7Program.")]
+    class DownloadProgramBlocksOptions : OnlineProgramOptions
+    {
+        [Option("overwrite", HelpText = "Force overwrite of online blocks")]
+        public bool Overwrite { get; set; }
     }
 
     /// <summary>

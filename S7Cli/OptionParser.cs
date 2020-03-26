@@ -195,6 +195,27 @@ namespace S7Cli
                 case CompileAllStationsOptions opt:
                     rv = Api.CompileAllStations(ctx, opt.Project, opt.AllowFail);
                     break;
+                case StartProgramOptions opt:
+                    if (!opt.Force)
+                        if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                            break;
+                    rv = Online.StartProgram(ctx,
+                        opt.Project, opt.Station, opt.Rack, opt.Module);
+                    break;
+                case StopProgramOptions opt:
+                    if (!opt.Force)
+                        if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                            break;
+                    rv = Online.StopProgram(ctx,
+                        opt.Project, opt.Station, opt.Rack, opt.Module);
+                    break;
+                case DownloadProgramBlocksOptions opt:
+                    if (!opt.Force)
+                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                            break;
+                    rv = Online.DownloadProgramBlocks(ctx,
+                        opt.Project, opt.Station, opt.Rack, opt.Module, opt.Overwrite);
+                    break;
             }
             ReturnValue = rv;
         }

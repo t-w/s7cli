@@ -25,20 +25,21 @@ namespace S7Lib
         /// <param name="rack">Rack name</param>
         /// <param name="module">Child module name</param>
         /// <returns>S7Program on success, null otherwise</returns>
-        private static S7Program getProgram(S7Context ctx,
+        private static S7Program GetProgram(S7Context ctx,
             string project, string station, string rack, string module)
         {
-            var api = ctx.Api;
             var log = ctx.Log;
+            var projectObj = Api.GetProject(ctx, project);
+            if (projectObj == null) return null;
 
             IS7Station6 stationObj;
             try
             {
-                stationObj = api.Projects[project].Stations[station];
+                stationObj = projectObj.Stations[station];
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not find station {station} in project {project}");
+                log.Error(exc, $"Could not find station {projectObj.Name}:{station}");
                 return null;
             }
             IS7Module moduleObj;
@@ -54,7 +55,7 @@ namespace S7Lib
             S7Program programObj;
             try
             {
-                programObj = (S7Program)api.Projects[project].Programs[moduleObj];
+                programObj = (S7Program)projectObj.Programs[moduleObj];
             }
             catch (Exception exc)
             {
@@ -78,7 +79,7 @@ namespace S7Lib
         {
             var log = ctx.Log;
 
-            S7Program programObj = getProgram(ctx, project, station, rack, module);
+            S7Program programObj = GetProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             var flag = overwrite ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk;
@@ -113,7 +114,7 @@ namespace S7Lib
         {
             var log = ctx.Log;
 
-            S7Program programObj = getProgram(ctx, project, station, rack, module);
+            S7Program programObj = GetProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             try
@@ -153,7 +154,7 @@ namespace S7Lib
         {
             var log = ctx.Log;
 
-            S7Program programObj = getProgram(ctx, project, station, rack, module);
+            S7Program programObj = GetProgram(ctx, project, station, rack, module);
             if (programObj == null) return -1;
 
             try
