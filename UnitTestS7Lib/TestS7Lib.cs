@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S7Lib;
 
@@ -6,30 +7,113 @@ using S7Lib;
 namespace UnitTestS7Lib
 {
     [TestClass]
-    public class TestSource
+    public class TestS7Lib
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
         static readonly string SourcesDir = Path.GetFullPath(@"..\..\..\resources\sources\");
 
         [ClassInitialize]
-        public static void CreateWorkspace(TestContext testContext)
+        public static void ClassInitialize(TestContext testCtx)
         {
             Directory.CreateDirectory(WorkspaceDir);
+            var ctx = new S7Context();
+            Api.RemoveProject(ctx, "testProj");
+            Api.RemoveProject(ctx, "testLib");
+            Api.CreateProject(ctx, "testProj", WorkspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
+            Api.CreateLibrary(ctx, "testLib", WorkspaceDir);
         }
 
         [ClassCleanup]
-        public static void RemoveTestProject()
+        public static void ClassCleanup()
         {
             var ctx = new S7Context();
             Api.RemoveProject(ctx, "testProj");
+            Api.RemoveProject(ctx, "testLib");
+        }
+
+        [TestMethod]
+        public void TestListProjects()
+        {
+            var ctx = new S7Context();
+            var output = new List<KeyValuePair<string, string>>();
+            var rv = Api.ListProjects(ctx, ref output);
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestListPrograms()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListPrograms(ctx, ref output, "AWP_Demo07");
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestListContainers()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListContainers(ctx, ref output, "AWP_Demo07");
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestListStations()
+        {
+            var ctx = new S7Context();
+            var output = new List<string>();
+            var rv = Api.ListStations(ctx, ref output, "AWP_Demo07");
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestRegisterProject()
+        {
+            var ctx = new S7Context();
+            var s7ProjFilePath = Path.Combine(WorkspaceDir, @"testProj\testProj.s7p");
+            var rv = Api.RegisterProject(ctx, s7ProjFilePath);
+            Assert.AreEqual(0, rv);
+            Api.RemoveProject(ctx, "testProj");
+        }
+
+        [TestMethod]
+        public void TestCreateInvalidProject()
+        {
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProject", WorkspaceDir);
+            Assert.AreEqual(-1, rv);
+        }
+
+        [TestMethod]
+        public void TestCreateProjectTwice()
+        {
+            var ctx = new S7Context();
+            var rv = Api.CreateProject(ctx, "testProj", WorkspaceDir);
+            Assert.AreEqual(-1, rv);
+        }
+
+        [TestMethod]
+        public void TestRegisterInvalidProject()
+        {
+            var ctx = new S7Context();
+            var rv = Api.RegisterProject(ctx, ".!");
+            Assert.AreEqual(-1, rv);
+        }
+
+        [TestMethod]
+        public void TestRemoveInvalidProject()
+        {
+            var ctx = new S7Context();
+            var rv = Api.RemoveProject(ctx, ".!");
+            Assert.AreEqual(-1, rv);
         }
 
         [TestMethod]
         public void TestImportSclSource()
         {
             var ctx = new S7Context();
-            Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
             var rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", SourcesDir);
             Assert.AreEqual(0, rv);
             // Import existing sources fails if overwrite is set to false
@@ -38,34 +122,27 @@ namespace UnitTestS7Lib
             // Import existing sources succeeds if overwrite is set to true
             rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", SourcesDir, overwrite: true);
             Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestImportLibSources()
         {
             var ctx = new S7Context();
-            Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
             var rv = Api.ImportLibSources(ctx,
                 library: "AWP_Demo01", libProgram: "S7-Programm",
                 project: "testProj", projProgram: "testProgram");
             Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
         public void TestImportLibBlocks()
         {
             var ctx = new S7Context();
-            Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
             Api.CompileSource(ctx, "AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
             var rv = Api.ImportLibBlocks(ctx,
                 library: "AWP_Demo01", libProgram: "S7-Programm",
                 project: "testProj", projProgram: "testProgram");
             Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
@@ -95,8 +172,6 @@ namespace UnitTestS7Lib
             var ctx = new S7Context();
             var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
             Api.ExportSymbols(ctx, "AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
-            Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
             var rv = Api.ImportSymbols(ctx, "testProj", "testProgram", symbolFile);
             Assert.AreEqual(0, rv);
         }
