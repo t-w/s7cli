@@ -241,7 +241,7 @@ namespace S7Lib
         {
             var log = ctx.Log;
             var sourceType = source.ConcreteType;
-            string outputFile = Path.Combine(exportDir, $"{source.Name}.{sourceType}");
+            string outputFile = Path.Combine(exportDir, source.Name);
 
             try
             {
