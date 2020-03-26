@@ -178,13 +178,13 @@ namespace S7Lib
             }
             catch (Exception) { }
 
-            if (source != null && !overwrite)
+            if (destSource != null && !overwrite)
             {
                 log.Error($"Could not import {sourceName} from library: " +
                           $"Source with the same name exists.");
                 return -1;
             }
-            else if (source != null && overwrite)
+            else if (destSource != null && overwrite)
             {
                 log.Debug($"{sourceName} already exists. Overwriting.");
                 try
@@ -200,7 +200,7 @@ namespace S7Lib
 
             try
             {
-                var item = source.Copy(destination.Next);
+                var item = source.Copy(destination);
             }
             catch (Exception exc)
             {

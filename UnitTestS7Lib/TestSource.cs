@@ -42,6 +42,19 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestImportLibSources()
+        {
+            var ctx = new S7Context();
+            Api.CreateProject(ctx, "testProj", workspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
+            var rv = Api.ImportLibSources(ctx,
+                library: "AWP_Demo01", libProgram: "S7-Programm",
+                project: "testPro1", projProgram: "testProgram");
+            Assert.AreEqual(0, rv);
+            Api.RemoveProject(ctx, "testProj");
+        }
+
+        [TestMethod]
         public void TestExportSymbols()
         {
             var ctx = new S7Context();
