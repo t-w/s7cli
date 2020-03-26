@@ -161,6 +161,10 @@ namespace S7Cli
                     rv = Api.ImportSourcesDir(ctx,
                         opt.Project, opt.Program, opt.SourcesDir, opt.Overwrite);
                     break;
+                case ExportAllSourcesOptions opt:
+                    rv = Api.ExportAllSources(ctx,
+                        opt.Project, opt.Program, opt.SourcesDir);
+                    break;
                 case ImportLibSourcesOptions opt:
                     rv = Api.ImportLibSources(ctx,
                         library: opt.Library, libProgram: opt.LibProgram,
@@ -189,7 +193,7 @@ namespace S7Cli
                             rv = -1;
                     break;
                 case CompileAllStationsOptions opt:
-                    rv = Api.compileAllStations(ctx, opt.Project, opt.AllowFail);
+                    rv = Api.CompileAllStations(ctx, opt.Project, opt.AllowFail);
                     break;
             }
             ReturnValue = rv;

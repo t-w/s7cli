@@ -286,7 +286,7 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         /// <param name="sourcesDir">Directory to which to export sources</param>
         /// <returns>0 on success, -1 otherwise</returns>
-        public static int ExportSources(S7Context ctx,
+        public static int ExportAllSources(S7Context ctx,
             string project, string program, string sourcesDir)
         {
             var log = ctx.Log;
@@ -474,7 +474,7 @@ namespace S7Lib
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="allowFail">Return 0 even if unable to compile some station</param>
         /// <returns></returns>
-        public static int compileAllStations(S7Context ctx, string project, bool allowFail = true)
+        public static int CompileAllStations(S7Context ctx, string project, bool allowFail = true)
         {
             var log = ctx.Log;
 

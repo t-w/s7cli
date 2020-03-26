@@ -113,6 +113,13 @@ namespace S7Cli
         public bool Overwrite { get; set; }
     }
 
+    [Verb("exportAllSources", HelpText = "Export all sources from a program.")]
+    class ExportAllSourcesOptions : ProgramOptions
+    {
+        [Option("sourcesDir", Required = true, HelpText = "Directory to which to export sources")]
+        public string SourcesDir { get; set; }
+    }
+
     [Verb("importLibSources", HelpText = "Import sources from a library into a program.")]
     class ImportLibSourcesOptions : ImportFromLibraryOptions
     {
