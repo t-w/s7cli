@@ -14,8 +14,11 @@ namespace S7Lib
     {
         // Default path for symbol import report file
         static string ReportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";
-        // Default name for Notepad window opened on import symbols command
-        static string NotepadWindowName = "sym_imp.txt - Notepad";
+        // Default titles for Notepad window opened on import symbols command
+        // The title window may or may not include the .txt extension depending on Explorer settings
+        static string[] NotepadWindowTitles = new string[]{
+            "sym_imp - Notepad", "sym_imp.txt - Notepad"
+        };
 
         public static string ReadFile(S7Context ctx, string path)
         {
@@ -57,13 +60,18 @@ namespace S7Lib
         private static void CloseSymbolImportationLogWindow(S7Context ctx)
         {
             var log = ctx.Log;
-            IntPtr handle = WindowsAPI.FindWindow(null, NotepadWindowName);
-            if (handle.Equals(null) || handle.Equals(IntPtr.Zero))
+            IntPtr windowHandle = IntPtr.Zero;
+            foreach (var windowTitle in NotepadWindowTitles)
             {
-                log.Warning($"Could not find window titled {NotepadWindowName}.");
+                windowHandle = WindowsAPI.FindWindow(null, windowTitle);
+                if (windowHandle != IntPtr.Zero) break;
+            }
+            if (windowHandle == IntPtr.Zero)
+            {
+                log.Warning($"Could not find Notepad window with importation log.");
                 return;
             }
-            WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            WindowsAPI.SendMessage(windowHandle, WindowsAPI.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
             log.Debug($"Closed Notepad window with importation log");
         }
 
