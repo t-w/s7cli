@@ -17,8 +17,8 @@ namespace UnitTestS7Lib
             Directory.CreateDirectory(workspaceDir);
         }
 
-        [ClassCleanup]
-        public static void RemoveTestProject()
+        [TestCleanup]
+        public void RemoveTestProject()
         {
             var ctx = new S7Context();
             Api.RemoveProject(ctx, "testProj");
@@ -90,6 +90,14 @@ namespace UnitTestS7Lib
         {
             var ctx = new S7Context();
             var rv = Api.CompileSource(ctx, "ZEN05_01_S7SCL__Measv06", "S7 Program", "Measv06");
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
+        public void TestCompileAllStations()
+        {
+            var ctx = new S7Context();
+            var rv = Api.CompileAllStations(ctx, "AWP_Demo01");
             Assert.AreEqual(0, rv);
         }
     }
