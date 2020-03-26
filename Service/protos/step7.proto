@@ -9,46 +9,73 @@ package step7service;
 
 
 service Step7 {
-  // Creates and registers an empty STEP 7 project
+
+  // Create new empty STEP 7 project
   rpc CreateProject (CreateProjectRequest) returns (StatusReply) {}
+    // Create new empty STEP 7 library
+  rpc CreateLibrary (CreateLibraryRequest) returns (StatusReply) {}
   // Registers existing STEP 7 project
   rpc RegisterProject (RegisterProjectRequest) returns (StatusReply) {}
+  // Removes STEP 7 project and deletes all of its files
+  rpc RemoveProject (RemoveProjectRequest) returns (StatusReply) {}
 
-  // Import sources from a library into project
-  rpc ImportLibSources (ImportLibRequest) returns (StatusReply) {}
-  // Import blocks from a library into project
-  rpc ImportLibBlocks (ImportLibRequest) returns (StatusReply) {}
-  // Import symbols from an sdf file into project
-  rpc ImportSymbols (ImportSymbolsRequest) returns (StatusReply) {}
+  // Import source into a program
+  rpc ImportSource (ImportSourceRequest) returns (StatusReply){}
   // Import sources from a directory into a project
   rpc ImportSourcesDir (ImportSourcesDirRequest) returns (StatusReply) {}
+  // Import sources from a library into project
+  rpc ImportLibSources (ImportLibSourcesRequest) returns (StatusReply) {}
+  // Exports a source from a program to a directory
+  rpc ExportSouce (ExportSourceRequest) returns (StatusReply) {}
+  // Exports all sources from a program to a directory
+  rpc ExportAllSources (ExportAllSourcesRequest) returns (StatusReply) {}
+
+  // Compile specified source code module
+  rpc CompileSource (CompileSourceRequest) returns (StatusReply) {}
+  // TODO: Compile multiple sources in order
+
+  // Import blocks from a library into project
+  rpc ImportLibBlocks (ImportLibBlocksRequest) returns (StatusReply) {}
+  // Imports symbols into a program from a file
+  rpc ImportSymbols (ImportSymbolsRequest) returns (StatusReply) {}
+  // Exports symbols from program from into a file
+  rpc ExportSymbols (ExportSymbolsRequest) returns (StatusReply) {}
   
-  // Compile specified source code module(s)
-  rpc CompileSources (CompileSourcesRequest) returns (StatusReply) {}
+  // Compiles the HW configuration for each of the stations in a project
+  rpc CompileAllStations (CompileAllStationsRequest) returns (StatusReply) {}
 
-  // Gets list of programs in a STEP 7 project
-  rpc GetListOfPrograms (ProjectRequest) returns (ListReply) {}
-    
-  // Removes blocks from a project
-  rpc RemoveBlocks (RemoveBlocksRequest) returns (StatusReply) {}
+  // TODO: List functions could return better replies with more data...
 
-  // Compile all stations hardware configuration
-  rpc CompileHw (CompileHwRequest) returns (StatusReply) {}
-  // Download to all stations
-  rpc Download (DownloadRequest) returns (StatusReply) {}
+  // Creates list with project names
+  rpc ListProjects (ListProjectsRequest) returns (ListReply) {}
+  // Creates list with programs in a given project
+  rpc ListPrograms (ListProgramsRequest) returns (ListReply) {}
+  // Creates list with stations in a given project
+  rpc ListStations (ListStationsRequest) returns (ListReply) {}
+  // Creates list with containers for each program in a given project
+  rpc ListContainers (ListContainersRequest) returns (ListReply) {}
+
+  // [ONLINE] Starts/restarts a program
+  rpc StartProgram (ProgramRequest) returns (StatusReply) {}
+  // [ONLINE] Stops a program
+  rpc StopProgram (ProgramRequest) returns (StatusReply) {}
+  // [ONLINE] Downloads all the blocks under a Program
+  rpc DownloadProgramBlocks (DownloadProgramBlocksRequest) returns (StatusReply) {}
 }
 
 // Request messages
 
-message ProjectRequest {
-  // Project name or path to project
-  string project = 1;
+message CreateProjectRequest {
+  // Project name (max 8 characters)
+  string projectName = 1;
+  // Path to project's parent directory
+  string projectDir = 2;
 }
 
-message CreateProjectRequest {
-  // Project name
+message CreateLibraryRequest {
+  // Library name (max 8 characters)
   string projectName = 1;
-  // Project directory
+  // Path to library's parent directory
   string projectDir = 2;
 }
 
@@ -57,67 +84,168 @@ message RegisterProjectRequest {
   string projectFilePath = 1;
 }
 
-message ImportLibRequest {
-  // Project name or directory
+message RemoveProjectRequest {
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
-  string program = 2;
-  // Library name
-  string libraryName = 3;
-  // Target program in library project
-  string libraryProgram = 4;
-  // Force overwrite existing sources in project
-  bool force = 5;
 }
 
-message ImportSymbolsRequest {
-  // Project name or directory
+message ImportSourceRequest {
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
   // Program name
   string program = 2;
-  // Symbol table file
-  string symbols = 3;
+  // Path to source file
+  string source = 3;
+  // Force overwrite existing source in project
+  bool overwrite = 4;
 }
 
 message ImportSourcesDirRequest {
-  // Project name or directory
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
   // Program name
   string program = 2;
-  // Path to directory with sources to import
+  // Directory from which to import sources
   string sourcesDir = 3;
   // Force overwrite existing sources in project
-  bool force = 4;
+  bool overwrite = 4;
 }
 
-message CompileSourcesRequest {
+message ImportLibSourcesRequest {
+  // Source library id, path to .s7l (unique) or library name
+  string library = 1;
+  // Source library program name
+  string libProgram = 2;
+  // Destination project id, path to .s7p (unique) or project name
+  string project = 3;
+  // Destination program name
+  string projProgram = 4;
+  // Force overwrite existing sources in destination project
+  bool overwrite = 5;
+}
+
+message ExportAllSourcesRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Directory to which to export sources
+  string sourcesDir = 3;
+}
+
+message ExportSourceRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Source name
+  string source = 3;
+  // Directory to which to export sources
+  string sourcesDir = 4;
+}
+
+message CompileSourceRequest {
   // Project name or directory
   string project = 1;
   // Program name
   string program = 2;
-  // List of name of sources to compile
-  repeated string sources = 3;
+  // Source name
+  string source = 3;
 }
 
-message RemoveBlocksRequest {
-  // Project name or directory
+// TODO: CompileSources for multiple sources
+
+message ImportLibBlocksRequest {
+  // Source library id, path to .s7l (unique) or library name
+  string library = 1;
+  // Source library program name
+  string libProgram = 2;
+  // Destination project id, path to .s7p (unique) or project name
+  string project = 3;
+  // Destination program name
+  string projProgram = 4;
+  // Force overwrite existing blocks in destination project
+  bool overwrite = 5;
+}
+
+message ImportSymbolsRequest {
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
   // Program name
   string program = 2;
-  // List of name of blocks to remove
-  repeated string blocks = 3;
+  // Path to input symbol table file (usually .sdf)
+  //   Supported extensions .asc, .dif, .sdf, .seq
+  string symbolFile = 3;
+  // Symbol import flag (S7SymImportFlags)
+  //   - 0, S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities
+  //   - 1, S7SymImportOverwriteNameLeading - existing values with the same name are replaced. 
+  //     The addresses are adjusted according to the specifications in the import file.
+  //   - 2, S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
+  //     Symbol names are adjusted to the specifications in the import file.
+  int32 flag = 4;
+  // Succeed (return 0) even if conflits are detected
+  bool allowConflicts = 5;
 }
 
-message CompileHwRequest {
-  // Project name or directory
+message ExportSymbolsRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Path to output symbol table file (usually .sdf)
+  // Supported extensions .asc, .dif, .sdf, .seq
+  string symbolFile = 3;
+  // Overwrite output file if it exists
+  bool overwrite = 4;
+}
+
+message CompileAllStationsRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Succeed (return 0) even if unable to compile some station
+  bool allowFail = 2;
+}
+
+message ListProjectsRequest { }
+
+message ListProgramsRequest {
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
 }
 
-message DownloadRequest {
-  // Project name or directory
+message ListStationsRequest {
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
 }
 
+message ListContainersRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+}
+
+message ProgramRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Station name
+  string station = 2;
+  // Rack name
+  string rack = 3;
+  // Child module name
+  string module = 4;
+}
+
+message DownloadProgramBlocksRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Station name
+  string station = 2;
+  // Rack name
+  string rack = 3;
+  // Child module name
+  string module = 4;
+  // Force overwrite of online blocks
+  bool overwrite = 5;
+}
 
 // Reply messages
 
