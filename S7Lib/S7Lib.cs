@@ -249,7 +249,7 @@ namespace S7Lib
         /// <summary>
         /// Import sources from a library into a program
         /// </summary>
-        /// <param name="library">Source library id, path to .s7p (unique) or project name</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
         /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
@@ -374,7 +374,7 @@ namespace S7Lib
         /// <summary>
         /// Import blocks from a directory into a project
         /// </summary>
-        /// <param name="library">Source library id, path to .s7p (unique) or project name</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
         /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
