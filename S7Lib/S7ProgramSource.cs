@@ -332,7 +332,7 @@ namespace S7Lib
 
             // get status and close the SCL compiler
             S7CompilerSCL compiler = new S7CompilerSCL(ctx);
-            log.Information($"SCL status buffer: {compiler.getSclStatusBuffer()}");
+            log.Debug($"SCL status buffer:\n{compiler.getSclStatusBuffer()}");
             string statusLine = compiler.getSclStatusLine();
             int errors = compiler.getErrorCount();
             int warnings = compiler.getWarningCount();
@@ -388,7 +388,7 @@ namespace S7Lib
 
             // read and show the log file
             string[] logfile = File.ReadAllLines(verbLogFile);
-            Array.ForEach<string>(logfile, s => log.Information(s));
+            Array.ForEach<string>(logfile, s => log.Debug(s));
             File.Delete(verbLogFile);
 
             // parse status in the logfile
@@ -442,6 +442,12 @@ namespace S7Lib
             var blockName = block.Name;
             var blockType = block.ConcreteType;
 
+            if (blockType == S7BlockType.S7SDBs)
+            {
+                log.Debug($"Block {blockName} is a system data block: skipping.");
+                return 0;
+            }
+
             IS7SWItem destBlock = null;
             // Check if block is already present
             try
@@ -450,13 +456,13 @@ namespace S7Lib
             }
             catch (Exception) { }
 
-            if (block != null && !overwrite)
+            if (destBlock != null && !overwrite)
             {
                 log.Error($"Could not import {blockName} from library: " +
                           $"block with the same name exists.");
                 return -1;
             }
-            else if (block != null && overwrite)
+            else if (destBlock != null && overwrite)
             {
                 log.Debug($"{blockName} already exists. Overwriting.");
                 try
