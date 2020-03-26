@@ -66,6 +66,16 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestExportAllSources()
+        {
+            var ctx = new S7Context();
+            var rv = Api.ExportAllSources(ctx, "AWP_Demo01", "S7-Programm", workspaceDir);
+            Assert.AreEqual(0, rv);
+            var sourceExists = File.Exists(Path.Combine(workspaceDir, "AWP_DB333.AWL"));
+            Assert.IsTrue(sourceExists);
+        }
+
+        [TestMethod]
         public void TestImportSymbols()
         {
             var ctx = new S7Context();
