@@ -75,7 +75,6 @@ namespace UnitTestS7Lib
             var s7ProjFilePath = Path.Combine(WorkspaceDir, @"testProj\testProj.s7p");
             var rv = Api.RegisterProject(ctx, s7ProjFilePath);
             Assert.AreEqual(0, rv);
-            Api.RemoveProject(ctx, "testProj");
         }
 
         [TestMethod]
@@ -139,7 +138,6 @@ namespace UnitTestS7Lib
         {
             var ctx = new S7Context();
             Api.CompileSource(ctx, "AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
-            ctx = new S7Context();
             var rv = Api.ImportLibBlocks(ctx,
                 library: "AWP_Demo01", libProgram: "S7-Programm",
                 project: "testProj", projProgram: "testProgram");
