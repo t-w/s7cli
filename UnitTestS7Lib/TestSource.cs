@@ -66,6 +66,18 @@ namespace UnitTestS7Lib
         }
 
         [TestMethod]
+        public void TestImportSymbols()
+        {
+            var ctx = new S7Context();
+            var symbolFile = Path.Combine(workspaceDir, "awp_demo01.sdf");
+            Api.ExportSymbols(ctx, "AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
+            Api.CreateProject(ctx, "testProj", workspaceDir);
+            Api.CreateProgram(ctx, "testProj", "testProgram");
+            var rv = Api.ImportSymbols(ctx, "testProj", "testProgram", symbolFile);
+            Assert.AreEqual(0, rv);
+        }
+
+        [TestMethod]
         public void TestCompileAwlSource()
         {
             var ctx = new S7Context();
