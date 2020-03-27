@@ -18,41 +18,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='step7service',
   syntax='proto3',
   serialized_options=b'\n\005step7B\005Step7P\001\242\002\002S7',
-  serialized_pb=b'\n\x0bstep7.proto\x12\x0cstep7service\"!\n\x0eProjectRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\"?\n\x14\x43reateProjectRequest\x12\x13\n\x0bprojectName\x18\x01 \x01(\t\x12\x12\n\nprojectDir\x18\x02 \x01(\t\"p\n\x10ImportLibRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x13\n\x0blibraryName\x18\x03 \x01(\t\x12\x16\n\x0elibraryProgram\x18\x04 \x01(\t\x12\r\n\x05\x66orce\x18\x05 \x01(\x08\"I\n\x14ImportSymbolsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x0f\n\x07symbols\x18\x03 \x01(\t\"^\n\x17ImportSourcesDirRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x12\n\nsourcesDir\x18\x03 \x01(\t\x12\r\n\x05\x66orce\x18\x04 \x01(\x08\"J\n\x15\x43ompileSourcesRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x0f\n\x07sources\x18\x03 \x03(\t\"\x1f\n\x0bStatusReply\x12\x10\n\x08\x65xitCode\x18\x01 \x01(\x05\"H\n\tListReply\x12)\n\x06status\x18\x01 \x01(\x0b\x32\x19.step7service.StatusReply\x12\x10\n\x08listItem\x18\x02 \x03(\t2\xc6\x04\n\x05Step7\x12P\n\rCreateProject\x12\".step7service.CreateProjectRequest\x1a\x19.step7service.StatusReply\"\x00\x12O\n\x10ImportLibSources\x12\x1e.step7service.ImportLibRequest\x1a\x19.step7service.StatusReply\"\x00\x12N\n\x0fImportLibBlocks\x12\x1e.step7service.ImportLibRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rImportSymbols\x12\".step7service.ImportSymbolsRequest\x1a\x19.step7service.StatusReply\"\x00\x12V\n\x10ImportSourcesDir\x12%.step7service.ImportSourcesDirRequest\x1a\x19.step7service.StatusReply\"\x00\x12R\n\x0e\x43ompileSources\x12#.step7service.CompileSourcesRequest\x1a\x19.step7service.StatusReply\"\x00\x12L\n\x11GetListOfPrograms\x12\x1c.step7service.ProjectRequest\x1a\x17.step7service.ListReply\"\x00\x42\x15\n\x05step7B\x05Step7P\x01\xa2\x02\x02S7b\x06proto3'
+  serialized_pb=b'\n\x0bstep7.proto\x12\x0cstep7service\"?\n\x14\x43reateProjectRequest\x12\x13\n\x0bprojectName\x18\x01 \x01(\t\x12\x12\n\nprojectDir\x18\x02 \x01(\t\"?\n\x14\x43reateLibraryRequest\x12\x13\n\x0bprojectName\x18\x01 \x01(\t\x12\x12\n\nprojectDir\x18\x02 \x01(\t\"1\n\x16RegisterProjectRequest\x12\x17\n\x0fprojectFilePath\x18\x01 \x01(\t\"\'\n\x14RemoveProjectRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\"Z\n\x13ImportSourceRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\toverwrite\x18\x04 \x01(\x08\"b\n\x17ImportSourcesDirRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x12\n\nsourcesDir\x18\x03 \x01(\t\x12\x11\n\toverwrite\x18\x04 \x01(\x08\"w\n\x17ImportLibSourcesRequest\x12\x0f\n\x07library\x18\x01 \x01(\t\x12\x12\n\nlibProgram\x18\x02 \x01(\t\x12\x0f\n\x07project\x18\x03 \x01(\t\x12\x13\n\x0bprojProgram\x18\x04 \x01(\t\x12\x11\n\toverwrite\x18\x05 \x01(\x08\"O\n\x17\x45xportAllSourcesRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x12\n\nsourcesDir\x18\x03 \x01(\t\"[\n\x13\x45xportSourceRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x12\n\nsourcesDir\x18\x04 \x01(\t\"H\n\x14\x43ompileSourceRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\"v\n\x16ImportLibBlocksRequest\x12\x0f\n\x07library\x18\x01 \x01(\t\x12\x12\n\nlibProgram\x18\x02 \x01(\t\x12\x0f\n\x07project\x18\x03 \x01(\t\x12\x13\n\x0bprojProgram\x18\x04 \x01(\t\x12\x11\n\toverwrite\x18\x05 \x01(\x08\"r\n\x14ImportSymbolsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x12\n\nsymbolFile\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x05\x12\x16\n\x0e\x61llowConflicts\x18\x05 \x01(\x08\"_\n\x14\x45xportSymbolsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07program\x18\x02 \x01(\t\x12\x12\n\nsymbolFile\x18\x03 \x01(\t\x12\x11\n\toverwrite\x18\x04 \x01(\x08\"?\n\x19\x43ompileAllStationsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x11\n\tallowFail\x18\x02 \x01(\x08\"\x15\n\x13ListProjectsRequest\"&\n\x13ListProgramsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\"&\n\x13ListStationsRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\"(\n\x15ListContainersRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\"P\n\x0eProgramRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07station\x18\x02 \x01(\t\x12\x0c\n\x04rack\x18\x03 \x01(\t\x12\x0e\n\x06module\x18\x04 \x01(\t\"q\n\x1c\x44ownloadProgramBlocksRequest\x12\x0f\n\x07project\x18\x01 \x01(\t\x12\x0f\n\x07station\x18\x02 \x01(\t\x12\x0c\n\x04rack\x18\x03 \x01(\t\x12\x0e\n\x06module\x18\x04 \x01(\t\x12\x11\n\toverwrite\x18\x05 \x01(\x08\",\n\x0bStatusReply\x12\x10\n\x08\x65xitCode\x18\x01 \x01(\x05\x12\x0b\n\x03log\x18\x02 \x03(\t\"E\n\tListReply\x12)\n\x06status\x18\x01 \x01(\x0b\x32\x19.step7service.StatusReply\x12\r\n\x05items\x18\x02 \x03(\t2\xd5\r\n\x05Step7\x12P\n\rCreateProject\x12\".step7service.CreateProjectRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rCreateLibrary\x12\".step7service.CreateLibraryRequest\x1a\x19.step7service.StatusReply\"\x00\x12T\n\x0fRegisterProject\x12$.step7service.RegisterProjectRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rRemoveProject\x12\".step7service.RemoveProjectRequest\x1a\x19.step7service.StatusReply\"\x00\x12N\n\x0cImportSource\x12!.step7service.ImportSourceRequest\x1a\x19.step7service.StatusReply\"\x00\x12V\n\x10ImportSourcesDir\x12%.step7service.ImportSourcesDirRequest\x1a\x19.step7service.StatusReply\"\x00\x12V\n\x10ImportLibSources\x12%.step7service.ImportLibSourcesRequest\x1a\x19.step7service.StatusReply\"\x00\x12M\n\x0b\x45xportSouce\x12!.step7service.ExportSourceRequest\x1a\x19.step7service.StatusReply\"\x00\x12V\n\x10\x45xportAllSources\x12%.step7service.ExportAllSourcesRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rCompileSource\x12\".step7service.CompileSourceRequest\x1a\x19.step7service.StatusReply\"\x00\x12T\n\x0fImportLibBlocks\x12$.step7service.ImportLibBlocksRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rImportSymbols\x12\".step7service.ImportSymbolsRequest\x1a\x19.step7service.StatusReply\"\x00\x12P\n\rExportSymbols\x12\".step7service.ExportSymbolsRequest\x1a\x19.step7service.StatusReply\"\x00\x12Z\n\x12\x43ompileAllStations\x12\'.step7service.CompileAllStationsRequest\x1a\x19.step7service.StatusReply\"\x00\x12L\n\x0cListProjects\x12!.step7service.ListProjectsRequest\x1a\x17.step7service.ListReply\"\x00\x12L\n\x0cListPrograms\x12!.step7service.ListProgramsRequest\x1a\x17.step7service.ListReply\"\x00\x12L\n\x0cListStations\x12!.step7service.ListStationsRequest\x1a\x17.step7service.ListReply\"\x00\x12P\n\x0eListContainers\x12#.step7service.ListContainersRequest\x1a\x17.step7service.ListReply\"\x00\x12I\n\x0cStartProgram\x12\x1c.step7service.ProgramRequest\x1a\x19.step7service.StatusReply\"\x00\x12H\n\x0bStopProgram\x12\x1c.step7service.ProgramRequest\x1a\x19.step7service.StatusReply\"\x00\x12`\n\x15\x44ownloadProgramBlocks\x12*.step7service.DownloadProgramBlocksRequest\x1a\x19.step7service.StatusReply\"\x00\x42\x15\n\x05step7B\x05Step7P\x01\xa2\x02\x02S7b\x06proto3'
 )
 
 
-
-
-_PROJECTREQUEST = _descriptor.Descriptor(
-  name='ProjectRequest',
-  full_name='step7service.ProjectRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='project', full_name='step7service.ProjectRequest.project', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=29,
-  serialized_end=62,
-)
 
 
 _CREATEPROJECTREQUEST = _descriptor.Descriptor(
@@ -88,49 +57,142 @@ _CREATEPROJECTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=64,
-  serialized_end=127,
+  serialized_start=29,
+  serialized_end=92,
 )
 
 
-_IMPORTLIBREQUEST = _descriptor.Descriptor(
-  name='ImportLibRequest',
-  full_name='step7service.ImportLibRequest',
+_CREATELIBRARYREQUEST = _descriptor.Descriptor(
+  name='CreateLibraryRequest',
+  full_name='step7service.CreateLibraryRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='project', full_name='step7service.ImportLibRequest.project', index=0,
+      name='projectName', full_name='step7service.CreateLibraryRequest.projectName', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='program', full_name='step7service.ImportLibRequest.program', index=1,
+      name='projectDir', full_name='step7service.CreateLibraryRequest.projectDir', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=94,
+  serialized_end=157,
+)
+
+
+_REGISTERPROJECTREQUEST = _descriptor.Descriptor(
+  name='RegisterProjectRequest',
+  full_name='step7service.RegisterProjectRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='projectFilePath', full_name='step7service.RegisterProjectRequest.projectFilePath', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=159,
+  serialized_end=208,
+)
+
+
+_REMOVEPROJECTREQUEST = _descriptor.Descriptor(
+  name='RemoveProjectRequest',
+  full_name='step7service.RemoveProjectRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.RemoveProjectRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=210,
+  serialized_end=249,
+)
+
+
+_IMPORTSOURCEREQUEST = _descriptor.Descriptor(
+  name='ImportSourceRequest',
+  full_name='step7service.ImportSourceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ImportSourceRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.ImportSourceRequest.program', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='libraryName', full_name='step7service.ImportLibRequest.libraryName', index=2,
+      name='source', full_name='step7service.ImportSourceRequest.source', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='libraryProgram', full_name='step7service.ImportLibRequest.libraryProgram', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='force', full_name='step7service.ImportLibRequest.force', index=4,
-      number=5, type=8, cpp_type=7, label=1,
+      name='overwrite', full_name='step7service.ImportSourceRequest.overwrite', index=3,
+      number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -147,53 +209,8 @@ _IMPORTLIBREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=129,
-  serialized_end=241,
-)
-
-
-_IMPORTSYMBOLSREQUEST = _descriptor.Descriptor(
-  name='ImportSymbolsRequest',
-  full_name='step7service.ImportSymbolsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='project', full_name='step7service.ImportSymbolsRequest.project', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='program', full_name='step7service.ImportSymbolsRequest.program', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='symbols', full_name='step7service.ImportSymbolsRequest.symbols', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=243,
-  serialized_end=316,
+  serialized_start=251,
+  serialized_end=341,
 )
 
 
@@ -226,7 +243,7 @@ _IMPORTSOURCESDIRREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='force', full_name='step7service.ImportSourcesDirRequest.force', index=3,
+      name='overwrite', full_name='step7service.ImportSourcesDirRequest.overwrite', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -244,36 +261,50 @@ _IMPORTSOURCESDIRREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=318,
-  serialized_end=412,
+  serialized_start=343,
+  serialized_end=441,
 )
 
 
-_COMPILESOURCESREQUEST = _descriptor.Descriptor(
-  name='CompileSourcesRequest',
-  full_name='step7service.CompileSourcesRequest',
+_IMPORTLIBSOURCESREQUEST = _descriptor.Descriptor(
+  name='ImportLibSourcesRequest',
+  full_name='step7service.ImportLibSourcesRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='project', full_name='step7service.CompileSourcesRequest.project', index=0,
+      name='library', full_name='step7service.ImportLibSourcesRequest.library', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='program', full_name='step7service.CompileSourcesRequest.program', index=1,
+      name='libProgram', full_name='step7service.ImportLibSourcesRequest.libProgram', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sources', full_name='step7service.CompileSourcesRequest.sources', index=2,
-      number=3, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
+      name='project', full_name='step7service.ImportLibSourcesRequest.project', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='projProgram', full_name='step7service.ImportLibSourcesRequest.projProgram', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='overwrite', full_name='step7service.ImportLibSourcesRequest.overwrite', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -289,8 +320,586 @@ _COMPILESOURCESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=414,
-  serialized_end=488,
+  serialized_start=443,
+  serialized_end=562,
+)
+
+
+_EXPORTALLSOURCESREQUEST = _descriptor.Descriptor(
+  name='ExportAllSourcesRequest',
+  full_name='step7service.ExportAllSourcesRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ExportAllSourcesRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.ExportAllSourcesRequest.program', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sourcesDir', full_name='step7service.ExportAllSourcesRequest.sourcesDir', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=564,
+  serialized_end=643,
+)
+
+
+_EXPORTSOURCEREQUEST = _descriptor.Descriptor(
+  name='ExportSourceRequest',
+  full_name='step7service.ExportSourceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ExportSourceRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.ExportSourceRequest.program', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='step7service.ExportSourceRequest.source', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='sourcesDir', full_name='step7service.ExportSourceRequest.sourcesDir', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=645,
+  serialized_end=736,
+)
+
+
+_COMPILESOURCEREQUEST = _descriptor.Descriptor(
+  name='CompileSourceRequest',
+  full_name='step7service.CompileSourceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.CompileSourceRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.CompileSourceRequest.program', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='step7service.CompileSourceRequest.source', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=738,
+  serialized_end=810,
+)
+
+
+_IMPORTLIBBLOCKSREQUEST = _descriptor.Descriptor(
+  name='ImportLibBlocksRequest',
+  full_name='step7service.ImportLibBlocksRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='library', full_name='step7service.ImportLibBlocksRequest.library', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='libProgram', full_name='step7service.ImportLibBlocksRequest.libProgram', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ImportLibBlocksRequest.project', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='projProgram', full_name='step7service.ImportLibBlocksRequest.projProgram', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='overwrite', full_name='step7service.ImportLibBlocksRequest.overwrite', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=812,
+  serialized_end=930,
+)
+
+
+_IMPORTSYMBOLSREQUEST = _descriptor.Descriptor(
+  name='ImportSymbolsRequest',
+  full_name='step7service.ImportSymbolsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ImportSymbolsRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.ImportSymbolsRequest.program', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='symbolFile', full_name='step7service.ImportSymbolsRequest.symbolFile', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='flag', full_name='step7service.ImportSymbolsRequest.flag', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='allowConflicts', full_name='step7service.ImportSymbolsRequest.allowConflicts', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=932,
+  serialized_end=1046,
+)
+
+
+_EXPORTSYMBOLSREQUEST = _descriptor.Descriptor(
+  name='ExportSymbolsRequest',
+  full_name='step7service.ExportSymbolsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ExportSymbolsRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='program', full_name='step7service.ExportSymbolsRequest.program', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='symbolFile', full_name='step7service.ExportSymbolsRequest.symbolFile', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='overwrite', full_name='step7service.ExportSymbolsRequest.overwrite', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1048,
+  serialized_end=1143,
+)
+
+
+_COMPILEALLSTATIONSREQUEST = _descriptor.Descriptor(
+  name='CompileAllStationsRequest',
+  full_name='step7service.CompileAllStationsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.CompileAllStationsRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='allowFail', full_name='step7service.CompileAllStationsRequest.allowFail', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1145,
+  serialized_end=1208,
+)
+
+
+_LISTPROJECTSREQUEST = _descriptor.Descriptor(
+  name='ListProjectsRequest',
+  full_name='step7service.ListProjectsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1210,
+  serialized_end=1231,
+)
+
+
+_LISTPROGRAMSREQUEST = _descriptor.Descriptor(
+  name='ListProgramsRequest',
+  full_name='step7service.ListProgramsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ListProgramsRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1233,
+  serialized_end=1271,
+)
+
+
+_LISTSTATIONSREQUEST = _descriptor.Descriptor(
+  name='ListStationsRequest',
+  full_name='step7service.ListStationsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ListStationsRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1273,
+  serialized_end=1311,
+)
+
+
+_LISTCONTAINERSREQUEST = _descriptor.Descriptor(
+  name='ListContainersRequest',
+  full_name='step7service.ListContainersRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ListContainersRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1313,
+  serialized_end=1353,
+)
+
+
+_PROGRAMREQUEST = _descriptor.Descriptor(
+  name='ProgramRequest',
+  full_name='step7service.ProgramRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.ProgramRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='station', full_name='step7service.ProgramRequest.station', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rack', full_name='step7service.ProgramRequest.rack', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='module', full_name='step7service.ProgramRequest.module', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1355,
+  serialized_end=1435,
+)
+
+
+_DOWNLOADPROGRAMBLOCKSREQUEST = _descriptor.Descriptor(
+  name='DownloadProgramBlocksRequest',
+  full_name='step7service.DownloadProgramBlocksRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='project', full_name='step7service.DownloadProgramBlocksRequest.project', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='station', full_name='step7service.DownloadProgramBlocksRequest.station', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='rack', full_name='step7service.DownloadProgramBlocksRequest.rack', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='module', full_name='step7service.DownloadProgramBlocksRequest.module', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='overwrite', full_name='step7service.DownloadProgramBlocksRequest.overwrite', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1437,
+  serialized_end=1550,
 )
 
 
@@ -308,6 +917,13 @@ _STATUSREPLY = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='log', full_name='step7service.StatusReply.log', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -320,8 +936,8 @@ _STATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=490,
-  serialized_end=521,
+  serialized_start=1552,
+  serialized_end=1596,
 )
 
 
@@ -340,7 +956,7 @@ _LISTREPLY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='listItem', full_name='step7service.ListReply.listItem', index=1,
+      name='items', full_name='step7service.ListReply.items', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -358,27 +974,34 @@ _LISTREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=523,
-  serialized_end=595,
+  serialized_start=1598,
+  serialized_end=1667,
 )
 
 _LISTREPLY.fields_by_name['status'].message_type = _STATUSREPLY
-DESCRIPTOR.message_types_by_name['ProjectRequest'] = _PROJECTREQUEST
 DESCRIPTOR.message_types_by_name['CreateProjectRequest'] = _CREATEPROJECTREQUEST
-DESCRIPTOR.message_types_by_name['ImportLibRequest'] = _IMPORTLIBREQUEST
-DESCRIPTOR.message_types_by_name['ImportSymbolsRequest'] = _IMPORTSYMBOLSREQUEST
+DESCRIPTOR.message_types_by_name['CreateLibraryRequest'] = _CREATELIBRARYREQUEST
+DESCRIPTOR.message_types_by_name['RegisterProjectRequest'] = _REGISTERPROJECTREQUEST
+DESCRIPTOR.message_types_by_name['RemoveProjectRequest'] = _REMOVEPROJECTREQUEST
+DESCRIPTOR.message_types_by_name['ImportSourceRequest'] = _IMPORTSOURCEREQUEST
 DESCRIPTOR.message_types_by_name['ImportSourcesDirRequest'] = _IMPORTSOURCESDIRREQUEST
-DESCRIPTOR.message_types_by_name['CompileSourcesRequest'] = _COMPILESOURCESREQUEST
+DESCRIPTOR.message_types_by_name['ImportLibSourcesRequest'] = _IMPORTLIBSOURCESREQUEST
+DESCRIPTOR.message_types_by_name['ExportAllSourcesRequest'] = _EXPORTALLSOURCESREQUEST
+DESCRIPTOR.message_types_by_name['ExportSourceRequest'] = _EXPORTSOURCEREQUEST
+DESCRIPTOR.message_types_by_name['CompileSourceRequest'] = _COMPILESOURCEREQUEST
+DESCRIPTOR.message_types_by_name['ImportLibBlocksRequest'] = _IMPORTLIBBLOCKSREQUEST
+DESCRIPTOR.message_types_by_name['ImportSymbolsRequest'] = _IMPORTSYMBOLSREQUEST
+DESCRIPTOR.message_types_by_name['ExportSymbolsRequest'] = _EXPORTSYMBOLSREQUEST
+DESCRIPTOR.message_types_by_name['CompileAllStationsRequest'] = _COMPILEALLSTATIONSREQUEST
+DESCRIPTOR.message_types_by_name['ListProjectsRequest'] = _LISTPROJECTSREQUEST
+DESCRIPTOR.message_types_by_name['ListProgramsRequest'] = _LISTPROGRAMSREQUEST
+DESCRIPTOR.message_types_by_name['ListStationsRequest'] = _LISTSTATIONSREQUEST
+DESCRIPTOR.message_types_by_name['ListContainersRequest'] = _LISTCONTAINERSREQUEST
+DESCRIPTOR.message_types_by_name['ProgramRequest'] = _PROGRAMREQUEST
+DESCRIPTOR.message_types_by_name['DownloadProgramBlocksRequest'] = _DOWNLOADPROGRAMBLOCKSREQUEST
 DESCRIPTOR.message_types_by_name['StatusReply'] = _STATUSREPLY
 DESCRIPTOR.message_types_by_name['ListReply'] = _LISTREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-ProjectRequest = _reflection.GeneratedProtocolMessageType('ProjectRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PROJECTREQUEST,
-  '__module__' : 'step7_pb2'
-  # @@protoc_insertion_point(class_scope:step7service.ProjectRequest)
-  })
-_sym_db.RegisterMessage(ProjectRequest)
 
 CreateProjectRequest = _reflection.GeneratedProtocolMessageType('CreateProjectRequest', (_message.Message,), {
   'DESCRIPTOR' : _CREATEPROJECTREQUEST,
@@ -387,19 +1010,33 @@ CreateProjectRequest = _reflection.GeneratedProtocolMessageType('CreateProjectRe
   })
 _sym_db.RegisterMessage(CreateProjectRequest)
 
-ImportLibRequest = _reflection.GeneratedProtocolMessageType('ImportLibRequest', (_message.Message,), {
-  'DESCRIPTOR' : _IMPORTLIBREQUEST,
+CreateLibraryRequest = _reflection.GeneratedProtocolMessageType('CreateLibraryRequest', (_message.Message,), {
+  'DESCRIPTOR' : _CREATELIBRARYREQUEST,
   '__module__' : 'step7_pb2'
-  # @@protoc_insertion_point(class_scope:step7service.ImportLibRequest)
+  # @@protoc_insertion_point(class_scope:step7service.CreateLibraryRequest)
   })
-_sym_db.RegisterMessage(ImportLibRequest)
+_sym_db.RegisterMessage(CreateLibraryRequest)
 
-ImportSymbolsRequest = _reflection.GeneratedProtocolMessageType('ImportSymbolsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _IMPORTSYMBOLSREQUEST,
+RegisterProjectRequest = _reflection.GeneratedProtocolMessageType('RegisterProjectRequest', (_message.Message,), {
+  'DESCRIPTOR' : _REGISTERPROJECTREQUEST,
   '__module__' : 'step7_pb2'
-  # @@protoc_insertion_point(class_scope:step7service.ImportSymbolsRequest)
+  # @@protoc_insertion_point(class_scope:step7service.RegisterProjectRequest)
   })
-_sym_db.RegisterMessage(ImportSymbolsRequest)
+_sym_db.RegisterMessage(RegisterProjectRequest)
+
+RemoveProjectRequest = _reflection.GeneratedProtocolMessageType('RemoveProjectRequest', (_message.Message,), {
+  'DESCRIPTOR' : _REMOVEPROJECTREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.RemoveProjectRequest)
+  })
+_sym_db.RegisterMessage(RemoveProjectRequest)
+
+ImportSourceRequest = _reflection.GeneratedProtocolMessageType('ImportSourceRequest', (_message.Message,), {
+  'DESCRIPTOR' : _IMPORTSOURCEREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ImportSourceRequest)
+  })
+_sym_db.RegisterMessage(ImportSourceRequest)
 
 ImportSourcesDirRequest = _reflection.GeneratedProtocolMessageType('ImportSourcesDirRequest', (_message.Message,), {
   'DESCRIPTOR' : _IMPORTSOURCESDIRREQUEST,
@@ -408,12 +1045,103 @@ ImportSourcesDirRequest = _reflection.GeneratedProtocolMessageType('ImportSource
   })
 _sym_db.RegisterMessage(ImportSourcesDirRequest)
 
-CompileSourcesRequest = _reflection.GeneratedProtocolMessageType('CompileSourcesRequest', (_message.Message,), {
-  'DESCRIPTOR' : _COMPILESOURCESREQUEST,
+ImportLibSourcesRequest = _reflection.GeneratedProtocolMessageType('ImportLibSourcesRequest', (_message.Message,), {
+  'DESCRIPTOR' : _IMPORTLIBSOURCESREQUEST,
   '__module__' : 'step7_pb2'
-  # @@protoc_insertion_point(class_scope:step7service.CompileSourcesRequest)
+  # @@protoc_insertion_point(class_scope:step7service.ImportLibSourcesRequest)
   })
-_sym_db.RegisterMessage(CompileSourcesRequest)
+_sym_db.RegisterMessage(ImportLibSourcesRequest)
+
+ExportAllSourcesRequest = _reflection.GeneratedProtocolMessageType('ExportAllSourcesRequest', (_message.Message,), {
+  'DESCRIPTOR' : _EXPORTALLSOURCESREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ExportAllSourcesRequest)
+  })
+_sym_db.RegisterMessage(ExportAllSourcesRequest)
+
+ExportSourceRequest = _reflection.GeneratedProtocolMessageType('ExportSourceRequest', (_message.Message,), {
+  'DESCRIPTOR' : _EXPORTSOURCEREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ExportSourceRequest)
+  })
+_sym_db.RegisterMessage(ExportSourceRequest)
+
+CompileSourceRequest = _reflection.GeneratedProtocolMessageType('CompileSourceRequest', (_message.Message,), {
+  'DESCRIPTOR' : _COMPILESOURCEREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.CompileSourceRequest)
+  })
+_sym_db.RegisterMessage(CompileSourceRequest)
+
+ImportLibBlocksRequest = _reflection.GeneratedProtocolMessageType('ImportLibBlocksRequest', (_message.Message,), {
+  'DESCRIPTOR' : _IMPORTLIBBLOCKSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ImportLibBlocksRequest)
+  })
+_sym_db.RegisterMessage(ImportLibBlocksRequest)
+
+ImportSymbolsRequest = _reflection.GeneratedProtocolMessageType('ImportSymbolsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _IMPORTSYMBOLSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ImportSymbolsRequest)
+  })
+_sym_db.RegisterMessage(ImportSymbolsRequest)
+
+ExportSymbolsRequest = _reflection.GeneratedProtocolMessageType('ExportSymbolsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _EXPORTSYMBOLSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ExportSymbolsRequest)
+  })
+_sym_db.RegisterMessage(ExportSymbolsRequest)
+
+CompileAllStationsRequest = _reflection.GeneratedProtocolMessageType('CompileAllStationsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _COMPILEALLSTATIONSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.CompileAllStationsRequest)
+  })
+_sym_db.RegisterMessage(CompileAllStationsRequest)
+
+ListProjectsRequest = _reflection.GeneratedProtocolMessageType('ListProjectsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTPROJECTSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ListProjectsRequest)
+  })
+_sym_db.RegisterMessage(ListProjectsRequest)
+
+ListProgramsRequest = _reflection.GeneratedProtocolMessageType('ListProgramsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTPROGRAMSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ListProgramsRequest)
+  })
+_sym_db.RegisterMessage(ListProgramsRequest)
+
+ListStationsRequest = _reflection.GeneratedProtocolMessageType('ListStationsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTSTATIONSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ListStationsRequest)
+  })
+_sym_db.RegisterMessage(ListStationsRequest)
+
+ListContainersRequest = _reflection.GeneratedProtocolMessageType('ListContainersRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LISTCONTAINERSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ListContainersRequest)
+  })
+_sym_db.RegisterMessage(ListContainersRequest)
+
+ProgramRequest = _reflection.GeneratedProtocolMessageType('ProgramRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PROGRAMREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.ProgramRequest)
+  })
+_sym_db.RegisterMessage(ProgramRequest)
+
+DownloadProgramBlocksRequest = _reflection.GeneratedProtocolMessageType('DownloadProgramBlocksRequest', (_message.Message,), {
+  'DESCRIPTOR' : _DOWNLOADPROGRAMBLOCKSREQUEST,
+  '__module__' : 'step7_pb2'
+  # @@protoc_insertion_point(class_scope:step7service.DownloadProgramBlocksRequest)
+  })
+_sym_db.RegisterMessage(DownloadProgramBlocksRequest)
 
 StatusReply = _reflection.GeneratedProtocolMessageType('StatusReply', (_message.Message,), {
   'DESCRIPTOR' : _STATUSREPLY,
@@ -438,8 +1166,8 @@ _STEP7 = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=598,
-  serialized_end=1180,
+  serialized_start=1670,
+  serialized_end=3419,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateProject',
@@ -451,57 +1179,183 @@ _STEP7 = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='ImportLibSources',
-    full_name='step7service.Step7.ImportLibSources',
+    name='CreateLibrary',
+    full_name='step7service.Step7.CreateLibrary',
     index=1,
     containing_service=None,
-    input_type=_IMPORTLIBREQUEST,
+    input_type=_CREATELIBRARYREQUEST,
     output_type=_STATUSREPLY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='ImportLibBlocks',
-    full_name='step7service.Step7.ImportLibBlocks',
+    name='RegisterProject',
+    full_name='step7service.Step7.RegisterProject',
     index=2,
     containing_service=None,
-    input_type=_IMPORTLIBREQUEST,
+    input_type=_REGISTERPROJECTREQUEST,
     output_type=_STATUSREPLY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='ImportSymbols',
-    full_name='step7service.Step7.ImportSymbols',
+    name='RemoveProject',
+    full_name='step7service.Step7.RemoveProject',
     index=3,
     containing_service=None,
-    input_type=_IMPORTSYMBOLSREQUEST,
+    input_type=_REMOVEPROJECTREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ImportSource',
+    full_name='step7service.Step7.ImportSource',
+    index=4,
+    containing_service=None,
+    input_type=_IMPORTSOURCEREQUEST,
     output_type=_STATUSREPLY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='ImportSourcesDir',
     full_name='step7service.Step7.ImportSourcesDir',
-    index=4,
+    index=5,
     containing_service=None,
     input_type=_IMPORTSOURCESDIRREQUEST,
     output_type=_STATUSREPLY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='CompileSources',
-    full_name='step7service.Step7.CompileSources',
-    index=5,
+    name='ImportLibSources',
+    full_name='step7service.Step7.ImportLibSources',
+    index=6,
     containing_service=None,
-    input_type=_COMPILESOURCESREQUEST,
+    input_type=_IMPORTLIBSOURCESREQUEST,
     output_type=_STATUSREPLY,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='GetListOfPrograms',
-    full_name='step7service.Step7.GetListOfPrograms',
-    index=6,
+    name='ExportSouce',
+    full_name='step7service.Step7.ExportSouce',
+    index=7,
     containing_service=None,
-    input_type=_PROJECTREQUEST,
+    input_type=_EXPORTSOURCEREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ExportAllSources',
+    full_name='step7service.Step7.ExportAllSources',
+    index=8,
+    containing_service=None,
+    input_type=_EXPORTALLSOURCESREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='CompileSource',
+    full_name='step7service.Step7.CompileSource',
+    index=9,
+    containing_service=None,
+    input_type=_COMPILESOURCEREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ImportLibBlocks',
+    full_name='step7service.Step7.ImportLibBlocks',
+    index=10,
+    containing_service=None,
+    input_type=_IMPORTLIBBLOCKSREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ImportSymbols',
+    full_name='step7service.Step7.ImportSymbols',
+    index=11,
+    containing_service=None,
+    input_type=_IMPORTSYMBOLSREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ExportSymbols',
+    full_name='step7service.Step7.ExportSymbols',
+    index=12,
+    containing_service=None,
+    input_type=_EXPORTSYMBOLSREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='CompileAllStations',
+    full_name='step7service.Step7.CompileAllStations',
+    index=13,
+    containing_service=None,
+    input_type=_COMPILEALLSTATIONSREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ListProjects',
+    full_name='step7service.Step7.ListProjects',
+    index=14,
+    containing_service=None,
+    input_type=_LISTPROJECTSREQUEST,
     output_type=_LISTREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ListPrograms',
+    full_name='step7service.Step7.ListPrograms',
+    index=15,
+    containing_service=None,
+    input_type=_LISTPROGRAMSREQUEST,
+    output_type=_LISTREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ListStations',
+    full_name='step7service.Step7.ListStations',
+    index=16,
+    containing_service=None,
+    input_type=_LISTSTATIONSREQUEST,
+    output_type=_LISTREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ListContainers',
+    full_name='step7service.Step7.ListContainers',
+    index=17,
+    containing_service=None,
+    input_type=_LISTCONTAINERSREQUEST,
+    output_type=_LISTREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='StartProgram',
+    full_name='step7service.Step7.StartProgram',
+    index=18,
+    containing_service=None,
+    input_type=_PROGRAMREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='StopProgram',
+    full_name='step7service.Step7.StopProgram',
+    index=19,
+    containing_service=None,
+    input_type=_PROGRAMREQUEST,
+    output_type=_STATUSREPLY,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='DownloadProgramBlocks',
+    full_name='step7service.Step7.DownloadProgramBlocks',
+    index=20,
+    containing_service=None,
+    input_type=_DOWNLOADPROGRAMBLOCKSREQUEST,
+    output_type=_STATUSREPLY,
     serialized_options=None,
   ),
 ])

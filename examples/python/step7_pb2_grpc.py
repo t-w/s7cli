@@ -19,19 +19,24 @@ class Step7Stub(object):
         request_serializer=step7__pb2.CreateProjectRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
-    self.ImportLibSources = channel.unary_unary(
-        '/step7service.Step7/ImportLibSources',
-        request_serializer=step7__pb2.ImportLibRequest.SerializeToString,
+    self.CreateLibrary = channel.unary_unary(
+        '/step7service.Step7/CreateLibrary',
+        request_serializer=step7__pb2.CreateLibraryRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
-    self.ImportLibBlocks = channel.unary_unary(
-        '/step7service.Step7/ImportLibBlocks',
-        request_serializer=step7__pb2.ImportLibRequest.SerializeToString,
+    self.RegisterProject = channel.unary_unary(
+        '/step7service.Step7/RegisterProject',
+        request_serializer=step7__pb2.RegisterProjectRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
-    self.ImportSymbols = channel.unary_unary(
-        '/step7service.Step7/ImportSymbols',
-        request_serializer=step7__pb2.ImportSymbolsRequest.SerializeToString,
+    self.RemoveProject = channel.unary_unary(
+        '/step7service.Step7/RemoveProject',
+        request_serializer=step7__pb2.RemoveProjectRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ImportSource = channel.unary_unary(
+        '/step7service.Step7/ImportSource',
+        request_serializer=step7__pb2.ImportSourceRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
     self.ImportSourcesDir = channel.unary_unary(
@@ -39,15 +44,80 @@ class Step7Stub(object):
         request_serializer=step7__pb2.ImportSourcesDirRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
-    self.CompileSources = channel.unary_unary(
-        '/step7service.Step7/CompileSources',
-        request_serializer=step7__pb2.CompileSourcesRequest.SerializeToString,
+    self.ImportLibSources = channel.unary_unary(
+        '/step7service.Step7/ImportLibSources',
+        request_serializer=step7__pb2.ImportLibSourcesRequest.SerializeToString,
         response_deserializer=step7__pb2.StatusReply.FromString,
         )
-    self.GetListOfPrograms = channel.unary_unary(
-        '/step7service.Step7/GetListOfPrograms',
-        request_serializer=step7__pb2.ProjectRequest.SerializeToString,
+    self.ExportSouce = channel.unary_unary(
+        '/step7service.Step7/ExportSouce',
+        request_serializer=step7__pb2.ExportSourceRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ExportAllSources = channel.unary_unary(
+        '/step7service.Step7/ExportAllSources',
+        request_serializer=step7__pb2.ExportAllSourcesRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.CompileSource = channel.unary_unary(
+        '/step7service.Step7/CompileSource',
+        request_serializer=step7__pb2.CompileSourceRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ImportLibBlocks = channel.unary_unary(
+        '/step7service.Step7/ImportLibBlocks',
+        request_serializer=step7__pb2.ImportLibBlocksRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ImportSymbols = channel.unary_unary(
+        '/step7service.Step7/ImportSymbols',
+        request_serializer=step7__pb2.ImportSymbolsRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ExportSymbols = channel.unary_unary(
+        '/step7service.Step7/ExportSymbols',
+        request_serializer=step7__pb2.ExportSymbolsRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.CompileAllStations = channel.unary_unary(
+        '/step7service.Step7/CompileAllStations',
+        request_serializer=step7__pb2.CompileAllStationsRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.ListProjects = channel.unary_unary(
+        '/step7service.Step7/ListProjects',
+        request_serializer=step7__pb2.ListProjectsRequest.SerializeToString,
         response_deserializer=step7__pb2.ListReply.FromString,
+        )
+    self.ListPrograms = channel.unary_unary(
+        '/step7service.Step7/ListPrograms',
+        request_serializer=step7__pb2.ListProgramsRequest.SerializeToString,
+        response_deserializer=step7__pb2.ListReply.FromString,
+        )
+    self.ListStations = channel.unary_unary(
+        '/step7service.Step7/ListStations',
+        request_serializer=step7__pb2.ListStationsRequest.SerializeToString,
+        response_deserializer=step7__pb2.ListReply.FromString,
+        )
+    self.ListContainers = channel.unary_unary(
+        '/step7service.Step7/ListContainers',
+        request_serializer=step7__pb2.ListContainersRequest.SerializeToString,
+        response_deserializer=step7__pb2.ListReply.FromString,
+        )
+    self.StartProgram = channel.unary_unary(
+        '/step7service.Step7/StartProgram',
+        request_serializer=step7__pb2.ProgramRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.StopProgram = channel.unary_unary(
+        '/step7service.Step7/StopProgram',
+        request_serializer=step7__pb2.ProgramRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
+        )
+    self.DownloadProgramBlocks = channel.unary_unary(
+        '/step7service.Step7/DownloadProgramBlocks',
+        request_serializer=step7__pb2.DownloadProgramBlocksRequest.SerializeToString,
+        response_deserializer=step7__pb2.StatusReply.FromString,
         )
 
 
@@ -56,7 +126,42 @@ class Step7Servicer(object):
   pass
 
   def CreateProject(self, request, context):
-    """Creates and registers an empty STEP 7 project
+    """Create new empty STEP 7 project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def CreateLibrary(self, request, context):
+    """Create new empty STEP 7 library
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def RegisterProject(self, request, context):
+    """Registers existing STEP 7 project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def RemoveProject(self, request, context):
+    """Removes STEP 7 project and deletes all of its files
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ImportSource(self, request, context):
+    """Import source into a program
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ImportSourcesDir(self, request, context):
+    """Import sources from a directory into a project
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -64,6 +169,27 @@ class Step7Servicer(object):
 
   def ImportLibSources(self, request, context):
     """Import sources from a library into project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ExportSouce(self, request, context):
+    """Exports a source from a program to a directory
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ExportAllSources(self, request, context):
+    """Exports all sources from a program to a directory
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def CompileSource(self, request, context):
+    """Compile specified source code module
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -77,28 +203,72 @@ class Step7Servicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def ImportSymbols(self, request, context):
-    """Import symbols from an sdf file into project
+    """Imports symbols into a program from a file
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def ImportSourcesDir(self, request, context):
-    """Import sources from a directory into a project
+  def ExportSymbols(self, request, context):
+    """Exports symbols from program from into a file
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def CompileSources(self, request, context):
-    """Compile specified source code module(s)
+  def CompileAllStations(self, request, context):
+    """Compiles the HW configuration for each of the stations in a project
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetListOfPrograms(self, request, context):
-    """Gets list of programs in a STEP 7 project
+  def ListProjects(self, request, context):
+    """TODO: List functions could return better replies with more data...
+
+    Creates list with project names
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ListPrograms(self, request, context):
+    """Creates list with programs in a given project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ListStations(self, request, context):
+    """Creates list with stations in a given project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ListContainers(self, request, context):
+    """Creates list with containers for each program in a given project
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def StartProgram(self, request, context):
+    """[ONLINE] Starts/restarts a program
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def StopProgram(self, request, context):
+    """[ONLINE] Stops a program
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def DownloadProgramBlocks(self, request, context):
+    """[ONLINE] Downloads all the blocks under a Program
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -112,19 +282,24 @@ def add_Step7Servicer_to_server(servicer, server):
           request_deserializer=step7__pb2.CreateProjectRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
-      'ImportLibSources': grpc.unary_unary_rpc_method_handler(
-          servicer.ImportLibSources,
-          request_deserializer=step7__pb2.ImportLibRequest.FromString,
+      'CreateLibrary': grpc.unary_unary_rpc_method_handler(
+          servicer.CreateLibrary,
+          request_deserializer=step7__pb2.CreateLibraryRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
-      'ImportLibBlocks': grpc.unary_unary_rpc_method_handler(
-          servicer.ImportLibBlocks,
-          request_deserializer=step7__pb2.ImportLibRequest.FromString,
+      'RegisterProject': grpc.unary_unary_rpc_method_handler(
+          servicer.RegisterProject,
+          request_deserializer=step7__pb2.RegisterProjectRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
-      'ImportSymbols': grpc.unary_unary_rpc_method_handler(
-          servicer.ImportSymbols,
-          request_deserializer=step7__pb2.ImportSymbolsRequest.FromString,
+      'RemoveProject': grpc.unary_unary_rpc_method_handler(
+          servicer.RemoveProject,
+          request_deserializer=step7__pb2.RemoveProjectRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ImportSource': grpc.unary_unary_rpc_method_handler(
+          servicer.ImportSource,
+          request_deserializer=step7__pb2.ImportSourceRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
       'ImportSourcesDir': grpc.unary_unary_rpc_method_handler(
@@ -132,15 +307,80 @@ def add_Step7Servicer_to_server(servicer, server):
           request_deserializer=step7__pb2.ImportSourcesDirRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
-      'CompileSources': grpc.unary_unary_rpc_method_handler(
-          servicer.CompileSources,
-          request_deserializer=step7__pb2.CompileSourcesRequest.FromString,
+      'ImportLibSources': grpc.unary_unary_rpc_method_handler(
+          servicer.ImportLibSources,
+          request_deserializer=step7__pb2.ImportLibSourcesRequest.FromString,
           response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
-      'GetListOfPrograms': grpc.unary_unary_rpc_method_handler(
-          servicer.GetListOfPrograms,
-          request_deserializer=step7__pb2.ProjectRequest.FromString,
+      'ExportSouce': grpc.unary_unary_rpc_method_handler(
+          servicer.ExportSouce,
+          request_deserializer=step7__pb2.ExportSourceRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ExportAllSources': grpc.unary_unary_rpc_method_handler(
+          servicer.ExportAllSources,
+          request_deserializer=step7__pb2.ExportAllSourcesRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'CompileSource': grpc.unary_unary_rpc_method_handler(
+          servicer.CompileSource,
+          request_deserializer=step7__pb2.CompileSourceRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ImportLibBlocks': grpc.unary_unary_rpc_method_handler(
+          servicer.ImportLibBlocks,
+          request_deserializer=step7__pb2.ImportLibBlocksRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ImportSymbols': grpc.unary_unary_rpc_method_handler(
+          servicer.ImportSymbols,
+          request_deserializer=step7__pb2.ImportSymbolsRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ExportSymbols': grpc.unary_unary_rpc_method_handler(
+          servicer.ExportSymbols,
+          request_deserializer=step7__pb2.ExportSymbolsRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'CompileAllStations': grpc.unary_unary_rpc_method_handler(
+          servicer.CompileAllStations,
+          request_deserializer=step7__pb2.CompileAllStationsRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'ListProjects': grpc.unary_unary_rpc_method_handler(
+          servicer.ListProjects,
+          request_deserializer=step7__pb2.ListProjectsRequest.FromString,
           response_serializer=step7__pb2.ListReply.SerializeToString,
+      ),
+      'ListPrograms': grpc.unary_unary_rpc_method_handler(
+          servicer.ListPrograms,
+          request_deserializer=step7__pb2.ListProgramsRequest.FromString,
+          response_serializer=step7__pb2.ListReply.SerializeToString,
+      ),
+      'ListStations': grpc.unary_unary_rpc_method_handler(
+          servicer.ListStations,
+          request_deserializer=step7__pb2.ListStationsRequest.FromString,
+          response_serializer=step7__pb2.ListReply.SerializeToString,
+      ),
+      'ListContainers': grpc.unary_unary_rpc_method_handler(
+          servicer.ListContainers,
+          request_deserializer=step7__pb2.ListContainersRequest.FromString,
+          response_serializer=step7__pb2.ListReply.SerializeToString,
+      ),
+      'StartProgram': grpc.unary_unary_rpc_method_handler(
+          servicer.StartProgram,
+          request_deserializer=step7__pb2.ProgramRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'StopProgram': grpc.unary_unary_rpc_method_handler(
+          servicer.StopProgram,
+          request_deserializer=step7__pb2.ProgramRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
+      ),
+      'DownloadProgramBlocks': grpc.unary_unary_rpc_method_handler(
+          servicer.DownloadProgramBlocks,
+          request_deserializer=step7__pb2.DownloadProgramBlocksRequest.FromString,
+          response_serializer=step7__pb2.StatusReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
