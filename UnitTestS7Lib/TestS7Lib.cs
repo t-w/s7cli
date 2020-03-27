@@ -36,7 +36,7 @@ namespace UnitTestS7Lib
         public void TestListProjects()
         {
             var ctx = new S7Context();
-            var output = new List<KeyValuePair<string, string>>();
+            var output = new Dictionary<string, string>();
             var rv = Api.ListProjects(ctx, ref output);
             Assert.AreEqual(0, rv);
         }

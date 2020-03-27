@@ -124,7 +124,7 @@ namespace S7Cli
             switch (options)
             {
                 case ListProjectsOptions opt:
-                    var projects = new List<KeyValuePair<string, string>>();
+                    var projects = new Dictionary<string, string>();
                     rv = Api.ListProjects(ctx, ref projects);
                     break;
                 case ListProgramsOptions opt:

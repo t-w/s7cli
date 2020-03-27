@@ -515,9 +515,9 @@ namespace S7Lib
         /// <summary>
         /// Creates List with project name, project path key-value pairs
         /// </summary>
-        /// <param name="output">List with project name, project path key-value pairs</param>
+        /// <param name="output">Dictionary with project name, project path key-value pairs</param>
         /// <returns>0 on success</returns>
-        public static int ListProjects(S7Context ctx, ref List<KeyValuePair<string, string>> output)
+        public static int ListProjects(S7Context ctx, ref Dictionary<string, string> output)
         {
             var api = ctx.Api;
             var log = ctx.Log;
@@ -527,8 +527,8 @@ namespace S7Lib
             {
                 var projectObj = (S7Project)project;
                 var kv = new KeyValuePair<string, string>(projectObj.Name, projectObj.LogPath);
-                output.Add(kv);
-                log.Information($"Project {kv.Key} Path {kv.Value}");
+                output.Add(projectObj.Name, projectObj.LogPath);
+                log.Information($"Project {projectObj.Name} Path {output[projectObj.Name]}");
             }
 
             return 0;
