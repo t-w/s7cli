@@ -76,19 +76,20 @@ namespace S7Cli
         /// <param name="errors">List of parsing errors</param>
         private void HandleErrors(IList<Error> errors)
         {
+            ReturnValue = 0;
             if (errors.Any())
             {
+                ReturnValue = -1;
                 foreach (Error error in errors)
                 {
                     // Not selecting a verb or requesting version or help is handled as success
                     if (!(error is NoVerbSelectedError || error is VersionRequestedError
                        || error is HelpVerbRequestedError || error is HelpRequestedError))
                     {
-                        ReturnValue = 1; return;
+                        ReturnValue = 0; return;
                     }
                 }
             }
-            ReturnValue = 0;
         }
 
         /// <summary>
