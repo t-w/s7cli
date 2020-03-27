@@ -272,6 +272,47 @@ namespace Step7Server
         {
             return Task.FromResult(CompileAllStationsImpl(req));
         }
+
+        // Online commands
+
+        private StatusReply StartProgramImpl(ProgramRequest req)
+        {
+            var log = new List<string>();
+            var ctx = CreateApiContext(ref log);
+            var rv = Online.StartProgram(ctx, req.Project, req.Station, req.Rack, req.Module);
+            return CreateStatusReply(rv, ref log);
+        }
+
+        public override Task<StatusReply> StartProgram(ProgramRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(StartProgramImpl(req));
+        }
+
+        private StatusReply StopProgramImpl(ProgramRequest req)
+        {
+            var log = new List<string>();
+            var ctx = CreateApiContext(ref log);
+            var rv = Online.StopProgram(ctx, req.Project, req.Station, req.Rack, req.Module);
+            return CreateStatusReply(rv, ref log);
+        }
+
+        public override Task<StatusReply> StopProgram(ProgramRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(StopProgramImpl(req));
+        }
+
+        private StatusReply DownloadProgramBlocksImpl(DownloadProgramBlocksRequest req)
+        {
+            var log = new List<string>();
+            var ctx = CreateApiContext(ref log);
+            var rv = Online.DownloadProgramBlocks(ctx, req.Project, req.Station, req.Rack, req.Module, req.Overwrite);
+            return CreateStatusReply(rv, ref log);
+        }
+
+        public override Task<StatusReply> DownloadProgramBlocks(DownloadProgramBlocksRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(DownloadProgramBlocksImpl(req));
+        }
     }
 
     class Program
