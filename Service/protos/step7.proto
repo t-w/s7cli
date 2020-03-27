@@ -252,9 +252,11 @@ message DownloadProgramBlocksRequest {
 message StatusReply {
   // Request exit code
   int32 exitCode = 1;
+  // Logs
+  repeated string log = 2;
 }
 
 message ListReply {
   StatusReply status = 1;
-  repeated string listItem = 2;
+  repeated string items = 2;
 }
