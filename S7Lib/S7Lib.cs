@@ -372,6 +372,25 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Compiles multiple source, in order
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="program">Program name</param>
+        /// <param name="sources">Ordered list of source names</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        static public int CompileSources(S7Context ctx, string project, string program, List<string> sources)
+        {
+            foreach (var source in sources)
+            {
+                if (S7ProgramSource.CompileSource(ctx, project, program, source) != 0)
+                {
+                    return -1;
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Import blocks from a directory into a project
         /// </summary>
         /// <param name="library">Source library id, path to .s7l (unique) or library name</param>

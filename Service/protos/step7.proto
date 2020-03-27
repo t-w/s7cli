@@ -32,7 +32,8 @@ service Step7 {
 
   // Compile specified source code module
   rpc CompileSource (CompileSourceRequest) returns (StatusReply) {}
-  // TODO: Compile multiple sources in order
+  // Compile multiple source code modules, in given order
+  rpc CompileSources (CompileSourcesRequest) returns (StatusReply) {}
 
   // Import blocks from a library into project
   rpc ImportLibBlocks (ImportLibBlocksRequest) returns (StatusReply) {}
@@ -145,7 +146,7 @@ message ExportSourceRequest {
 }
 
 message CompileSourceRequest {
-  // Project name or directory
+  // Project identifier, path to .s7p (unique) or project name
   string project = 1;
   // Program name
   string program = 2;
@@ -153,7 +154,14 @@ message CompileSourceRequest {
   string source = 3;
 }
 
-// TODO: CompileSources for multiple sources
+message CompileSourcesRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Program name
+  string program = 2;
+  // Ordered list of source names
+  repeated string sources = 3;
+}
 
 message ImportLibBlocksRequest {
   // Source library id, path to .s7l (unique) or library name

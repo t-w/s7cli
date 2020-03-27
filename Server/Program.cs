@@ -260,6 +260,20 @@ namespace Step7Server
             return Task.FromResult(CompileSourceImpl(req));
         }
 
+        private StatusReply CompileSourcesImpl(CompileSourcesRequest req)
+        {
+            var log = new List<string>();
+            var sources = new List<string>(req.Sources);
+            var ctx = CreateApiContext(ref log);
+            var rv = Api.CompileSources(ctx, req.Project, req.Program, sources);
+            return CreateStatusReply(rv, ref log);
+        }
+
+        public override Task<StatusReply> CompileSources(CompileSourcesRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(CompileSourcesImpl(req));
+        }
+
         private StatusReply CompileAllStationsImpl(CompileAllStationsRequest req)
         {
             var log = new List<string>();

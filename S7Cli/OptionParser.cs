@@ -189,9 +189,7 @@ namespace S7Cli
                     rv = Api.CompileSource(ctx, opt.Project, opt.Program, opt.Source);
                     break;
                 case CompileSourcesOptions opt:
-                    foreach (string source in opt.Sources)
-                        if (Api.CompileSource(ctx, opt.Project, opt.Program, source) != 0)
-                            rv = -1;
+                    rv = Api.CompileSources(ctx, opt.Project, opt.Program, opt.Sources.ToList());
                     break;
                 case CompileAllStationsOptions opt:
                     rv = Api.CompileAllStations(ctx, opt.Project, opt.AllowFail);
