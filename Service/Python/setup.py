@@ -2,11 +2,9 @@
 from setuptools import setup, find_packages
 import os
 
-version = "0.0.0.0"
+version = "0.10.0.0"
 if os.environ.get("CI_COMMIT_TAG"):
     version = os.environ["CI_COMMIT_TAG"]
-elif os.environ.get("CI_JOB_ID"):
-    version = os.environ["CI_JOB_ID"]
 
 
 setup(
