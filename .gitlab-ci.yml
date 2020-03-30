@@ -22,6 +22,9 @@ build_job:
       -I ./Service/protos/
       --python_out=./Service/Python/
       --grpc_python_out=./Service/Python/
+    # Build Python s7service package with setuptools
+    - cd ./Service/Python/
+    - python setup.py sdist bdist_wheel
   artifacts:
     paths:
       # Library
