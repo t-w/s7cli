@@ -17,9 +17,11 @@ build_job:
     # Build solution
     - '& "$env:NUGET_PATH" restore'
     - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /clp:ErrorsOnly'
-    # Build gRPC stubs for Python client in examples directory
-    - python -m grpc_tools.protoc ./Service/protos/step7.proto -I ./Service/protos
-      --python_out=./examples/python --grpc_python_out=./examples/python
+    # Build gRPC stubs for Python
+    - python -m grpc_tools.protoc ./Service/protos/s7service/step7.proto
+      -I ./Service/protos/
+      --python_out=./Service/Python/
+      --grpc_python_out=./Service/Python/
   artifacts:
     paths:
       # Library
@@ -29,8 +31,8 @@ build_job:
       - '.\S7Cli\bin\x86\Release\'
       # gRPC C# server
       - '.\Server\bin\x86\Release\'
-      # gRPC Python client stubs
-      - '.\examples\python\'
+      # gRPC S7Service stubs
+      - '.\Service\Python\'
       # Legacy s7cli
       - '.\S7Cli_Legacy\bin\x86\Release\'
       - '.\UnitTests_s7cli\bin\x86\Release\'
