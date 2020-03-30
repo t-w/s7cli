@@ -22,12 +22,18 @@ build_job:
       --python_out=./examples/python --grpc_python_out=./examples/python
   artifacts:
     paths:
-      - '.\s7cli\bin\x86\Release\'
-      - '.\Server\bin\x86\Release\'
-      - '.\UnitTests_s7cli\bin\x86\Release\'
+      # Library
       - '.\S7Lib\bin\x86\Release\'
       - '.\UnitTestS7Lib\bin\x86\Release\'
+      # CLI
+      - '.\S7Cli\bin\x86\Release\'
+      # gRPC C# server
+      - '.\Server\bin\x86\Release\'
+      # gRPC Python client stubs
       - '.\examples\python\'
+      # Legacy s7cli
+      - '.\S7Cli_Legacy\bin\x86\Release\'
+      - '.\UnitTests_s7cli\bin\x86\Release\'
 
 test_job:
   stage: test
