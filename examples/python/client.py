@@ -2,8 +2,8 @@ import logging
 
 import grpc
 
-from step7_pb2 import *
-from step7_pb2_grpc import Step7Stub
+from s7service.step7_pb2 import *
+from s7service.step7_pb2_grpc import Step7Stub
 
 SERVICE_HOST = "localhost:50051"
 
