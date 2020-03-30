@@ -532,9 +532,9 @@ namespace S7Lib
         // List commands
 
         /// <summary>
-        /// Creates List with project name, project path key-value pairs
+        /// Creates dictionary with {projectDir, projectName} key-value pairs
         /// </summary>
-        /// <param name="output">Dictionary with project name, project path key-value pairs</param>
+        /// <param name="output">Dictionary with {projectDir, projectName} key-value pairs</param>
         /// <returns>0 on success</returns>
         public static int ListProjects(S7Context ctx, ref Dictionary<string, string> output)
         {
@@ -545,9 +545,8 @@ namespace S7Lib
             foreach (var project in api.Projects)
             {
                 var projectObj = (S7Project)project;
-                var kv = new KeyValuePair<string, string>(projectObj.Name, projectObj.LogPath);
-                output.Add(projectObj.Name, projectObj.LogPath);
-                log.Information($"Project {projectObj.Name} Path {output[projectObj.Name]}");
+                output.Add(projectObj.LogPath, projectObj.Name);
+                log.Information($"Project {projectObj.Name} Path {projectObj.LogPath}");
             }
 
             return 0;

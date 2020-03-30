@@ -45,7 +45,7 @@ namespace Step7Server
             var output = new Dictionary<string, string>();
             var ctx = CreateApiContext(ref log);
             var rv = Api.ListProjects(ctx, ref output);
-            var projectList = new List<string >(output.Keys);
+            var projectList = new List<string>(output.Values);
             return CreateListReply(rv, ref log, ref projectList);
         }
 
