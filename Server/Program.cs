@@ -5,7 +5,7 @@ using Serilog;
 using Serilog.Sinks.ListOfString;
 
 using Grpc.Core;
-using Step7Service;
+using S7Service;
 
 using S7Lib;
 

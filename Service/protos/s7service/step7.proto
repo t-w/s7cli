@@ -5,7 +5,7 @@ option java_package = "step7";
 option java_outer_classname = "Step7";
 option objc_class_prefix = "S7";
 
-package step7service;
+package s7service;
 
 
 service Step7 {
