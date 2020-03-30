@@ -10,7 +10,4 @@
     <FallbackCulture>en-US</FallbackCulture>
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <StartArguments>downloadSystemData -p CPC6_TEST_PLC --program "S7 Program%281%29"</StartArguments>
-  </PropertyGroup>
 </Project>
