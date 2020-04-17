@@ -3,17 +3,77 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Serilog;
 using Serilog.Sinks.ListOfString;
+using System.Configuration;
+using System.Diagnostics;
+using System.Threading;
 
 using Grpc.Core;
 using S7Service;
 
 using S7Lib;
-
+using System.ComponentModel;
 
 namespace Step7Server
 {
     class Step7Impl : Step7.Step7Base
     {
+        private string S7CliPath;
+        private bool S7CliVerbose;
+        static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="s7CliPath">Path to S7Cli.exe</param>
+        /// <param name="s7CliVerbose">Whether to call S7Cli with verbose flag</param>
+        public Step7Impl(string s7CliPath, bool s7CliVerbose)
+        {
+            S7CliPath = s7CliPath;
+            S7CliVerbose = s7CliVerbose;
+        }
+
+        /// <summary>
+        /// Launches a S7Cli child process and returns its exitCode and log
+        /// </summary>
+        /// <remarks>
+        /// Spawning a separate child process is crucial for performing some S7Api requests,
+        /// as the lower-level Simatic API can lock resources and interfere with subsequent
+        /// function calls.
+        /// This way, affected resources are freed as soon as the child proccess terminates.
+        /// Additionally, only one S7Cli can be spawned at a time.
+        /// This is ensured by a semaphore.
+        /// </remarks>
+        /// <param name="log">Output ordered list of log messages</param>
+        /// <param name="arguments">Command-line arguments for S7CLi proccess</param>
+        /// <param name="timeout">Timeout for acquiring semaphore, in seconds</param>
+        /// <returns></returns>
+        private int LaunchS7Cli(ref List<string> log, string arguments, int timeout = 5*60)
+        {
+            var exitCode = -1;
+            var flags = (S7CliVerbose? "-v" : "");
+            Semaphore.Wait(millisecondsTimeout: timeout * 1000);
+            try
+            {
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = S7CliPath,
+                    Arguments = $"{flags} {arguments}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                var process = Process.Start(processStartInfo);
+                while (!process.StandardOutput.EndOfStream)
+                    log.Add(process.StandardOutput.ReadLine());
+                process.WaitForExit();
+                exitCode = process.ExitCode;
+            }
+            finally
+            {
+                Semaphore.Release();
+            }
+            return exitCode;
+        }
+
         private S7Context CreateApiContext(ref List<string> log)
         {
             var logger = new LoggerConfiguration().WriteTo.StringList(log).CreateLogger();
@@ -101,8 +161,8 @@ namespace Step7Server
         private StatusReply CreateProjectImpl(CreateProjectRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.CreateProject(ctx, req.ProjectName, req.ProjectDir);
+            var arguments = $"createProject --name {req.ProjectName} --dir {req.ProjectDir}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -114,8 +174,8 @@ namespace Step7Server
         private StatusReply CreateLibraryImpl(CreateLibraryRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.CreateLibrary(ctx, req.ProjectName, req.ProjectDir);
+            var arguments = $"createLibrary --name {req.ProjectName} --dir {req.ProjectDir}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -127,8 +187,8 @@ namespace Step7Server
         private StatusReply RegisterProjectImpl(RegisterProjectRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.RegisterProject(ctx, req.ProjectFilePath);
+            var arguments = $"registerProject --projectFilePath {req.ProjectFilePath}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -140,8 +200,8 @@ namespace Step7Server
         private StatusReply RemoveProjectImpl(RemoveProjectRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.RemoveProject(ctx, req.Project);
+            var arguments = $"removeProject --force --project {req.Project}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -155,8 +215,10 @@ namespace Step7Server
         private StatusReply ImportSourceImpl(ImportSourceRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ImportSource(ctx, req.Project, req.Program, req.Source, req.Overwrite);
+            var arguments = $"importSource " +
+                $"--project {req.Project} --program {req.Program} --source {req.Source}";
+            if (req.Overwrite) arguments += " --overwrite";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -168,8 +230,9 @@ namespace Step7Server
         private StatusReply ImportSourcesDirImpl(ImportSourcesDirRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ImportSourcesDir(ctx, req.Project, req.Program, req.SourcesDir, req.Overwrite);
+            var arguments = $"importSourcesDir " +
+                $"--project {req.Project} --program {req.Program} --sourcesDir {req.SourcesDir}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -181,8 +244,9 @@ namespace Step7Server
         private StatusReply ExportAllSourcesImpl(ExportAllSourcesRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ExportAllSources(ctx, req.Project, req.Program, req.SourcesDir);
+            var arguments = $"exportAllSources " +
+                $"--project {req.Project} --program {req.Program} --sourcesDir {req.SourcesDir}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -194,10 +258,10 @@ namespace Step7Server
         private StatusReply ImportLibSourcesImpl(ImportLibSourcesRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ImportLibSources(ctx,
-                library: req.Library, libProgram: req.LibProgram,
-                project: req.Project, projProgram: req.ProjProgram, req.Overwrite);
+            var arguments = $"importLibSources " +
+                $"--project {req.Project} --library {req.Library} --projProgram {req.ProjProgram} --libProgram {req.LibProgram}";
+            if (req.Overwrite) arguments += " --overwrite";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -209,10 +273,10 @@ namespace Step7Server
         private StatusReply ImportLibBlocksImpl(ImportLibBlocksRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ImportLibBlocks(ctx,
-                library: req.Library, libProgram: req.LibProgram,
-                project: req.Project, projProgram: req.ProjProgram, req.Overwrite);
+            var arguments = $"importLibBlocks " +
+                $"--project {req.Project} --library {req.Library} --projProgram {req.ProjProgram} --libProgram {req.LibProgram}";
+            if (req.Overwrite) arguments += " --overwrite";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -224,8 +288,10 @@ namespace Step7Server
         private StatusReply ImportSymbolsImpl(ImportSymbolsRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ImportSymbols(ctx, req.Project, req.Program, req.SymbolFile, req.Flag, req.AllowConflicts);
+            var arguments = $"importSymbols " +
+                $"--project {req.Project} --program {req.Program} --symbolFile {req.SymbolFile} --flag {req.Flag}";
+            if (req.AllowConflicts) arguments += " --allowConflicts";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -237,8 +303,9 @@ namespace Step7Server
         private StatusReply ExportSymbolsImpl(ExportSymbolsRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ExportSymbols(ctx, req.Project, req.Program, req.SymbolFile);
+            var arguments = $"exportSymbols " +
+                $"--project {req.Project} --program {req.Program} --symbolFile {req.SymbolFile}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -250,8 +317,9 @@ namespace Step7Server
         private StatusReply CompileSourceImpl(CompileSourceRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.CompileSource(ctx, req.Project, req.Program, req.Source);
+            var arguments = $"compileSource " +
+                $"--project {req.Project} --program {req.Program} --source {req.Source}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -264,8 +332,9 @@ namespace Step7Server
         {
             var log = new List<string>();
             var sources = new List<string>(req.Sources);
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.CompileSources(ctx, req.Project, req.Program, sources);
+            var arguments = $"compileSources " +
+                $"--project {req.Project} --program {req.Program} --source {string.Join(",", sources)}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -277,8 +346,9 @@ namespace Step7Server
         private StatusReply CompileAllStationsImpl(CompileAllStationsRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.CompileAllStations(ctx, req.Project, req.AllowFail);
+            var arguments = $"compileAllStations --project {req.Project}";
+            if (req.AllowFail) arguments += " --allowFail";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -292,8 +362,9 @@ namespace Step7Server
         private StatusReply StartProgramImpl(ProgramRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Online.StartProgram(ctx, req.Project, req.Station, req.Rack, req.Module);
+            var arguments = $"startProgram --force" +
+                $"--project {req.Project} --station {req.Station} --rack {req.Rack} --module {req.Module}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -305,8 +376,9 @@ namespace Step7Server
         private StatusReply StopProgramImpl(ProgramRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Online.StopProgram(ctx, req.Project, req.Station, req.Rack, req.Module);
+            var arguments = $"stopProgram --force" +
+                $"--project {req.Project} --station {req.Station} --rack {req.Rack} --module {req.Module}";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -318,8 +390,10 @@ namespace Step7Server
         private StatusReply DownloadProgramBlocksImpl(DownloadProgramBlocksRequest req)
         {
             var log = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Online.DownloadProgramBlocks(ctx, req.Project, req.Station, req.Rack, req.Module, req.Overwrite);
+            var arguments = $"downloadProgramBlocks --force" +
+                $"--project {req.Project} --station {req.Station} --rack {req.Rack} --module {req.Module}";
+            if (req.Overwrite) arguments += " --overwrite";
+            var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
 
@@ -331,18 +405,47 @@ namespace Step7Server
 
     class Program
     {
-        const int Port = 50051;
+        static int ServerPort;
+        static string S7CliPath;
+        static bool S7CliVerbose;
 
-        public static void Main(string[] args)
+        /// <summary>
+        /// Reads variables from App.config into static class variables
+        /// </summary>
+        public static void ReadAppConfig()
         {
+            var serverPort = ConfigurationManager.AppSettings["ServerPort"];
+            S7CliPath = ConfigurationManager.AppSettings["S7CliPath"];
+            var s7CliVerbose = ConfigurationManager.AppSettings["S7CliVerbose"];
+            if (serverPort == null || S7CliPath == null || s7CliVerbose == null)
+            {
+                throw new Exception("Configuration error in App.config: missing keys.");
+            }
+            try
+            {
+                Program.ServerPort = int.Parse(serverPort);
+                S7CliVerbose = bool.Parse(s7CliVerbose);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Error reading App.config: {exc}");
+                throw;
+            }
+        }
+
+        public static void Main()
+        {
+            ReadAppConfig();
+
             Server server = new Server
             {
-                Services = { Step7.BindService(new Step7Impl()) },
-                Ports = { new ServerPort("localhost", Port, ServerCredentials.Insecure) }
+                Services = { Step7.BindService(new Step7Impl(S7CliPath, S7CliVerbose)) },
+                Ports = { new ServerPort("localhost", ServerPort, ServerCredentials.Insecure) }
             };
             server.Start();
 
-            Console.WriteLine("Step7 server listening on port " + Port);
+            Console.WriteLine($"Step7 server listening on port {ServerPort}");
+
             try
             {
                 Console.Read();
