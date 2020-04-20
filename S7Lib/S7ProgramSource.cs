@@ -15,8 +15,19 @@ namespace S7Lib
         public static S7Container GetContainer(S7Context ctx, S7Project projectObj, string program, S7ContainerType type)
         {
             var log = ctx.Log;
+            IS7Program programObj;
 
-            foreach (var container in projectObj.Programs[program].Next)
+            try
+            {
+                programObj = projectObj.Programs[program];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access program {projectObj.Name}:{program}");
+                return null;
+            }
+
+            foreach (var container in programObj.Next)
             {
                 try
                 {
