@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Serilog;
-using Serilog.Sinks.ListOfString;
 using System.Configuration;
 using System.Diagnostics;
 using System.Threading;
+using Serilog;
+using Serilog.Core;
+using Serilog.Sinks.ListOfString;
 
 using Grpc.Core;
 using S7Service;
 
 using S7Lib;
-using System.ComponentModel;
+using System.IO;
 
 namespace Step7Server
 {
@@ -20,6 +21,7 @@ namespace Step7Server
         private string S7CliPath;
         private bool S7CliVerbose;
         static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
+        private Logger Log;
 
         /// <summary>
         /// Constructor
@@ -30,6 +32,9 @@ namespace Step7Server
         {
             S7CliPath = s7CliPath;
             S7CliVerbose = s7CliVerbose;
+            Log = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateLogger();
         }
 
         /// <summary>
@@ -51,11 +56,11 @@ namespace Step7Server
         {
             var exitCode = -1;
             var argString = CreateArgumentString(arguments);
-            Console.WriteLine(argString);
 
-            Semaphore.Wait(millisecondsTimeout: timeout * 1000);
             try
             {
+                Semaphore.Wait(millisecondsTimeout: timeout * 1000);
+                Log.Information($"S7Cli.exe {argString}");
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = S7CliPath,
@@ -66,8 +71,12 @@ namespace Step7Server
                 var process = Process.Start(processStartInfo);
                 while (!process.StandardOutput.EndOfStream)
                     log.Add(process.StandardOutput.ReadLine());
-                process.WaitForExit();
+                process.WaitForExit(milliseconds: timeout * 1000);
                 exitCode = process.ExitCode;
+            }
+            catch (Exception exc)
+            {
+                Log.Error(exc, $"Could not run {S7CliPath}");
             }
             finally
             {
@@ -441,15 +450,24 @@ namespace Step7Server
         /// <summary>
         /// Reads variables from App.config into static class variables
         /// </summary>
-        public static void ReadAppConfig()
+        /// <returns>0 on success, 1 otherwise</returns>
+        public static int ReadAppConfig()
         {
             var serverPort = ConfigurationManager.AppSettings["ServerPort"];
             S7CliPath = ConfigurationManager.AppSettings["S7CliPath"];
             var s7CliVerbose = ConfigurationManager.AppSettings["S7CliVerbose"];
             if (serverPort == null || S7CliPath == null || s7CliVerbose == null)
             {
-                throw new Exception("Configuration error in App.config: missing keys.");
+                Console.WriteLine("[ERR] Invalid Server.config:\nMissing keys.");
+                return 1;
             }
+            if (!File.Exists(S7CliPath))
+            {
+                Console.WriteLine("[ERR] Invalid Server.config:\n" +
+                    $"Could not find path to S7Cli.exe {S7CliPath}");
+                return 1;
+            }
+
             try
             {
                 Program.ServerPort = int.Parse(serverPort);
@@ -457,14 +475,15 @@ namespace Step7Server
             }
             catch (Exception exc)
             {
-                Console.WriteLine($"Error reading App.config: {exc}");
-                throw;
+                Console.WriteLine($"[ERR] Invalid Server.config:\n{exc}");
+                return 1;
             }
+            return 0;
         }
 
         public static void Main()
         {
-            ReadAppConfig();
+            if (ReadAppConfig() != 0) return;
 
             Server server = new Server
             {
