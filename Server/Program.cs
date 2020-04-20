@@ -57,7 +57,7 @@ namespace Step7Server
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = S7CliPath,
-                    Arguments = $"{flags} {arguments}",
+                    Arguments = $"{arguments} {flags}",
                     RedirectStandardOutput = true,
                     UseShellExecute = false
                 };
