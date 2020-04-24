@@ -12,55 +12,37 @@ namespace S7Lib
     public static class Online
     {
         /// <summary>
-        /// Obtain S7 program from its child module
+        /// Obtain S7 program from its logPath property
         /// </summary>
         /// <remarks>
-        /// The only way to uniquely identify a program is to specify its child module.
-        /// A program name may not be unique.
-        /// To understand the structure of an existing project use SimTree API demo.
-        /// It shows a tree in a GUI and highlights the type of each element in it
+        /// Identifies a program for its logical path property:
+        /// {project}\{station}\{module}\{program}
         /// </remarks>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="station">Station name</param>
-        /// <param name="rack">Rack name</param>
-        /// <param name="module">Child module name</param>
+        /// <param name="module">Parent module name</param>
+        /// <param name="program">Program name</param>
         /// <returns>S7Program on success, null otherwise</returns>
         private static S7Program GetProgram(S7Context ctx,
-            string project, string station, string rack, string module)
+            string project, string station, string module, string program)
         {
             var log = ctx.Log;
             var projectObj = Api.GetProject(ctx, project);
             if (projectObj == null) return null;
-
-            IS7Station6 stationObj;
-            try
+            var logPath = $"{projectObj.Name}\\{station}\\{module}\\{program}";
+            
+            S7Program programObj = null;
+            foreach (IS7Program p in projectObj.Programs)
             {
-                stationObj = projectObj.Stations[station];
+                if (p.LogPath == logPath)
+                {
+                    programObj = (S7Program)p;
+                    break;
+                }
             }
-            catch (Exception exc)
+            if (programObj == null)
             {
-                log.Error(exc, $"Could not find station {projectObj.Name}:{station}");
-                return null;
-            }
-            IS7Module moduleObj;
-            try
-            {
-                moduleObj = stationObj.Racks[rack].Modules[module];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not find module {module} in {project}:{station}:{rack}");
-                return null;
-            }
-            S7Program programObj;
-            try
-            {
-                programObj = (S7Program)projectObj.Programs[moduleObj];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not find program for module {module}");
-                return null;
+                log.Error($"Could not find program in {logPath}");
             }
             return programObj;
         }
@@ -68,53 +50,50 @@ namespace S7Lib
         /// <summary>
         /// Downloads all the blocks under an S7Program
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="station">Station name</param>
-        /// <param name="rack">Rack name</param>
-        /// <param name="module">Child module name</param>
+        /// <param name="module">Parent module name</param>
+        /// <param name="program">Program name</param>
         /// <param name="overwrite">Force overwrite of online blocks</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int DownloadProgramBlocks(S7Context ctx,
-            string project, string station, string rack, string module, bool overwrite)
+            string project, string station, string module, string program, bool overwrite)
         {
             var log = ctx.Log;
-
-            S7Program programObj = GetProgram(ctx, project, station, rack, module);
+            var projectObj = Api.GetProject(ctx, project);
+            S7Program programObj = GetProgram(ctx, project, station, module, program);
             if (programObj == null) return -1;
 
             var flag = overwrite ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk;
 
             try
             {
-                var blocks = (S7Container)programObj.Next["Blocks"].Next;
+                var blocks = S7ProgramSource.GetBlocks(ctx, projectObj, programObj.Name);
                 blocks.Download(flag);
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not download blocks for {programObj.Name} " +
-                               $"{project}:{station}:{rack}:{module}");
+                log.Error(exc, $"Could not download blocks for {programObj.Name} {programObj.LogPath}");
                 return -1;
             }
 
-            log.Debug($"Downloaded blocks for {programObj.Name} " +
-                      $"{project}:{station}:{rack}:{module}");
+            log.Debug($"Downloaded blocks for {programObj.Name} {programObj.LogPath}");
             return 0;
         }
 
         /// <summary>
         /// Starts/restarts a program
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="station">Station name</param>
-        /// <param name="rack">Rack name</param>
-        /// <param name="module">Child module name</param>
+        /// <param name="module">Parent module name</param>
+        /// <param name="program">Program name</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int StartProgram(S7Context ctx,
-            string project, string station, string rack, string module)
+            string project, string station, string module, string program)
         {
             var log = ctx.Log;
-
-            S7Program programObj = GetProgram(ctx, project, station, rack, module);
+            S7Program programObj = GetProgram(ctx, project, station, module, program);
             if (programObj == null) return -1;
 
             try
@@ -131,30 +110,27 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not start/restart {programObj.Name} " +
-                               $"{project}:{station}:{rack}:{module}");
+                log.Error(exc, $"Could not start/restart {programObj.Name} {programObj.LogPath}");
                 return -1;
             }
 
-            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode " +
-                      $"{project}:{station}:{rack}:{module}");
+            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode");
             return 0;
         }
 
         /// <summary>
         /// Stops a program
         /// </summary>
-        /// <param name="project">Project name</param>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="station">Station name</param>
-        /// <param name="rack">Rack name</param>
-        /// <param name="module">Child module name</param>
+        /// <param name="module">Parent module name</param>
+        /// <param name="program">Program name</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int StopProgram(S7Context ctx,
-            string project, string station, string rack, string module)
+            string project, string station, string module, string program)
         {
             var log = ctx.Log;
-
-            S7Program programObj = GetProgram(ctx, project, station, rack, module);
+            S7Program programObj = GetProgram(ctx, project, station, module, program);
             if (programObj == null) return -1;
 
             try
@@ -163,13 +139,11 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not stop {programObj.Name} " +
-                               $"{project}:{station}:{rack}:{module}");
+                log.Error(exc, $"Could not stop {programObj.Name} {programObj.LogPath}");
                 return -1;
             }
 
-            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode " +
-                      $"{project}:{station}:{rack}:{module}");
+            log.Debug($"{programObj.Name} is in {programObj.ModuleState} mode");
             return 0;
         }
     }
