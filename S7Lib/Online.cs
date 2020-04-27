@@ -135,7 +135,8 @@ namespace S7Lib
 
             try
             {
-                programObj.Stop();
+                if (programObj.ModuleState != S7ModState.S7Stop)
+                    programObj.Stop();
             }
             catch (Exception exc)
             {
