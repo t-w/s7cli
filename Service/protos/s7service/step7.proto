@@ -236,10 +236,10 @@ message ProgramRequest {
   string project = 1;
   // Station name
   string station = 2;
-  // Rack name
-  string rack = 3;
-  // Child module name
-  string module = 4;
+  // Parent module name
+  string module = 3;
+  // Program name
+  string program = 4;
 }
 
 message DownloadProgramBlocksRequest {
@@ -247,10 +247,10 @@ message DownloadProgramBlocksRequest {
   string project = 1;
   // Station name
   string station = 2;
-  // Rack name
-  string rack = 3;
-  // Child module name
-  string module = 4;
+  // Parent module name
+  string module = 3;
+  // Program name
+  string program = 4;
   // Force overwrite of online blocks
   bool overwrite = 5;
 }

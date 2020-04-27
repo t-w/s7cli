@@ -401,7 +401,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "startProgram",
-                "--force", "--project", req.Project, "--station", req.Station, "--rack", req.Rack, "--module", req.Module };
+                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
@@ -415,7 +415,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "stopProgram",
-                "--force", "--project", req.Project, "--station", req.Station, "--rack", req.Rack, "--module", req.Module };
+                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }
@@ -429,7 +429,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "downloadProgramBlocks",
-                "--force", "--project", req.Project, "--station", req.Station, "--rack", req.Rack, "--module", req.Module };
+                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
             if (req.Overwrite) arguments.Add("--overwrite");
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);

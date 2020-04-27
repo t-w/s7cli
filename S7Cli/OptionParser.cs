@@ -196,24 +196,24 @@ namespace S7Cli
                     break;
                 case StartProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                        if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
                     rv = Online.StartProgram(ctx,
-                        opt.Project, opt.Station, opt.Rack, opt.Module);
+                        opt.Project, opt.Station, opt.Module, opt.Program);
                     break;
                 case StopProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                        if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
                     rv = Online.StopProgram(ctx,
-                        opt.Project, opt.Station, opt.Rack, opt.Module);
+                        opt.Project, opt.Station, opt.Module, opt.Program);
                     break;
                 case DownloadProgramBlocksOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Rack}:{opt.Module}"))
+                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
                     rv = Online.DownloadProgramBlocks(ctx,
-                        opt.Project, opt.Station, opt.Rack, opt.Module, opt.Overwrite);
+                        opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
                     break;
             }
             ReturnValue = rv;

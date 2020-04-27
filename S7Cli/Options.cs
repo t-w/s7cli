@@ -40,10 +40,11 @@ namespace S7Cli
     {
         [Option("station", Required = true, HelpText = "Station name")]
         public string Station { get; set; }
-        [Option("rack", Required = true, HelpText = "Rack name")]
-        public string Rack { get; set; }
-        [Option("module", Required = true, HelpText = "Child module name")]
+        [Option("module", Required = true, HelpText = "Parent module name")]
         public string Module { get; set; }
+        [Option("program", Required = true, HelpText = "Program name")]
+        public string Program { get; set; }
+
         [Option('f', "force", HelpText = "Run command without confirmation")]
         public bool Force { get; set; }
     }
