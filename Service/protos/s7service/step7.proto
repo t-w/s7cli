@@ -179,8 +179,8 @@ message ImportLibBlocksRequest {
 message ImportSymbolsRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
-  string program = 2;
+  // Logical path to program
+  string programPath = 2;
   // Path to input symbol table file (usually .sdf)
   //   Supported extensions .asc, .dif, .sdf, .seq
   string symbolFile = 3;
@@ -198,8 +198,8 @@ message ImportSymbolsRequest {
 message ExportSymbolsRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
-  string program = 2;
+  // Logical path to program
+  string programPath = 2;
   // Path to output symbol table file (usually .sdf)
   // Supported extensions .asc, .dif, .sdf, .seq
   string symbolFile = 3;
