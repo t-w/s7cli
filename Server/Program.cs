@@ -327,7 +327,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "importSymbols",
-                "--project", req.Project, "--program", req.Program, "--symbolFile", req.SymbolFile, "--flag", $"{req.Flag}" };
+                "--project", req.Project, "--program", req.ProgramPath, "--symbolFile", req.SymbolFile, "--flag", $"{req.Flag}" };
             if (req.AllowConflicts) arguments.Add("--allowConflicts");
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
@@ -342,7 +342,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "exportSymbols",
-                "--project", req.Project, "--program", req.Program, "--symbolFile", req.SymbolFile };
+                "--project", req.Project, "--program", req.ProgramPath, "--symbolFile", req.SymbolFile };
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
         }

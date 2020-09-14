@@ -28,7 +28,7 @@ namespace UnitTestS7Lib
         public static void ClassCleanup()
         {
             var ctx = new S7Context();
-            Api.RemoveProject(ctx, "testProj");
+            //Api.RemoveProject(ctx, "testProj");
             Api.RemoveProject(ctx, "testLib");
         }
 
@@ -149,7 +149,7 @@ namespace UnitTestS7Lib
         {
             var ctx = new S7Context();
             var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
-            var rv = Api.ExportSymbols(ctx, "AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
+            var rv = Api.ExportSymbols(ctx, "AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
             Assert.AreEqual(0, rv);
             var symbolTableExists = File.Exists(symbolFile);
             Assert.IsTrue(symbolTableExists);
@@ -170,7 +170,7 @@ namespace UnitTestS7Lib
         {
             var ctx = new S7Context();
             var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
-            Api.ExportSymbols(ctx, "AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
+            Api.ExportSymbols(ctx, "AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
             var rv = Api.ImportSymbols(ctx, "testProj", "testProgram", symbolFile);
             Assert.AreEqual(0, rv);
         }

@@ -179,11 +179,11 @@ namespace S7Cli
                         overwrite: opt.Overwrite);
                     break;
                 case ImportSymbolsOptions opt:
-                    rv = Api.ImportSymbols(ctx, opt.Project, opt.Program, opt.SymbolFile,
+                    rv = Api.ImportSymbols(ctx, opt.Project, opt.ProgramPath, opt.SymbolFile,
                         flag: opt.Flag, allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    rv = Api.ExportSymbols(ctx, opt.Project, opt.Program, opt.SymbolFile);
+                    rv = Api.ExportSymbols(ctx, opt.Project, opt.ProgramPath, opt.SymbolFile);
                     break;
                 case CompileSourceOptions opt:
                     rv = Api.CompileSource(ctx, opt.Project, opt.Program, opt.Source);

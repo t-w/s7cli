@@ -11,41 +11,6 @@ namespace S7Lib
     /// </summary>
     public static class Online
     {
-        /// <summary>
-        /// Obtain S7 program from its logPath property
-        /// </summary>
-        /// <remarks>
-        /// Identifies a program for its logical path property:
-        /// {project}\{station}\{module}\{program}
-        /// </remarks>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
-        /// <returns>S7Program on success, null otherwise</returns>
-        private static S7Program GetProgram(S7Context ctx,
-            string project, string station, string module, string program)
-        {
-            var log = ctx.Log;
-            var projectObj = Api.GetProject(ctx, project);
-            if (projectObj == null) return null;
-            var logPath = $"{projectObj.Name}\\{station}\\{module}\\{program}";
-            
-            S7Program programObj = null;
-            foreach (IS7Program p in projectObj.Programs)
-            {
-                if (p.LogPath == logPath)
-                {
-                    programObj = (S7Program)p;
-                    break;
-                }
-            }
-            if (programObj == null)
-            {
-                log.Error($"Could not find program in {logPath}");
-            }
-            return programObj;
-        }
 
         /// <summary>
         /// Downloads all the blocks under an S7Program
@@ -60,8 +25,8 @@ namespace S7Lib
             string project, string station, string module, string program, bool overwrite)
         {
             var log = ctx.Log;
-            var projectObj = Api.GetProject(ctx, project);
-            S7Program programObj = GetProgram(ctx, project, station, module, program);
+            S7Project projectObj = Api.GetProject(ctx, project);
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
             if (programObj == null) return -1;
 
             var flag = overwrite ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk;
@@ -93,7 +58,7 @@ namespace S7Lib
             string project, string station, string module, string program)
         {
             var log = ctx.Log;
-            S7Program programObj = GetProgram(ctx, project, station, module, program);
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
             if (programObj == null) return -1;
 
             try
@@ -130,7 +95,7 @@ namespace S7Lib
             string project, string station, string module, string program)
         {
             var log = ctx.Log;
-            S7Program programObj = GetProgram(ctx, project, station, module, program);
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
             if (programObj == null) return -1;
 
             try

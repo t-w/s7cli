@@ -34,6 +34,15 @@ namespace S7Cli
     }
 
     /// <summary>
+    /// Options for every command that requires a program to be specified by its logical path
+    /// </summary>
+    class ProgramPathOptions : ProjectOptions
+    {
+        [Option("programPath", Required = true, HelpText = "Logical path to program")]
+        public string ProgramPath { get; set; }
+    }
+
+    /// <summary>
     /// Options for every online command that requires a program to be specified
     /// </summary>
     class OnlineProgramOptions : ProjectOptions
@@ -151,7 +160,7 @@ namespace S7Cli
     }
 
     [Verb("importSymbols", HelpText = "Import symbols into a program from a file.")]
-    class ImportSymbolsOptions : ProgramOptions
+    class ImportSymbolsOptions : ProgramPathOptions
     {
         [Option("symbolFile", Required = true,
             HelpText = "Path to input symbol table file (.sdf, .asc, .dif, .seq)")]
@@ -167,7 +176,7 @@ namespace S7Cli
     }
 
     [Verb("exportSymbols", HelpText = "Export program symbols to a file.")]
-    class ExportSymbolsOptions : ProgramOptions
+    class ExportSymbolsOptions : ProgramPathOptions
     {
         [Option("symbolFile", Required = true,
             HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]

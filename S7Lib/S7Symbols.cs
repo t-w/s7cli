@@ -76,31 +76,23 @@ namespace S7Lib
         }
 
         public static int ImportSymbols(S7Context ctx,
-            string project, string program, string symbolFile, int flag = 0, bool allowConflicts = false)
+            string project, string programPath, string symbolFile, int flag = 0, bool allowConflicts = false)
         {
             var api = ctx.Api;
             var log = ctx.Log;
             var flags = (S7SymImportFlags)flag;
 
-            S7Program target;
-            try
-            {
-                target = (S7Program)api.Projects[project].Programs[program];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access {project}:{program}");
-                return -1;
-            }
+            S7Program programObj = Api.GetProgram(ctx, project, programPath);
+            if (programObj == null) return -1;
 
             S7SymbolTable symbolTable;
             try
             {
-                symbolTable = (S7SymbolTable)target.SymbolTable;
+                symbolTable = (S7SymbolTable)programObj.SymbolTable;
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not access symbol table in {project}:{program}");
+                log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
                 return -1;
             }
 
@@ -111,7 +103,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not import symbol table into {project}:{program} " +
+                log.Error(exc, $"Could not import symbol table into {project}:{programObj.LogPath} " +
                                $"from {symbolFile}");
                 return -1;
             }
@@ -120,7 +112,7 @@ namespace S7Lib
             string report = GetImportReport(ctx, ref errors, ref warnings, ref conflicts);
             CloseSymbolImportationLogWindow(ctx);
 
-            log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{program}\n" +
+            log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{programObj.LogPath}\n" +
                       $"Report {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s):\n" +
                       $"{report}");
 
@@ -130,32 +122,21 @@ namespace S7Lib
         }
 
         public static int ExportSymbols(S7Context ctx,
-            string project, string program, string symbolFile)
+            string project, string programPath, string symbolFile)
         {
             var log = ctx.Log;
 
-            var projectObj = Api.GetProject(ctx, project);
-            if (projectObj == null) return -1;
-
-            S7Program target;
-            try
-            {
-                target = (S7Program)projectObj.Programs[program];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access {project}:{program}");
-                return -1;
-            }
+            S7Program programObj = Api.GetProgram(ctx, project, programPath);
+            if (programObj == null) return -1;
 
             S7SymbolTable symbolTable;
             try
             {
-                symbolTable = (S7SymbolTable)target.SymbolTable;
+                symbolTable = (S7SymbolTable)programObj.SymbolTable;
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not access symbol table in {project}:{program}");
+                log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
                 return -1;
             }
 
@@ -165,12 +146,12 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                log.Error(exc, $"Could not export symbols from {project}:{program} " +
+                log.Error(exc, $"Could not export symbols from {project}:{programObj.LogPath} " +
                                $"to {symbolFile}");
                 return -1;
             }
 
-            log.Debug($"Exported symbols from {project}:{program} to {symbolFile}");
+            log.Debug($"Exported symbols from {project}:{programObj.LogPath} to {symbolFile}");
             return 0;
         }
     }

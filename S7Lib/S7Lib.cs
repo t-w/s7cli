@@ -63,6 +63,40 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Obtain S7 program from its logPath property
+        /// </summary>
+        /// <remarks>
+        /// Identifies a program for its logical path property, e.g.
+        /// {logPath}={project}\{station}\{module}\{program}
+        /// </remarks>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="programPath">Logical path to program (not including project name)</param>
+        /// <returns>S7Program on success, null otherwise</returns>
+        public static S7Program GetProgram(S7Context ctx,
+            string project, string programPath)
+        {
+            var log = ctx.Log;
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return null;
+            var logPath = $"{projectObj.Name}\\{programPath}";
+
+            S7Program programObj = null;
+            foreach (IS7Program p in projectObj.Programs)
+            {
+                if (p.LogPath == logPath)
+                {
+                    programObj = (S7Program)p;
+                    break;
+                }
+            }
+            if (programObj == null)
+            {
+                log.Error($"Could not find program in {logPath}");
+            }
+            return programObj;
+        }
+
+        /// <summary>
         /// Internal function to create STEP 7 project or library
         /// </summary>
         /// <param name="projectName">Project name (max 8 characters)</param>
@@ -428,7 +462,7 @@ namespace S7Lib
         /// Imports symbols into a program from a file
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="programPath">Logical path to program (not including project name)</param>
         /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
@@ -442,31 +476,31 @@ namespace S7Lib
         /// <param name="allowConflicts">Succeed (return 0) even if conflits are detected</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ImportSymbols(S7Context ctx,
-            string project, string program, string symbolFile, int flag = 0, bool allowConflicts = false)
+            string project, string programPath, string symbolFile, int flag = 0, bool allowConflicts = false)
         {
             // TODO: Check file exists
-            return S7Symbols.ImportSymbols(ctx, project, program, symbolFile, flag, allowConflicts);
+            return S7Symbols.ImportSymbols(ctx, project, programPath, symbolFile, flag, allowConflicts);
         }
 
         /// <summary>
         /// Exports symbols from program from into a file
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="programPath">Logical path to program (not including project name)</param>
         /// <param name="symbolFile">Path to output symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
         /// <param name="overwrite">Overwrite output file if it exists</param>
         /// <returns>0 on success, -1 otherwise</returns>
         public static int ExportSymbols(S7Context ctx,
-            string project, string program, string symbolFile, bool overwrite = false)
+            string project, string programPath, string symbolFile, bool overwrite = false)
         {
             var log = ctx.Log;
 
             string exportDir = Path.GetDirectoryName(symbolFile);
             if (!Directory.Exists(exportDir))
             {
-                log.Error($"Could not export symbols from {project}:{program}: " +
+                log.Error($"Could not export symbols from {project}:{programPath}: " +
                           $"Output directory does not exist {exportDir}");
                 return -1;
             }
@@ -475,7 +509,7 @@ namespace S7Lib
 
             if (File.Exists(symbolFile) && !overwrite)
             {
-                log.Error($"Could not export symbols from {project}:{program}: " +
+                log.Error($"Could not export symbols from {project}:{programPath}: " +
                           $"Output file exists {symbolFile}");
                 return -1;
             }
@@ -484,7 +518,7 @@ namespace S7Lib
                 log.Information($"Overwriting {symbolFile}");
             }
 
-            return S7Symbols.ExportSymbols(ctx, project, program, symbolFile);
+            return S7Symbols.ExportSymbols(ctx, project, programPath, symbolFile);
         }
 
         /// <summary>
