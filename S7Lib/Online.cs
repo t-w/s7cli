@@ -26,7 +26,7 @@ namespace S7Lib
         {
             var log = ctx.Log;
             S7Project projectObj = Api.GetProject(ctx, project);
-            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}\\{module}\\{program}");
             if (programObj == null) return -1;
 
             var flag = overwrite ? S7OverwriteFlags.S7OverwriteAll : S7OverwriteFlags.S7OverwriteAsk;
@@ -58,7 +58,7 @@ namespace S7Lib
             string project, string station, string module, string program)
         {
             var log = ctx.Log;
-            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}\\{module}\\{program}");
             if (programObj == null) return -1;
 
             try
@@ -95,7 +95,7 @@ namespace S7Lib
             string project, string station, string module, string program)
         {
             var log = ctx.Log;
-            S7Program programObj = Api.GetProgram(ctx, project, $"{station}//{module}//{program}");
+            S7Program programObj = Api.GetProgram(ctx, project, $"{station}\\{module}\\{program}");
             if (programObj == null) return -1;
 
             try
