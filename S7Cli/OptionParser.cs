@@ -83,8 +83,8 @@ namespace S7Cli
                 foreach (Error error in errors)
                 {
                     // Not selecting a verb or requesting version or help is handled as success
-                    if (!(error is NoVerbSelectedError || error is VersionRequestedError
-                       || error is HelpVerbRequestedError || error is HelpRequestedError))
+                    if (error is NoVerbSelectedError || error is VersionRequestedError
+                       || error is HelpVerbRequestedError || error is HelpRequestedError)
                     {
                         ReturnValue = 0; return;
                     }
