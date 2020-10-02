@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 using SimaticLib;
 using S7HCOM_XLib;
+using System.Net;
+using System.Globalization;
 
 
 // TODO: Pass api and log to each function, for improved configurability?
@@ -617,6 +619,116 @@ namespace S7Lib
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// Edit properties of target module
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="station">Name of parent station</param>
+        /// <param name="rack">Name of parent rack</param>
+        /// <param name="modulePath">Path to targt module</param>
+        /// <param name="properties">Module properties as key-value pairs, e.g.
+        /// {"IPAddress", "127.0.0.1"}
+        /// {"SubnetMask", "255.255.255.192"}
+        /// {"RouterAdress", "127.0.0.2"}
+        /// {"MACAddress", "080006010000"}
+        /// {"IPActive", true}
+        /// {"RouterActive", false}
+        /// </param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int EditModule(S7Context ctx,
+            string project, string station, string rack, string modulePath, ref Dictionary<string, object> properties)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+            var stationObj = GetStationImpl(ctx, projectObj, station);
+            if (stationObj == null) return -1;
+            var rackObj = GetRackImpl(ctx, stationObj, rack);
+            if (rackObj == null) return -1;
+            var moduleObj = GetModuleImpl(ctx, rackObj.Modules, modulePath);
+            if (moduleObj == null) return -1;
+
+            return SetModuleProperties(ctx, ref moduleObj, ref properties);
+        }
+
+        private static int SetModuleProperties(S7Context ctx,
+            ref IS7Module6 module, ref Dictionary<string, object> properties)
+        {
+            foreach (var kvPair in properties)
+            {
+                try
+                {
+                    SetModuleProperty(ctx, ref module, kvPair.Key, kvPair.Value);
+                    ctx.Log.Debug($"Set {module.LogPath}.{kvPair.Key}={kvPair.Value}");
+                }
+                catch (Exception exc)
+                {
+                    ctx.Log.Error(exc, $"Could not set {module.LogPath}.{kvPair.Key}={kvPair.Value}");
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        private static void SetModuleProperty(S7Context ctx,
+            ref IS7Module6 module, string property, object value)
+        {
+            // TODO: Need to link/unlink subnetworks?
+            switch (property)
+            {
+                case "IPAddress":
+                    module.IPAddress = AddressToHex((string)value);
+                    break;
+                case "SubnetMask":
+                    module.SubnetMask = AddressToHex((string)value);
+                    break;
+                case "RouterAddress":
+                    module.RouterAddress = AddressToHex((string)value);
+                    break;
+                case "MACAddress":
+                    module.MACAddress = (string)value;
+                    break;
+                case "IPActive":
+                    module.IPActive = (bool)value? 1 : 0;
+                    break;
+                case "RouterActive":
+                    module.RouterActive = (bool)value ? 1 : 0;
+                    break;
+                default:
+                    ctx.Log.Error($"Unknown module property {property}");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Returns IP address from hexadecimal string representation of address.
+        /// Assumes big-endianness
+        /// </summary>
+        /// <param name="hex">Hex input string</param>
+        /// <returns>IP Adress object</returns>
+        private static IPAddress HexToAddress(string hex)
+        {
+            string address = uint.Parse(hex, NumberStyles.AllowHexSpecifier).ToString();
+            return IPAddress.Parse(address);
+        }
+
+        /// <summary>
+        /// Returns hexadecimal string representation of IP Address.
+        /// Assumes big-endianness
+        /// </summary>
+        /// <param name="address">Input IP Address string (e.g. "127.0.0.1")</param>
+        /// <returns>Hex string with IP address</returns>
+        private static string AddressToHex(string address)
+        {
+            var ipAddress = IPAddress.Parse(address);
+            byte[] bytes = ipAddress.GetAddressBytes();
+            string hex = "";
+            foreach (byte val in bytes) hex += $"{val:X2}";
+            return hex;
         }
 
         /// <summary>
