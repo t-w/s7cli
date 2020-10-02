@@ -583,6 +583,43 @@ namespace S7Lib
         }
 
         /// <summary>
+        /// Exports the hardware configuration of a target station
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="station">Name of target station to export</param>
+        /// <param name="exportFile">Path to output export file (generally .cfg file)</param>
+        /// <returns>0 on success, -1 otherwise</returns>
+        public static int ExportStation(S7Context ctx, string project, string station, string exportFile)
+        {
+            var log = ctx.Log;
+
+            var projectObj = GetProject(ctx, project);
+            if (projectObj == null) return -1;
+
+            S7Station6 stationObj;
+            try
+            {
+                stationObj = projectObj.Stations[station];
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not access station {station} in project {project}");
+                return -1;
+            }
+            try
+            {
+                stationObj.Export(exportFile);
+            }
+            catch (Exception exc)
+            {
+                log.Error(exc, $"Could not export station {station} to {exportFile}");
+                return -1;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
         /// Compiles the HW configuration for each of the stations in a project
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
