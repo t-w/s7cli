@@ -75,13 +75,16 @@ namespace S7Lib
         public static S7Program GetProgram(S7Context ctx,
             string project, string programPath)
         {
-            var log = ctx.Log;
             var projectObj = GetProject(ctx, project);
             if (projectObj == null) return null;
-            var logPath = $"{projectObj.Name}\\{programPath}";
+            return GetProgramImpl(ctx, projectObj, programPath);
+        }
 
+        private static S7Program GetProgramImpl(S7Context ctx, S7Project project, string programPath)
+        {
+            var logPath = $"{project.Name}\\{programPath}";
             S7Program programObj = null;
-            foreach (IS7Program p in projectObj.Programs)
+            foreach (IS7Program p in project.Programs)
             {
                 if (p.LogPath == logPath)
                 {
@@ -91,9 +94,67 @@ namespace S7Lib
             }
             if (programObj == null)
             {
-                log.Error($"Could not find program in {logPath}");
+                ctx.Log.Error($"Could not find program in {logPath}");
             }
             return programObj;
+        }
+
+        private static IS7Station GetStationImpl(S7Context ctx, S7Project project, string station)
+        {
+            IS7Station stationObj = null;
+            try
+            {
+                stationObj = project.Stations[station];
+            }
+            catch (Exception exc)
+            {
+                ctx.Log.Error(exc, $"Could not find station {station}");
+            }
+            return stationObj;
+        }
+
+        private static S7Rack GetRackImpl(S7Context ctx, IS7Station station, string rack)
+        {
+            S7Rack rackObj = null;
+            try
+            {
+                rackObj = station.Racks[rack];
+            }
+            catch (Exception exc)
+            {
+                ctx.Log.Error(exc, $"Could not find rack {rack}");
+            }
+            return rackObj;
+        }
+
+        private static IS7Module6 GetModuleImpl(S7Context ctx,
+            S7Modules modules, string modulePath)
+        {
+            var split = modulePath.Split('\\');
+            var childModules = modules;
+            IS7Module6 moduleObj = null;
+
+            foreach (var part in split)
+            {
+                try
+                {
+                    foreach (IS7Module6 child in childModules)
+                    {
+                        if (part == child.Name)
+                        {
+                            moduleObj = child;
+                            break;
+                        }
+                    }
+                    childModules = moduleObj.Modules;
+                }
+                catch (Exception exc)
+                {
+                    ctx.Log.Error(exc, $"Could not find module {modulePath} {exc.StackTrace}");
+                    break;
+                }
+            }
+            return moduleObj;
         }
 
         /// <summary>
