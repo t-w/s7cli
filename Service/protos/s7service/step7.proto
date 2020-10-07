@@ -56,6 +56,9 @@ service Step7 {
   // Creates list with containers for each program in a given project
   rpc ListContainers (ListContainersRequest) returns (ListReply) {}
 
+  // Edits properties of target module
+  rpc EditModule (EditModuleRequest) returns (StatusReply) {}
+
   // [ONLINE] Starts/restarts a program
   rpc StartProgram (ProgramRequest) returns (StatusReply) {}
   // [ONLINE] Stops a program
@@ -253,6 +256,19 @@ message DownloadProgramBlocksRequest {
   string program = 4;
   // Force overwrite of online blocks
   bool overwrite = 5;
+}
+
+message EditModuleRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Station name
+  string station = 2;
+  // Rack name
+  string rack = 3;
+  // Logical path to module
+  string module = 4;
+  // New module properties
+  map<string, string> poperties = 5;
 }
 
 // Reply messages

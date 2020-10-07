@@ -395,6 +395,51 @@ namespace Step7Server
             return Task.FromResult(CompileAllStationsImpl(req));
         }
 
+        /// <summary>
+        /// Parses EditModuleRequest into list of S7Cli command-line arguments
+        /// </summary>
+        /// <param name="req">Request message</param>
+        /// <param name="arguments">Output command-line arguments for S7Cli</param>
+        /// <param name="log">List of log messages</param>
+        private void ParseModuleProperties(EditModuleRequest req, ref List<string> arguments, ref List<string> log)
+        {
+            foreach (var entry in req.Poperties)
+            {
+                if (entry.Key == "IPAddress")
+                    arguments.Add("--ipAddress");
+                else if (entry.Key == "SubnetMask")
+                    arguments.Add("--subnetMask");
+                else if (entry.Key == "RouterAddress")
+                    arguments.Add("--routerAddress");
+                else if (entry.Key == "MACAddress")
+                    arguments.Add("--macAddress");
+                else if (entry.Key == "IpActive")
+                    arguments.Add("--ipActive");
+                else if (entry.Key == "RouterActive")
+                    arguments.Add("--routerActive");
+                else
+                {
+                    log.Add($"[WRN] Could not parse module property {entry.Key}={entry.Value}");
+                    continue; 
+                }
+                arguments.Add(entry.Value.ToString());
+            }
+        }
+
+        private StatusReply EditModuleImpl(EditModuleRequest req)
+        {
+            var log = new List<string>();
+            var arguments = new List<string> { "editModule", "--project", req.Project };
+            ParseModuleProperties(req, ref arguments, ref log);
+            var rv = LaunchS7Cli(ref log, arguments);
+            return CreateStatusReply(rv, ref log);
+        }
+
+        public override Task<StatusReply> EditModule(EditModuleRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(EditModuleImpl(req));
+        }
+
         // Online commands
 
         private StatusReply StartProgramImpl(ProgramRequest req)

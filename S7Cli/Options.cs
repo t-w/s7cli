@@ -205,6 +205,29 @@ namespace S7Cli
         public bool AllowFail { get; set; }
     }
 
+    [Verb("editModule", HelpText = "Edits properties of target module.")]
+    class EditModuleOptions : ProjectOptions
+    {
+        [Option("station", Required = true, HelpText = "Name of parent station")]
+        public string Station { get; set; }
+        [Option("rack", Required = true, HelpText = "Name of parent rack")]
+        public string Rack { get; set; }
+        [Option("module", Required = true, HelpText = "Logical path to target module")]
+        public string Module { get; set; }
+        [Option("ipAddress", HelpText = "IP Address (e.g. 127.0.0.1)")]
+        public string IPAddress { get; set; }
+        [Option("subnetMask", HelpText = "Subnetwork mask (e.g. 255.255.255.192)")]
+        public string SubnetMask { get; set;  }
+        [Option("routerAddress", HelpText = "Gateway router IP address (e.g. 127.0.0.2)")]
+        public string RouterAddress { get; set; }
+        [Option("macAddress", HelpText = "MAC Address (e.g. 080006010000)")]
+        public string MACAddress { get; set; }
+        [Option("ipActive", HelpText = "Whether IP is active {\"true\", \"false\"}")]
+        public string IPActive { get; set; }
+        [Option("routerActive", HelpText = "Whether gateway router is active {\"true\", \"false\"}")]
+        public string RouterActive { get; set; }
+    }
+
     [Verb("startProgram", HelpText = "[ONLINE] Start/restart a program.")]
     class StartProgramOptions : OnlineProgramOptions { }
 

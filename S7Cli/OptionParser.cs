@@ -7,6 +7,7 @@ using Serilog.Core;
 
 using S7Lib;
 using Serilog.Events;
+using System;
 
 namespace S7Cli
 {
@@ -194,6 +195,10 @@ namespace S7Cli
                 case CompileAllStationsOptions opt:
                     rv = Api.CompileAllStations(ctx, opt.Project, opt.AllowFail);
                     break;
+                case EditModuleOptions opt:
+                    var properties = ParseModuleProperties(ctx, opt);
+                    rv = Api.EditModule(ctx, opt.Project, opt.Station, opt.Rack, opt.Module, ref properties);
+                    break;
                 case StartProgramOptions opt:
                     if (!opt.Force)
                         if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
@@ -218,5 +223,35 @@ namespace S7Cli
             }
             ReturnValue = rv;
         }
+
+        private Dictionary<string, object> ParseModuleProperties(S7Context ctx, EditModuleOptions opt)
+        {
+            bool parsedBool;
+            var propertyDict = new Dictionary<string, object>();
+            if (!String.IsNullOrEmpty(opt.IPAddress))
+                propertyDict["IPAddress"] = opt.IPAddress;
+            if (!String.IsNullOrEmpty(opt.SubnetMask))
+                propertyDict["SubnetMask"] = opt.SubnetMask;
+            if (!String.IsNullOrEmpty(opt.RouterAddress))
+                propertyDict["RouterAddress"] = opt.RouterAddress;
+            if (!String.IsNullOrEmpty(opt.MACAddress))
+                propertyDict["MACAddress"] = opt.MACAddress;
+            if (!String.IsNullOrEmpty(opt.IPActive))
+            {
+                if (Boolean.TryParse(opt.IPActive, out parsedBool))
+                    propertyDict["IPActive"] = parsedBool;
+                else
+                    ctx.Log.Warning($"Could not parse bool from --ipActive \"{opt.IPActive}\". Ignoring.");
+            }
+            if (!String.IsNullOrEmpty(opt.RouterActive))
+            {
+                if (Boolean.TryParse(opt.RouterActive, out parsedBool))
+                    propertyDict["RouterActive"] = parsedBool;
+                else
+                    ctx.Log.Warning($"Could not parse bool from --routerActive \"{opt.RouterActive}\". Ignoring.");
+            }
+            return propertyDict;
+        }
+
     }
 }
