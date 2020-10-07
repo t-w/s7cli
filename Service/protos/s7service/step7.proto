@@ -188,12 +188,17 @@ message ImportSymbolsRequest {
   //   Supported extensions .asc, .dif, .sdf, .seq
   string symbolFile = 3;
   // Symbol import flag (S7SymImportFlags)
-  //   - 0, S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities
-  //   - 1, S7SymImportOverwriteNameLeading - existing values with the same name are replaced. 
-  //     The addresses are adjusted according to the specifications in the import file.
-  //   - 2, S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
-  //     Symbol names are adjusted to the specifications in the import file.
-  int32 flag = 4;
+  enum SymbolImportFlag {
+    // S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities
+    INSERT = 0;
+    // S7SymImportOverwriteNameLeading - existing values with the same symbol name are replaced. 
+    // The addresses are adjusted according to the specifications in the import file.
+    OVERWRITE_ADDRESS = 1;
+    // S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
+    // Symbol names are adjusted to the specifications in the import file.
+    OVERWRITE_NAME = 2; 
+  }
+  SymbolImportFlag flag = 4;
   // Succeed (return 0) even if conflits are detected
   bool allowConflicts = 5;
 }

@@ -327,7 +327,7 @@ namespace Step7Server
         {
             var log = new List<string>();
             var arguments = new List<string> { "importSymbols",
-                "--project", req.Project, "--programPath", req.ProgramPath, "--symbolFile", req.SymbolFile, "--flag", $"{req.Flag}" };
+                "--project", req.Project, "--programPath", req.ProgramPath, "--symbolFile", req.SymbolFile, "--flag", $"{(int)req.Flag}" };
             if (req.AllowConflicts) arguments.Add("--allowConflicts");
             var rv = LaunchS7Cli(ref log, arguments);
             return CreateStatusReply(rv, ref log);
