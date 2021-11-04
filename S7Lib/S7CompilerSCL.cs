@@ -47,10 +47,10 @@ namespace S7Lib
         /// Constructor
         /// </summary>
         ///
-        public S7CompilerSCL(S7Context ctx)
+        public S7CompilerSCL(S7Handle s7Handle)
         {
             nullptr = new IntPtr(0);
-            Log = ctx.Log;
+            Log = s7Handle.Log;
             var log = Log;
 
             handle = WindowsAPI.FindWindow( "AfxMDIFrame42", null );
@@ -228,7 +228,6 @@ namespace S7Lib
             WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
 
             // wait until the SCL compiler process dissappears
-            Process[] processes;
             while ( Array.Exists< Process >( Process.GetProcesses(),
                                              s => s.Id == pid ) )
             {

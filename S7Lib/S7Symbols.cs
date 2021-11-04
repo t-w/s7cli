@@ -13,16 +13,16 @@ namespace S7Lib
     public static class S7Symbols
     {
         // Default path for symbol import report file
-        static string ReportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";
+        static readonly string ReportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";
         // Default titles for Notepad window opened on import symbols command
         // The title window may or may not include the .txt extension depending on Explorer settings
-        static string[] NotepadWindowTitles = new string[]{
+        static readonly string[] NotepadWindowTitles = new string[]{
             "sym_imp - Notepad", "sym_imp.txt - Notepad"
         };
 
-        public static string ReadFile(S7Context ctx, string path)
+        internal static string ReadFile(S7Handle s7Handle, string path)
         {
-            var log = ctx.Log;
+            var log = s7Handle.Log;
             if (File.Exists(path))
                 return File.ReadAllText(path);
             log.Warning($"File {path} not found");
@@ -37,10 +37,10 @@ namespace S7Lib
         /// <param name="warnings">Number of warnings during importation</param>
         /// <param name="conflicts">Number of symbol conflicts during importation</param>
         /// <returns>The total number of critical errors (sum of errors and conflicts)</returns>
-        private static string GetImportReport(S7Context ctx,
+        private static string GetImportReport(S7Handle s7Handle,
             ref int errors, ref int warnings, ref int conflicts)
         {
-            string report = ReadFile(ctx, ReportFilePath);
+            string report = ReadFile(s7Handle, ReportFilePath);
             string[] split = report.Split('\n');
 
             int errorIndex = Array.FindIndex<string>(split, s => Regex.IsMatch(s, "^Error:.*"));
@@ -57,9 +57,9 @@ namespace S7Lib
         /// <summary>
         /// Close the Notepad window with importation log.
         /// </summary>
-        private static void CloseSymbolImportationLogWindow(S7Context ctx)
+        private static void CloseSymbolImportationLogWindow(S7Handle s7Handle)
         {
-            var log = ctx.Log;
+            var log = s7Handle.Log;
             IntPtr windowHandle = IntPtr.Zero;
             foreach (var windowTitle in NotepadWindowTitles)
             {
@@ -75,15 +75,22 @@ namespace S7Lib
             log.Debug($"Closed Notepad window with importation log");
         }
 
-        public static int ImportSymbols(S7Context ctx,
+        /// <summary>
+        /// Import symbol table into target program
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="programPath">Path to program in S7 project</param>
+        /// <param name="symbolFile">Path symbol file to import</param>
+        /// <param name="flag">TODO</param>
+        /// <param name="allowConflicts">
+        /// Whether to allow conflicts. If false, then an exception is raised if conflicts are detected.
+        /// </param>
+        internal static void ImportSymbols(S7Handle s7Handle,
             string project, string programPath, string symbolFile, int flag = 0, bool allowConflicts = false)
         {
-            var api = ctx.Api;
-            var log = ctx.Log;
+            var log = s7Handle.Log;
             var flags = (S7SymImportFlags)flag;
-
-            S7Program programObj = Api.GetProgram(ctx, project, programPath);
-            if (programObj == null) return -1;
+            S7Program programObj = s7Handle.GetProgram(project, programPath);
 
             S7SymbolTable symbolTable;
             try
@@ -93,41 +100,46 @@ namespace S7Lib
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
-                return -1;
+                throw;
             }
 
-            int numSymbols = -1;
+            int numSymbols;
             try
             {
+                // TODO Wrap import flag with enum!
                 numSymbols = symbolTable.Import(symbolFile, Flags: flags);
             }
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not import symbol table into {project}:{programObj.LogPath} " +
                                $"from {symbolFile}");
-                return -1;
+                throw;
             }
 
             int errors = -1, warnings = -1, conflicts = -1;
-            string report = GetImportReport(ctx, ref errors, ref warnings, ref conflicts);
-            CloseSymbolImportationLogWindow(ctx);
+            string report = GetImportReport(s7Handle, ref errors, ref warnings, ref conflicts);
+            CloseSymbolImportationLogWindow(s7Handle);
 
             log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{programObj.LogPath}\n" +
                       $"Report {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s):\n" +
                       $"{report}");
 
             if (!allowConflicts && conflicts > 0)
-                return -1;
-            return 0;
+                // TODO Improve Exception?
+                throw new Exception($"Symbols importation finished with {conflicts} conflict(s)");
         }
 
-        public static int ExportSymbols(S7Context ctx,
+        /// <summary>
+        /// Export symbol table to file
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="programPath">Path to program in S7 project</param>
+        /// <param name="symbolFile">Path to output symbol table file</param>
+        internal static void ExportSymbols(S7Handle s7Handle,
             string project, string programPath, string symbolFile)
         {
-            var log = ctx.Log;
-
-            S7Program programObj = Api.GetProgram(ctx, project, programPath);
-            if (programObj == null) return -1;
+            var log = s7Handle.Log;
+            S7Program programObj = s7Handle.GetProgram(project, programPath);
 
             S7SymbolTable symbolTable;
             try
@@ -137,7 +149,7 @@ namespace S7Lib
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
-                return -1;
+                throw;
             }
 
             try
@@ -148,11 +160,10 @@ namespace S7Lib
             {
                 log.Error(exc, $"Could not export symbols from {project}:{programObj.LogPath} " +
                                $"to {symbolFile}");
-                return -1;
+                throw;
             }
 
             log.Debug($"Exported symbols from {project}:{programObj.LogPath} to {symbolFile}");
-            return 0;
         }
     }
 }
