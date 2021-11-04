@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using S7Lib;
 
 
@@ -16,187 +19,236 @@ namespace UnitTestS7Lib
         public static void ClassInitialize(TestContext testCtx)
         {
             Directory.CreateDirectory(WorkspaceDir);
-            var ctx = new S7Context();
-            Api.RemoveProject(ctx, "testProj");
-            Api.RemoveProject(ctx, "testLib");
-            Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Api.CreateProgram(ctx, "testProj", "testProgram");
-            Api.CreateLibrary(ctx, "testLib", WorkspaceDir);
+            using (var api = new S7Handle())
+            {
+                try
+                {
+                    api.RemoveProject("testProj");
+                    api.RemoveProject("testLib");
+                }
+                catch { }
+
+                api.CreateProject("testProj", WorkspaceDir);
+                api.CreateProgram("testProj", "testProgram");
+                api.CreateLibrary("testLib", WorkspaceDir);
+            }
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            var ctx = new S7Context();
-            //Api.RemoveProject(ctx, "testProj");
-            Api.RemoveProject(ctx, "testLib");
+            using (var api = new S7Handle())
+            {
+                //api.RemoveProject("testProj");
+                api.RemoveProject("testLib");
+            }
         }
 
         [TestMethod]
         public void TestListProjects()
         {
-            var ctx = new S7Context();
-            var output = new Dictionary<string, string>();
-            var rv = Api.ListProjects(ctx, ref output);
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var output = new Dictionary<string, string>();
+                api.ListProjects(ref output);
+            }
         }
 
         [TestMethod]
         public void TestListPrograms()
         {
-            var ctx = new S7Context();
-            var output = new List<string>();
-            var rv = Api.ListPrograms(ctx, ref output, "AWP_Demo07");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var output = new List<string>();
+                api.ListPrograms(ref output, "AWP_Demo07");
+            }
         }
 
         [TestMethod]
         public void TestListContainers()
         {
-            var ctx = new S7Context();
-            var output = new List<string>();
-            var rv = Api.ListContainers(ctx, ref output, "AWP_Demo07");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var output = new List<string>();
+                api.ListContainers(ref output, "AWP_Demo07");
+            }
         }
 
         [TestMethod]
         public void TestListStations()
         {
-            var ctx = new S7Context();
-            var output = new List<string>();
-            var rv = Api.ListStations(ctx, ref output, "AWP_Demo07");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var output = new List<string>();
+                api.ListStations(ref output, "AWP_Demo07");
+            }
         }
 
         [TestMethod]
         public void TestRegisterProject()
         {
-            var ctx = new S7Context();
-            var s7ProjFilePath = Path.Combine(WorkspaceDir, @"testProj\testProj.s7p");
-            var rv = Api.RegisterProject(ctx, s7ProjFilePath);
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var s7ProjFilePath = Path.Combine(WorkspaceDir, @"testProj\testProj.s7p");
+                api.RegisterProject(s7ProjFilePath);
+            }
         }
 
         [TestMethod]
         public void TestCreateInvalidProject()
         {
-            var ctx = new S7Context();
-            var rv = Api.CreateProject(ctx, "testProject", WorkspaceDir);
-            Assert.AreEqual(-1, rv);
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.CreateProject("testProject", WorkspaceDir));
+            }
         }
 
         [TestMethod]
         public void TestCreateProjectTwice()
         {
-            var ctx = new S7Context();
-            var rv = Api.CreateProject(ctx, "testProj", WorkspaceDir);
-            Assert.AreEqual(-1, rv);
+            using (var api = new S7Handle())
+            {
+                var projects = new Dictionary<string, string>() { };
+                api.ListProjects(ref projects);
+                Assert.IsTrue(projects.ContainsValue("testProj"));
+
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.CreateProject("testProj", WorkspaceDir));
+            }
         }
 
         [TestMethod]
         public void TestRegisterInvalidProject()
         {
-            var ctx = new S7Context();
-            var rv = Api.RegisterProject(ctx, ".!");
-            Assert.AreEqual(-1, rv);
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<COMException>(
+                    () => api.RegisterProject(".!"));
+            }
         }
 
         [TestMethod]
         public void TestRemoveInvalidProject()
         {
-            var ctx = new S7Context();
-            var rv = Api.RemoveProject(ctx, ".!");
-            Assert.AreEqual(-1, rv);
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<KeyNotFoundException>(
+                    () => api.RemoveProject(".!"));
+            }
         }
 
         [TestMethod]
         public void TestImportSclSource()
         {
-            var ctx = new S7Context();
-            var rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", SourcesDir);
-            Assert.AreEqual(0, rv);
-            // Import existing sources fails if overwrite is set to false
-            rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", SourcesDir, overwrite: false);
-            Assert.AreEqual(-1, rv);
-            // Import existing sources succeeds if overwrite is set to true
-            rv = Api.ImportSourcesDir(ctx, "testProj", "testProgram", SourcesDir, overwrite: true);
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.ImportSourcesDir("testProj", "testProgram", SourcesDir);
+                // Import existing sources fails if overwrite is set to false
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.ImportSourcesDir("testProj", "testProgram", SourcesDir, overwrite: false));
+                // Import existing sources succeeds if overwrite is set to true
+                api.ImportSourcesDir("testProj", "testProgram", SourcesDir, overwrite: true);
+            }
         }
 
         [TestMethod]
         public void TestImportLibSources()
         {
-            var ctx = new S7Context();
-            var rv = Api.ImportLibSources(ctx,
-                library: "AWP_Demo01", libProgram: "S7-Programm",
-                project: "testProj", projProgram: "testProgram");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.ImportLibSources(library: "AWP_Demo01", libProgram: "S7-Programm",
+                                     project: "testProj", projProgram: "testProgram");
+            }
         }
 
         [TestMethod]
         public void TestImportLibBlocks()
         {
-            var ctx = new S7Context();
-            Api.CompileSource(ctx, "AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
-            var rv = Api.ImportLibBlocks(ctx,
-                library: "AWP_Demo01", libProgram: "S7-Programm",
-                project: "testProj", projProgram: "testProgram");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.CompileSource("AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
+                api.ImportLibBlocks(library: "AWP_Demo01", libProgram: "S7-Programm",
+                                    project: "testProj", projProgram: "testProgram");
+            }
         }
 
         [TestMethod]
         public void TestExportSymbols()
         {
-            var ctx = new S7Context();
-            var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
-            var rv = Api.ExportSymbols(ctx, "AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
-            Assert.AreEqual(0, rv);
-            var symbolTableExists = File.Exists(symbolFile);
-            Assert.IsTrue(symbolTableExists);
+            using (var api = new S7Handle())
+            {
+                var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
+                api.ExportSymbols("AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
+                var symbolTableExists = File.Exists(symbolFile);
+                Assert.IsTrue(symbolTableExists);
+            }
         }
 
         [TestMethod]
         public void TestExportAllSources()
         {
-            var ctx = new S7Context();
-            var rv = Api.ExportAllSources(ctx, "AWP_Demo01", "S7-Programm", WorkspaceDir);
-            Assert.AreEqual(0, rv);
-            var sourceExists = File.Exists(Path.Combine(WorkspaceDir, "AWP_DB333.AWL"));
-            Assert.IsTrue(sourceExists);
+            using (var api = new S7Handle())
+            {
+                api.ExportAllSources("AWP_Demo01", "S7-Programm", WorkspaceDir);
+                var sourceExists = File.Exists(Path.Combine(WorkspaceDir, "AWP_DB333.AWL"));
+                Assert.IsTrue(sourceExists);
+            }
         }
 
         [TestMethod]
         public void TestImportSymbols()
         {
-            var ctx = new S7Context();
-            var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
-            Api.ExportSymbols(ctx, "AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
-            var rv = Api.ImportSymbols(ctx, "testProj", "testProgram", symbolFile);
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
+                api.ExportSymbols("AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
+                api.ImportSymbols("testProj", "testProgram", symbolFile);
+            }
         }
 
         [TestMethod]
         public void TestCompileAwlSource()
         {
-            var ctx = new S7Context();
-            var rv = Api.CompileSource(ctx, "AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.CompileSource("AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
+            }
         }
 
         [TestMethod]
         public void TestCompileSclSource()
         {
-            var ctx = new S7Context();
-            var rv = Api.CompileSource(ctx, "ZEN05_01_S7SCL__Measv06", "S7 Program", "Measv06");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.CompileSource("ZEN05_01_S7SCL__Measv06", "S7 Program", "Measv06");
+            }
         }
 
         [TestMethod]
         public void TestCompileAllStations()
         {
-            var ctx = new S7Context();
-            var rv = Api.CompileAllStations(ctx, "AWP_Demo01");
-            Assert.AreEqual(0, rv);
+            using (var api = new S7Handle())
+            {
+                api.CompileAllStations("AWP_Demo01");
+            }
+        }
+
+        [TestMethod]
+        public void TestEditModule()
+        {
+            var properties = new Dictionary<string, object>()
+            {
+                {"IPAddress", "137.138.25.92"},
+                {"SubnetMask", "255.255.255.128"},
+                {"RouterAddress", "137.138.25.65"},
+                {"RouterActive", true }
+            };
+
+            using (var api = new S7Handle())
+            {
+                api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties);
+            };
         }
     }
 }
