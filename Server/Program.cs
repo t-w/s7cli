@@ -4,15 +4,15 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
+
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.ListOfString;
-
 using Grpc.Core;
-using S7Service;
 
+using S7Service;
 using S7Lib;
-using System.IO;
 
 namespace Step7Server
 {
@@ -107,11 +107,11 @@ namespace Step7Server
             return argString;
         }
 
-        private S7Context CreateApiContext(ref List<string> log)
+        private S7Handle CreateApiContext(ref List<string> log)
         {
             var logger = new LoggerConfiguration().WriteTo.StringList(log).CreateLogger();
-            var ctx = new S7Context(log: logger);
-            return ctx;
+            var api = new S7Handle(log: logger);
+            return api;
         }
 
         private StatusReply CreateStatusReply(int rv, ref List<string> log)
@@ -136,8 +136,18 @@ namespace Step7Server
         {
             var log = new List<string>();
             var output = new Dictionary<string, string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ListProjects(ctx, ref output);
+            int rv = 0;
+            using (var api = CreateApiContext(ref log))
+            {
+                try
+                {
+                    api.ListProjects(ref output);
+                }
+                catch (Exception)
+                {
+                    rv = 1;
+                }
+            }
             var projectList = new List<string>(output.Values);
             return CreateListReply(rv, ref log, ref projectList);
         }
@@ -149,10 +159,21 @@ namespace Step7Server
 
         private ListReply ListProgramsImpl(ListProgramsRequest req)
         {
+            // TODO Use context block. Handle errors
             var log = new List<string>();
             var output = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ListPrograms(ctx, ref output, req.Project);
+            int rv = 0;
+            using (var api = CreateApiContext(ref log))
+            {
+                try
+                {
+                    api.ListPrograms(ref output, req.Project);
+                }
+                catch (Exception)
+                {
+                    rv = 1;
+                }
+            }
             return CreateListReply(rv, ref log, ref output);
         }
 
@@ -165,8 +186,18 @@ namespace Step7Server
         {
             var log = new List<string>();
             var output = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ListContainers(ctx, ref output, req.Project);
+            int rv = 0;
+            using (var api = CreateApiContext(ref log))
+            {
+                try
+                {
+                    api.ListContainers(ref output, req.Project);
+                }
+                catch (Exception)
+                {
+                    rv = 1;
+                }
+            }
             return CreateListReply(rv, ref log, ref output);
         }
 
@@ -179,8 +210,18 @@ namespace Step7Server
         {
             var log = new List<string>();
             var output = new List<string>();
-            var ctx = CreateApiContext(ref log);
-            var rv = Api.ListStations(ctx, ref output, req.Project);
+            int rv = 0;
+            using (var api = CreateApiContext(ref log))
+            {
+                try
+                {
+                    api.ListStations(ref output, req.Project);
+                }
+                catch (Exception)
+                {
+                    rv = 1;
+                }
+            }
             return CreateListReply(rv, ref log, ref output);
         }
 
