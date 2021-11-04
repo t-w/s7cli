@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
+
 using CommandLine;
 using Serilog;
 using Serilog.Core;
-
+using Serilog.Events;
 
 using S7Lib;
-using Serilog.Events;
-using System;
+
 
 namespace S7Cli
 {
-    public class OptionParser
+    public sealed class OptionParser : IDisposable
     {
         /// <summary>
         /// Command return value
@@ -21,20 +22,20 @@ namespace S7Cli
         /// <summary>
         /// Whether to run command (for parser testing purposes)
         /// </summary>
-        private bool Run;
+        private readonly bool Run;
         /// <summary>
         /// Configured logger instance
         /// </summary>
-        private Logger Log;
+        private readonly Logger Log;
         /// <summary>
         /// Dynamic switch log level
         /// </summary>
-        private LoggingLevelSwitch LogLevel;
+        private readonly LoggingLevelSwitch LogLevel;
         /// <summary>
         /// Context for running S7Lib commands
         /// </summary>
-        private S7Context Context;
-        
+        private S7Handle Api = null;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -47,7 +48,12 @@ namespace S7Cli
                 .MinimumLevel.ControlledBy(LogLevel)
                 .WriteTo.Console()
                 .CreateLogger();
-            Context = new S7Context(log: Log);
+        }
+
+        public void Dispose()
+        {
+            Api?.Dispose();
+            Log?.Dispose();
         }
 
         /// <summary>
@@ -55,19 +61,28 @@ namespace S7Cli
         /// We can choose to not run a command for testing the argument parsing logic.
         /// </summary>
         /// <param name="args">Command-line args</param>
-        /// <param name="run">Whether to run command after parsing args</param>
         /// <returns>0 on success, 1 otherwise</returns>
         public int Parse(string[] args)
         {
             var result = Parser.Default.ParseArguments(args, OptionTypes.Get());
             result.WithNotParsed(errors => HandleErrors(errors.ToList()));
-            
+
             // Early return, if we choose not to run the parsed command
-            if (!Run) return ReturnValue;
+            if (!Run)
+                return ReturnValue;
 
             result.WithParsed<Options>(opts => SetGeneralOptions(opts.Verbose));
-            result.WithParsed(RunCommand);
-            
+
+            try
+            {
+                result.WithParsed<Options>(RunCommand);
+            }
+            catch (Exception exc)
+            {
+                Log.Error(exc, $"Could not run command.");
+                ReturnValue = 1;
+            }
+
             return ReturnValue;
         }
 
@@ -80,7 +95,7 @@ namespace S7Cli
             ReturnValue = 0;
             if (errors.Any())
             {
-                ReturnValue = -1;
+                ReturnValue = 1;
                 foreach (Error error in errors)
                 {
                     // Not selecting a verb or requesting version or help is handled as success
@@ -98,7 +113,7 @@ namespace S7Cli
         /// </summary>
         private void SetGeneralOptions(bool verbose)
         {
-            LogLevel.MinimumLevel = (verbose)?
+            LogLevel.MinimumLevel = (verbose) ?
                 LogEventLevel.Verbose : LogEventLevel.Information;
         }
 
@@ -119,112 +134,108 @@ namespace S7Cli
 
         private void RunCommand(object options)
         {
-            int rv = 0;
-            var ctx = Context;
+            Api = new S7Handle(log: Log);
 
             switch (options)
             {
-                case ListProjectsOptions opt:
+                case ListProjectsOptions _:
                     var projects = new Dictionary<string, string>();
-                    rv = Api.ListProjects(ctx, ref projects);
+                    Api.ListProjects(ref projects);
                     break;
                 case ListProgramsOptions opt:
                     var programs = new List<string>();
-                    rv = Api.ListPrograms(ctx, ref programs, opt.Project);
+                    Api.ListPrograms(ref programs, opt.Project);
                     break;
                 case ListContainersOptions opt:
                     var containers = new List<string>();
-                    rv = Api.ListContainers(ctx, ref containers, opt.Project);
+                    Api.ListContainers(ref containers, opt.Project);
                     break;
                 case ListStationsOptions opt:
                     var stations = new List<string>();
-                    rv = Api.ListStations(ctx, ref stations, opt.Project);
+                    Api.ListStations(ref stations, opt.Project);
                     break;
                 case CreateProjectOptions opt:
-                    rv = Api.CreateProject(ctx, opt.ProjectName, opt.ProjectDir);
+                    Api.CreateProject(opt.ProjectName, opt.ProjectDir);
                     break;
                 case CreateLibraryOptions opt:
-                    rv = Api.CreateLibrary(ctx, opt.ProjectName, opt.ProjectDir);
+                    Api.CreateLibrary(opt.ProjectName, opt.ProjectDir);
                     break;
                 case RegisterProjectOptions opt:
-                    rv = Api.RegisterProject(ctx, opt.ProjectFilePath);
+                    Api.RegisterProject(opt.ProjectFilePath);
                     break;
                 case RemoveProjectOptions opt:
                     if (!opt.Force)
                         if (!Confirm($"Remove project {opt.Project}"))
                             break;
-                    rv = Api.RemoveProject(ctx, opt.Project);
+                    Api.RemoveProject(opt.Project);
                     break;
                 case ImportSourceOptions opt:
-                    rv = Api.ImportSource(ctx,
-                        opt.Project, opt.Program, opt.Source, opt.Overwrite);
+                    Api.ImportSource(opt.Project, opt.Program, opt.Source, opt.Overwrite);
                     break;
                 case ImportSourcesDirOptions opt:
-                    rv = Api.ImportSourcesDir(ctx,
-                        opt.Project, opt.Program, opt.SourcesDir, opt.Overwrite);
+                    Api.ImportSourcesDir(opt.Project, opt.Program, opt.SourcesDir, opt.Overwrite);
                     break;
                 case ExportAllSourcesOptions opt:
-                    rv = Api.ExportAllSources(ctx,
-                        opt.Project, opt.Program, opt.SourcesDir);
+                    Api.ExportAllSources(opt.Project, opt.Program, opt.SourcesDir);
                     break;
                 case ImportLibSourcesOptions opt:
-                    rv = Api.ImportLibSources(ctx,
-                        library: opt.Library, libProgram: opt.LibProgram,
-                        project: opt.Project, projProgram: opt.ProjProgram,
-                        overwrite: opt.Overwrite);
+                    Api.ImportLibSources(library: opt.Library, libProgram: opt.LibProgram,
+                                         project: opt.Project, projProgram: opt.ProjProgram,
+                                         overwrite: opt.Overwrite);
                     break;
                 case ImportLibBlocksOptions opt:
-                    rv = Api.ImportLibBlocks(ctx,
-                        library: opt.Library, libProgram: opt.LibProgram,
-                        project: opt.Project, projProgram: opt.ProjProgram,
-                        overwrite: opt.Overwrite);
+                    Api.ImportLibBlocks(library: opt.Library, libProgram: opt.LibProgram,
+                                        project: opt.Project, projProgram: opt.ProjProgram,
+                                        overwrite: opt.Overwrite);
                     break;
                 case ImportSymbolsOptions opt:
-                    rv = Api.ImportSymbols(ctx, opt.Project, opt.ProgramPath, opt.SymbolFile,
-                        flag: opt.Flag, allowConflicts: opt.AllowConflicts);
+                    Api.ImportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile,
+                                      flag: opt.Flag, allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    rv = Api.ExportSymbols(ctx, opt.Project, opt.ProgramPath, opt.SymbolFile);
+                    Api.ExportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile);
                     break;
                 case CompileSourceOptions opt:
-                    rv = Api.CompileSource(ctx, opt.Project, opt.Program, opt.Source);
+                    Api.CompileSource(opt.Project, opt.Program, opt.Source);
                     break;
                 case CompileSourcesOptions opt:
-                    rv = Api.CompileSources(ctx, opt.Project, opt.Program, opt.Sources.ToList());
+                    Api.CompileSources(opt.Project, opt.Program, opt.Sources.ToList());
                     break;
                 case CompileAllStationsOptions opt:
-                    rv = Api.CompileAllStations(ctx, opt.Project, opt.AllowFail);
+                    Api.CompileAllStations(opt.Project, opt.AllowFail);
                     break;
                 case EditModuleOptions opt:
-                    var properties = ParseModuleProperties(ctx, opt);
-                    rv = Api.EditModule(ctx, opt.Project, opt.Station, opt.Rack, opt.Module, ref properties);
+                    var properties = ParseModuleProperties(opt);
+                    Api.EditModule(opt.Project, opt.Station, opt.Rack, opt.Module, properties);
                     break;
                 case StartProgramOptions opt:
                     if (!opt.Force)
                         if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
-                    rv = Online.StartProgram(ctx,
-                        opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StartProgram(opt.Project, opt.Station, opt.Module, opt.Program);
                     break;
                 case StopProgramOptions opt:
                     if (!opt.Force)
                         if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
-                    rv = Online.StopProgram(ctx,
-                        opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StopProgram(opt.Project, opt.Station, opt.Module, opt.Program);
                     break;
                 case DownloadProgramBlocksOptions opt:
                     if (!opt.Force)
                         if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
                             break;
-                    rv = Online.DownloadProgramBlocks(ctx,
-                        opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
+                    Api.DownloadProgramBlocks(opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
+                    break;
+                default:
+                    ReturnValue = 1;
+                    Log.Error($"Unknown options {options}");
                     break;
             }
-            ReturnValue = rv;
+
+            // TODO Save Project? Review auto-save logic
         }
 
-        private Dictionary<string, object> ParseModuleProperties(S7Context ctx, EditModuleOptions opt)
+        private Dictionary<string, object> ParseModuleProperties(EditModuleOptions opt)
         {
             bool parsedBool;
             var propertyDict = new Dictionary<string, object>();
@@ -241,14 +252,14 @@ namespace S7Cli
                 if (Boolean.TryParse(opt.IPActive, out parsedBool))
                     propertyDict["IPActive"] = parsedBool;
                 else
-                    ctx.Log.Warning($"Could not parse bool from --ipActive \"{opt.IPActive}\". Ignoring.");
+                    Log.Warning($"Could not parse bool from --ipActive \"{opt.IPActive}\". Ignoring.");
             }
             if (!String.IsNullOrEmpty(opt.RouterActive))
             {
                 if (Boolean.TryParse(opt.RouterActive, out parsedBool))
                     propertyDict["RouterActive"] = parsedBool;
                 else
-                    ctx.Log.Warning($"Could not parse bool from --routerActive \"{opt.RouterActive}\". Ignoring.");
+                    Log.Warning($"Could not parse bool from --routerActive \"{opt.RouterActive}\". Ignoring.");
             }
             return propertyDict;
         }
