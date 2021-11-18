@@ -135,13 +135,13 @@ namespace Step7Server
         private ListReply ListProjectsImpl(ListProjectsRequest req)
         {
             var log = new List<string>();
-            var output = new Dictionary<string, string>();
+            Dictionary<string, string> output = null;
             int rv = 0;
             using (var api = CreateApiContext(ref log))
             {
                 try
                 {
-                    api.ListProjects(ref output);
+                    output = api.ListProjects();
                 }
                 catch (Exception)
                 {
@@ -159,15 +159,15 @@ namespace Step7Server
 
         private ListReply ListProgramsImpl(ListProgramsRequest req)
         {
-            // TODO Use context block. Handle errors
+
             var log = new List<string>();
-            var output = new List<string>();
+            List<string> output = null;
             int rv = 0;
             using (var api = CreateApiContext(ref log))
             {
                 try
                 {
-                    api.ListPrograms(ref output, req.Project);
+                    output = api.ListPrograms(req.Project);
                 }
                 catch (Exception)
                 {
@@ -185,13 +185,13 @@ namespace Step7Server
         private ListReply ListContainersImpl(ListContainersRequest req)
         {
             var log = new List<string>();
-            var output = new List<string>();
+            List<string> output = null;
             int rv = 0;
             using (var api = CreateApiContext(ref log))
             {
                 try
                 {
-                    api.ListContainers(ref output, req.Project);
+                    output = api.ListContainers(req.Project);
                 }
                 catch (Exception)
                 {
@@ -209,13 +209,13 @@ namespace Step7Server
         private ListReply ListStationsImpl(ListStationsRequest req)
         {
             var log = new List<string>();
-            var output = new List<string>();
+            List<string> output = null;
             int rv = 0;
             using (var api = CreateApiContext(ref log))
             {
                 try
                 {
-                    api.ListStations(ref output, req.Project);
+                    output = api.ListStations(req.Project);
                 }
                 catch (Exception)
                 {

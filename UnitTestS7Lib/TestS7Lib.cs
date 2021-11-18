@@ -49,8 +49,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new Dictionary<string, string>();
-                api.ListProjects(ref output);
+                var projectDict = api.ListProjects();
             }
         }
 
@@ -59,8 +58,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListPrograms(ref output, "AWP_Demo07");
+                var programList = api.ListPrograms("AWP_Demo07");
             }
         }
 
@@ -69,8 +67,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListContainers(ref output, "AWP_Demo07");
+                var containerList = api.ListContainers("AWP_Demo07");
             }
         }
 
@@ -79,8 +76,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListStations(ref output, "AWP_Demo07");
+                var stationList = api.ListStations("AWP_Demo07");
             }
         }
 
@@ -109,8 +105,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var projects = new Dictionary<string, string>() { };
-                api.ListProjects(ref projects);
+                var projects = api.ListProjects();
                 Assert.IsTrue(projects.ContainsValue("testProj"));
 
                 Assert.ThrowsException<ArgumentException>(

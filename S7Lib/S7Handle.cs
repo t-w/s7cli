@@ -683,33 +683,34 @@ namespace S7Lib
         }
 
         // List commands
-        // TODO - Review return value of these functions
 
         /// <summary>
-        /// Creates dictionary with {projectDir, projectName} key-value pairs
+        /// Returns dictionary with {projectDir, projectName} key-value pairs
         /// </summary>
         /// <param name="output">Dictionary with {projectDir, projectName} key-value pairs</param>
-        public void ListProjects(ref Dictionary<string, string> output)
+        public Dictionary<string, string> ListProjects()
         {
             Log.Information($"Listing registered projects");
             foreach (var project in Api.Projects)
+            var output = new Dictionary<string, string>();
             {
                 var projectObj = (S7Project)project;
                 output.Add(projectObj.LogPath, projectObj.Name);
                 Log.Information($"Project {projectObj.Name} Path {projectObj.LogPath}");
             }
+            return output;
         }
 
         /// <summary>
-        /// Creates List with programs in a given project
+        /// Returns list with programs in a given project
         /// </summary>
-        /// <param name="output">List with program names</param>
-        public void ListPrograms(ref List<string> output, string project)
+        public List<string> ListPrograms(string project)
         {
             var projectObj = GetProject(project);
 
             Log.Information($"Listing programs for project {project}");
             foreach (var program in projectObj.Programs)
+            var output = new List<string>();
             {
                 // TODO: If the cast to S7Program is safe, remove try catch block
                 try
@@ -723,18 +724,20 @@ namespace S7Lib
                     Log.Error(exc, $"Could not access program in project {project}");
                 }
             }
+            return output;
         }
 
         /// <summary>
+        /// Returns list with stations in a given project
         /// Creates List with stations in a given project
         /// </summary>
-        /// <param name="output">List with station names</param>
-        public void ListStations(ref List<string> output, string project)
+        public List<string> ListStations(string project)
         {
             var projectObj = GetProject(project);
 
             Log.Information($"Listing stations for project {project}");
             foreach (var station in projectObj.Stations)
+            var output = new List<string>();
             {
                 // TODO: If the cast to S7Station is safe, remove try catch block
                 try
@@ -748,19 +751,20 @@ namespace S7Lib
                     Log.Error(exc, $"Could not access station in project {project}");
                 }
             }
+            return output;
         }
 
         /// <summary>
         /// Creates List with containers for each program in a given project
         /// </summary>
         /// TODO: Maybe include program name in output as well?
-        /// <param name="output">List with conteiner names</param>
-        public void ListContainers(ref List<string> output, string project)
+        public List<string> ListContainers(string project)
         {
             var projectObj = GetProject(project);
 
             Log.Debug($"Listing containers for project {project}");
             foreach (var program in projectObj.Programs)
+            var output = new List<string>();
             {
                 S7Program programObj;
                 // TODO: If the cast to S7Program is safe, remove try catch block
@@ -791,6 +795,7 @@ namespace S7Lib
                     }
                 }
             }
+            return output;
         }
 
         /// <summary>

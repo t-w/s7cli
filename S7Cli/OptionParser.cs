@@ -115,20 +115,16 @@ namespace S7Cli
             switch (options)
             {
                 case ListProjectsOptions _:
-                    var projects = new Dictionary<string, string>();
-                    Api.ListProjects(ref projects);
+                    Api.ListProjects();
                     break;
                 case ListProgramsOptions opt:
-                    var programs = new List<string>();
-                    Api.ListPrograms(ref programs, opt.Project);
+                    Api.ListPrograms(opt.Project);
                     break;
                 case ListContainersOptions opt:
-                    var containers = new List<string>();
-                    Api.ListContainers(ref containers, opt.Project);
+                    Api.ListContainers(opt.Project);
                     break;
                 case ListStationsOptions opt:
-                    var stations = new List<string>();
-                    Api.ListStations(ref stations, opt.Project);
+                    Api.ListStations(opt.Project);
                     break;
                 case CreateProjectOptions opt:
                     Api.CreateProject(opt.ProjectName, opt.ProjectDir);
