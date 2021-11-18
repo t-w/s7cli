@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 using SimaticLib;
@@ -91,40 +92,48 @@ namespace S7Lib
             var log = s7Handle.Log;
             var flags = (S7SymImportFlags)flag;
             S7Program programObj = s7Handle.GetProgram(project, programPath);
+            S7SymbolTable symbolTable = null;
+            int numSymbols = 0;
 
-            S7SymbolTable symbolTable;
             try
             {
-                symbolTable = (S7SymbolTable)programObj.SymbolTable;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
-                throw;
-            }
+                try
+                {
+                    symbolTable = (S7SymbolTable)programObj.SymbolTable;
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
+                    throw;
+                }
 
-            int numSymbols;
-            try
-            {
-                // TODO Wrap import flag with enum!
-                numSymbols = symbolTable.Import(symbolFile, Flags: flags);
+                try
+                {
+                    // TODO Wrap import flag with enum!
+                    numSymbols = symbolTable.Import(symbolFile, Flags: flags);
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not import symbol table into {project}:{programObj.LogPath} " +
+                                   $"from {symbolFile}");
+                    throw;
+                }
             }
-            catch (Exception exc)
+            finally
             {
-                log.Error(exc, $"Could not import symbol table into {project}:{programObj.LogPath} " +
-                               $"from {symbolFile}");
-                throw;
+                Marshal.FinalReleaseComObject(programObj);
+                if (symbolTable != null)
+                    Marshal.FinalReleaseComObject(symbolTable);
             }
 
             string report = GetImportReport(s7Handle, out int errors, out int warnings, out int conflicts);
             CloseSymbolImportationLogWindow(s7Handle);
 
-            log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{programObj.LogPath}\n" +
+            log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{programPath}\n" +
                       $"Report {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s):\n" +
                       $"{report}");
 
             if (!allowConflicts && conflicts > 0)
-                // TODO Improve Exception?
                 throw new Exception($"Symbols importation finished with {conflicts} conflict(s)");
         }
 
@@ -138,31 +147,40 @@ namespace S7Lib
             string project, string programPath, string symbolFile)
         {
             var log = s7Handle.Log;
+            log.Debug($"Exported symbols from {project}:{programPath} to {symbolFile}");
+
             S7Program programObj = s7Handle.GetProgram(project, programPath);
-
-            S7SymbolTable symbolTable;
-            try
-            {
-                symbolTable = (S7SymbolTable)programObj.SymbolTable;
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
-                throw;
-            }
+            S7SymbolTable symbolTable = null;
 
             try
             {
-                symbolTable.Export(symbolFile);
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not export symbols from {project}:{programObj.LogPath} " +
-                               $"to {symbolFile}");
-                throw;
-            }
+                try
+                {
+                    symbolTable = (S7SymbolTable)programObj.SymbolTable;
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
+                    throw;
+                }
 
-            log.Debug($"Exported symbols from {project}:{programObj.LogPath} to {symbolFile}");
+                try
+                {
+                    symbolTable.Export(symbolFile);
+                }
+                catch (Exception exc)
+                {
+                    log.Error(exc, $"Could not export symbols from {project}:{programObj.LogPath} " +
+                                   $"to {symbolFile}");
+                    throw;
+                }
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(programObj);
+                if (symbolTable != null)
+                    Marshal.FinalReleaseComObject(symbolTable);
+            }
         }
     }
 }

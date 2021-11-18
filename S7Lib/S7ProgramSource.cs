@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 using SimaticLib;
@@ -44,6 +45,7 @@ namespace S7Lib
                     log.Error(exc, $"Could not access container in {projectObj.Name}:{program}");
                     throw;
                 }
+                Marshal.FinalReleaseComObject(container);
             }
             throw new KeyNotFoundException($"Could not find container of type {type} in {projectObj.Name}:{program}");
         }
@@ -71,15 +73,23 @@ namespace S7Lib
         {
             S7Source sourceObj;
             var container = GetSources(s7Handle, projectObj, program);
+            S7SWItems swItems = null;
 
             try
             {
-                sourceObj = (S7Source)container.Next[source];
+                swItems = container.Next;
+                sourceObj = (S7Source)swItems[source];
             }
-            catch (System.Runtime.InteropServices.COMException exc)
+            catch (COMException exc)
             {
                 throw new KeyNotFoundException($"Could not find source {source} in {projectObj.Name}:{program}", exc);
             }
+            finally
+            {
+                Marshal.FinalReleaseComObject(swItems);
+                Marshal.FinalReleaseComObject(container);
+            }
+
             return sourceObj;
         }
 
@@ -95,15 +105,23 @@ namespace S7Lib
         {
             S7Block blockObj;
             var container = GetBlocks(s7Handle, projectObj, program);
-            
+            S7SWItems swItems = null;
+
             try
             {
-                blockObj = (S7Block)container.Next[block];
+                swItems = container.Next;
+                blockObj = (S7Block)swItems[block];
             }
-            catch (System.Runtime.InteropServices.COMException exc)
+            catch (COMException exc)
             {
                 throw new KeyNotFoundException($"Could not find block {block} in {projectObj.Name}:{program}", exc);
             }
+            finally
+            {
+                Marshal.FinalReleaseComObject(swItems);
+                Marshal.FinalReleaseComObject(container);
+            }
+
             return blockObj;
         }
 
@@ -115,11 +133,22 @@ namespace S7Lib
             var log = s7Handle.Log;
 
             IS7SWItem source;
+            S7SWItems swItems = null;
+
             try
             {
-                source = container.Next[sourceName];
+                swItems = container.Next;
+                source = swItems[sourceName];
             }
-            catch (System.Runtime.InteropServices.COMException) { return; }
+            catch (COMException)
+            {
+                log.Debug($"Source {sourceName} not found in container {container.Name}");
+                return;
+            }
+            finally
+            {
+                Marshal.FinalReleaseComObject(swItems);
+            }
 
             if (source != null && !overwrite)
             {
@@ -131,12 +160,17 @@ namespace S7Lib
                 log.Debug($"{sourceName} already exists. Overwriting.");
                 try
                 {
-                    container.Next.Remove(sourceName);
+                    swItems = container.Next;
+                    swItems.Remove(sourceName);
                 }
                 catch (Exception exc)
                 {
                     log.Error(exc, $"Could not remove existing source {sourceName}");
                     throw;
+                }
+                finally
+                {
+                    Marshal.FinalReleaseComObject(swItems);
                 }
             }
         }
@@ -154,20 +188,26 @@ namespace S7Lib
         {
             var log = s7Handle.Log;
             string sourceName = Path.GetFileNameWithoutExtension(sourceFilePath);
+            S7SWItems swItems = null;
+
+            log.Debug($"Imported source {sourceName} ({sourceType}) from {sourceFilePath}");
 
             ImportSourceHelper(s7Handle, container, sourceName, overwrite);
 
             try
             {
-                var item = container.Next.Add(sourceName, sourceType, sourceFilePath);
+                swItems = container.Next;
+                swItems.Add(sourceName, sourceType, sourceFilePath);
             }
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not import source {sourceName} ({sourceType}) from {sourceFilePath}");
                 throw;
             }
-
-            log.Debug($"Imported source {sourceName} ({sourceType}) from {sourceFilePath}");
+            finally
+            {
+                Marshal.FinalReleaseComObject(swItems);
+            }
         }
 
         /// <summary>
@@ -183,19 +223,19 @@ namespace S7Lib
             var sourceName = source.Name;
             var sourceType = source.ConcreteType;
 
+            log.Debug($"Importing source {sourceName} ({sourceType}) from library");
+
             ImportSourceHelper(s7Handle, destination, sourceName, overwrite);
 
             try
             {
-                var item = source.Copy(destination);
+                source.Copy(destination);
             }
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not import source {sourceName} ({sourceType}) from library: ");
                 throw;
             }
-
-            log.Debug($"Imported source {sourceName} ({sourceType}) from library");
         }
 
         /// See S7Handle.ImportLibSources
@@ -209,7 +249,7 @@ namespace S7Lib
         }
 
         /// See S7Handle.ExportSource
-        internal static int ExportSource(S7Handle s7Handle, S7Source source, string exportDir)
+        internal static void ExportSource(S7Handle s7Handle, S7Source source, string exportDir)
         {
             var log = s7Handle.Log;
             var sourceType = source.ConcreteType;
@@ -222,11 +262,10 @@ namespace S7Lib
             catch (Exception exc)
             {
                 log.Error(exc, $"Could not export source {source.Name} ({sourceType}) to {outputFile}");
-                return -1;
+                throw;
             }
 
             log.Debug($"Exported {source.Name} ({sourceType}) to {outputFile}");
-            return 0;
         }
 
         /// See S7Handle.ExportAllSources
@@ -250,29 +289,35 @@ namespace S7Lib
 
             var projectObj = s7Handle.GetProject(project);
             var source = GetSource(s7Handle, projectObj, program, sourceName);
-
             var sourceType = source.ConcreteType;
-            if (sourceType == S7SourceType.S7SCL || sourceType == S7SourceType.S7SCLMake)
-            {
-                CompileSclSource(s7Handle, source);
-                return;
-            }
-            else if (sourceType == S7SourceType.S7AWL)
-            {
-                CompileAwlSource(s7Handle, source);
-                return;
-            }
-            
-            // Try to compile sources that are not scl or awl
 
             try
             {
-                source.Compile();
+                if (sourceType == S7SourceType.S7SCL || sourceType == S7SourceType.S7SCLMake)
+                {
+                    CompileSclSource(s7Handle, source);
+                }
+                else if (sourceType == S7SourceType.S7AWL)
+                {
+                    CompileAwlSource(s7Handle, source);
+                }
+                else
+                {
+                    try
+                    {
+                        source.Compile();
+                    }
+                    catch (Exception exc)
+                    {
+                        log.Error(exc, $"Could not compile source {sourceName} in project {project} program {program}");
+                        throw;
+                    }
+                }
             }
-            catch (Exception exc)
+            finally
             {
-                log.Error(exc, $"Could not compile source {sourceName} in project {project} program {program}");
-                throw;
+                Marshal.FinalReleaseComObject(projectObj);
+                Marshal.FinalReleaseComObject(source);
             }
         }
 
@@ -284,27 +329,33 @@ namespace S7Lib
         private static void CompileSclSource(S7Handle s7Handle, S7Source src)
         {
             var log = s7Handle.Log;
+            IS7SWItems items = null;
+
             try
             {
-                IS7SWItems items = src.Compile();
+                items = src.Compile();
             }
             catch (Exception exc)
             {
                 log.Error(exc, $"Error compiling {src.Name}");
                 throw;
             }
+            finally
+            {
+                if (items != null)
+                    Marshal.FinalReleaseComObject(items);
+            }
 
             // get status and close the SCL compiler
             S7CompilerSCL compiler = new S7CompilerSCL(s7Handle);
             log.Debug($"SCL status buffer:\n{compiler.getSclStatusBuffer()}");
-            string statusLine = compiler.getSclStatusLine();
+            //string statusLine = compiler.getSclStatusLine();
             int errors = compiler.getErrorCount();
             int warnings = compiler.getWarningCount();
             compiler.closeSclWindow();
 
             if (errors > 0)
             {
-                // TODO Improve exception?
                 throw new Exception($"Could not compile {src.Name}: {errors} error(s)");
             }
             else if (warnings > 0)
@@ -333,9 +384,11 @@ namespace S7Lib
             oStream.SetLength(0);
             oStream.Close();
 
+            IS7SWItems items = null;
+
             try
             {
-                IS7SWItems items = src.Compile();
+                items = src.Compile();
             }
             catch (Exception exc)
             {
@@ -345,6 +398,11 @@ namespace S7Lib
                     log.Error($"Compilation log file not found {verbLogFile}");
                 }
                 throw;
+            }
+            finally
+            {
+                if (items != null)
+                    Marshal.FinalReleaseComObject(items);
             }
 
             // read and show the log file
@@ -459,10 +517,17 @@ namespace S7Lib
                 // Note: "System data" blocks to not have SymbolicName attribute
                 if (libBlock.Name == "System data")
                 {
-                    log.Debug("Cannot copy System data block. Skipping."); 
+                    log.Debug("Cannot copy System data block. Skipping.");
                     continue;
                 }
-                CopyBlock(s7Handle, libBlock, projBlocks, overwrite);
+                try
+                {
+                    CopyBlock(s7Handle, libBlock, projBlocks, overwrite);
+                }
+                finally
+                {
+                    Marshal.FinalReleaseComObject(libBlock);
+                }
             }
         }
     }
