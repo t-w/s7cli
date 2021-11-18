@@ -15,15 +15,6 @@ namespace S7Cli
     public sealed class OptionParser : IDisposable
     {
         /// <summary>
-        /// Command return value
-        /// </summary>
-        public int ReturnValue;
-
-        /// <summary>
-        /// Whether to run command (for parser testing purposes)
-        /// </summary>
-        private readonly bool Run;
-        /// <summary>
         /// Configured logger instance
         /// </summary>
         private readonly Logger Log;
@@ -39,10 +30,8 @@ namespace S7Cli
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="run">Whether to run parsed command</param>
-        public OptionParser(bool run = true)
+        public OptionParser()
         {
-            Run = run;
             LogLevel = new LoggingLevelSwitch();
             Log = new LoggerConfiguration()
                 .MinimumLevel.ControlledBy(LogLevel)
@@ -61,17 +50,24 @@ namespace S7Cli
         /// We can choose to not run a command for testing the argument parsing logic.
         /// </summary>
         /// <param name="args">Command-line args</param>
-        /// <returns>0 on success, 1 otherwise</returns>
-        public int Parse(string[] args)
+        /// <param name="run">Whether to run the command</param>
+        public void Parse(string[] args, bool run = true)
         {
             var result = Parser.Default.ParseArguments(args, OptionTypes.Get());
-            result.WithNotParsed(errors => HandleErrors(errors.ToList()));
+
+            try
+            {
+                result.WithNotParsed(errors => HandleErrors(errors.ToList()));
+                result.WithParsed<Options>(opts => SetGeneralOptions(opts.Verbose));
+            }
+            catch (FormatException exc)
+            {
+                throw new ArgumentException($"Could not parse command `{String.Join(" ", args)}`", nameof(args), exc);
+            }
 
             // Early return, if we choose not to run the parsed command
-            if (!Run)
-                return ReturnValue;
-
-            result.WithParsed<Options>(opts => SetGeneralOptions(opts.Verbose));
+            if (!run)
+                return;
 
             try
             {
@@ -79,11 +75,9 @@ namespace S7Cli
             }
             catch (Exception exc)
             {
-                Log.Error(exc, $"Could not run command.");
-                ReturnValue = 1;
+                Log.Error(exc, $"Could not run command `{String.Join(" ", args)}`.");
+                throw;
             }
-
-            return ReturnValue;
         }
 
         /// <summary>
@@ -92,17 +86,13 @@ namespace S7Cli
         /// <param name="errors">List of parsing errors</param>
         private void HandleErrors(IList<Error> errors)
         {
-            ReturnValue = 0;
             if (errors.Any())
             {
-                ReturnValue = 1;
                 foreach (Error error in errors)
                 {
-                    // Not selecting a verb or requesting version or help is handled as success
-                    if (error is NoVerbSelectedError || error is VersionRequestedError
-                       || error is HelpVerbRequestedError || error is HelpRequestedError)
+                    if (!(error is VersionRequestedError) && !(error is HelpVerbRequestedError) && !(error is HelpRequestedError))
                     {
-                        ReturnValue = 0; return;
+                        throw new FormatException($"Unhandled parsing error: {error}");
                     }
                 }
             }
@@ -111,25 +101,11 @@ namespace S7Cli
         /// <summary>
         /// Sets general options
         /// </summary>
+        /// <param name="verbose">Whether to activate verbose option</param>
         private void SetGeneralOptions(bool verbose)
         {
             LogLevel.MinimumLevel = (verbose) ?
                 LogEventLevel.Verbose : LogEventLevel.Information;
-        }
-
-        /// <summary>
-        /// Prompts user to confirm a portentially dangerous command
-        /// </summary>
-        /// <param name="message">Command description</param>
-        /// <returns></returns>
-        private bool Confirm(string message)
-        {
-            System.Console.WriteLine($"Are you sure you want to perform the following command:\n" +
-                                     $" - {message} (N/y) ?");
-            var line = System.Console.ReadLine();
-            if (line.ToLower() == "y") return true;
-            System.Console.WriteLine("Command cancelled. To confirm type 'y'");
-            return false;
         }
 
         private void RunCommand(object options)
@@ -227,12 +203,25 @@ namespace S7Cli
                     Api.DownloadProgramBlocks(opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
                     break;
                 default:
-                    ReturnValue = 1;
-                    Log.Error($"Unknown options {options}");
-                    break;
+                    throw new ArgumentException($"Unknown options {options}", nameof(options));
             }
 
             // TODO Save Project? Review auto-save logic
+        }
+
+        /// <summary>
+        /// Prompts user to confirm a portentially dangerous command
+        /// </summary>
+        /// <param name="message">Command description</param>
+        /// <returns></returns>
+        private bool Confirm(string message)
+        {
+            Console.WriteLine($"Are you sure you want to perform the following command:\n" +
+                              $" - {message} (N/y) ?");
+            var line = Console.ReadLine();
+            if (line.ToLower() == "y") return true;
+            Console.WriteLine("Command cancelled. To confirm type 'y'");
+            return false;
         }
 
         private Dictionary<string, object> ParseModuleProperties(EditModuleOptions opt)
@@ -263,6 +252,5 @@ namespace S7Cli
             }
             return propertyDict;
         }
-
     }
 }
