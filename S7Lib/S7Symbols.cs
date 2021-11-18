@@ -38,7 +38,7 @@ namespace S7Lib
         /// <param name="conflicts">Number of symbol conflicts during importation</param>
         /// <returns>The total number of critical errors (sum of errors and conflicts)</returns>
         private static string GetImportReport(S7Handle s7Handle,
-            ref int errors, ref int warnings, ref int conflicts)
+            out int errors, out int warnings, out int conflicts)
         {
             string report = ReadFile(s7Handle, ReportFilePath);
             string[] split = report.Split('\n');
@@ -116,8 +116,7 @@ namespace S7Lib
                 throw;
             }
 
-            int errors = -1, warnings = -1, conflicts = -1;
-            string report = GetImportReport(s7Handle, ref errors, ref warnings, ref conflicts);
+            string report = GetImportReport(s7Handle, out int errors, out int warnings, out int conflicts);
             CloseSymbolImportationLogWindow(s7Handle);
 
             log.Debug($"Imported {numSymbols} symbols from {symbolFile} into {project}:{programObj.LogPath}\n" +
