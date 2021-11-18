@@ -39,8 +39,15 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                //api.RemoveProject("testProj");
-                api.RemoveProject("testLib");
+                try
+                {
+                    api.RemoveProject("testProj");
+                    api.RemoveProject("testLib");
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine(exc);
+                }
             }
         }
 
