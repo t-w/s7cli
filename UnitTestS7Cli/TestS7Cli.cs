@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
 using S7Cli;
 
 namespace UnitTestS7Cli
@@ -6,38 +8,95 @@ namespace UnitTestS7Cli
     [TestClass]
     public class TestS7Cli
     {
-        [TestMethod]
-        public void TestMain()
-        {
-            var parser = new OptionParser(run: false);
+        static OptionParser Parser = null;
 
-            // No verb
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext _)
+        {
+            Parser = new OptionParser();
+        }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+        {
+            Parser.Dispose();
+        }
+
+        [TestMethod]
+        public void TestNoVerb()
+        {
             string[] args = { };
-            Assert.AreEqual(0, parser.Parse(args));
-            // Invalid verb
-            args = new string[] { "invalidVerb" };
-            Assert.AreEqual(1, parser.Parse(args));
-            // Valid help flag
-            args = new string[] { "--help" };
-            Assert.AreEqual(0, parser.Parse(args));
-            // Invalid help flag
-            args = new string[] { "-h" };
-            Assert.AreEqual(1, parser.Parse(args));
-            // Invalid verb
-            args = new string[] { "invalidVerb", "--help" };
-            Assert.AreEqual(1, parser.Parse(args));
-            // Invalid verb, invalid help flag
-            args = new string[] { "invalidVerb", "-h" };
-            Assert.AreEqual(1, parser.Parse(args));
-            // Valid verb, valid help flag, missing arguments
-            args = new string[] { "createProject", "--help" };
-            Assert.AreEqual(0, parser.Parse(args));
-            // Valid verb, invalid help flag, missing arguments
-            args = new string[] { "createProject", "-h" };
-            Assert.AreEqual(1, parser.Parse(args));
-            // Valid version flag
-            args = new string[] { "--version" };
-            Assert.AreEqual(0, parser.Parse(args));
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestInvalidVerb()
+        {
+            string[] args = new string[] { "invalidVerb" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestValidHelpFlag()
+        {
+            string[] args = new string[] { "--help" };
+            Parser.Parse(args, run: false);
+        }
+
+        [TestMethod]
+        public void TestInvalidHelpFlag()
+        {
+            string[] args = new string[] { "-h" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestInvalidVerbValidHelpFlag()
+        {
+            string[] args = new string[] { "invalidVerb", "--help" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestInvalidVerbInvalidHelpFlag()
+        {
+            string[] args = new string[] { "invalidVerb", "-h" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestValidVerbMissingArgs()
+        {
+            string[] args = new string[] { "registerProject" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestValidVerbValidHelpFlagMissingArgs()
+        {
+            string[] args = new string[] { "registerProject", "--help" };
+            Parser.Parse(args, run: false);
+        }
+
+        [TestMethod]
+        public void TestValidVerbInvalidHelpFlagMissingArgs()
+        {
+            string[] args = new string[] { "registerProject", "-h" };
+            Assert.ThrowsException<ArgumentException>(() => Parser.Parse(args, run: false));
+        }
+
+        [TestMethod]
+        public void TestValidVerbValidArgs()
+        {
+            string[] args = new string[] { "registerProject", "--projectFilePath", "path/To/Project/project.s7p" };
+            Parser.Parse(args, run: false);
+        }
+
+        [TestMethod]
+        public void TestVersionFlag()
+        {
+            string[] args = new string[] { "--version" };
+            Parser.Parse(args, run: false);
         }
     }
 }
