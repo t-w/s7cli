@@ -19,33 +19,30 @@ namespace S7Lib
             var log = s7Handle.Log;
             IS7Program programObj;
 
-            try
+            using (var wrapper = new ReleaseWrapper())
             {
-                programObj = projectObj.Programs[program];
-            }
-            catch (Exception exc)
-            {
-                log.Error(exc, $"Could not access program {projectObj.Name}:{program}");
-                throw;
-            }
-
-            foreach (var container in programObj.Next)
-            {
+                var programs = projectObj.Programs;
+                wrapper.Add(() => programs);
                 try
                 {
-                    var containerObj = (S7Container)container;
-                    if (containerObj.ConcreteType == type)
-                    {
-                        return containerObj;
-                    }
+                    programObj = wrapper.Add(() => programs[program]);
+                    //programObj = programs[program];
+                    //wrapper.Add(() => programObj);
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
-                    // TODO Previously did not trigger exception. Is this the correct behaviour?
-                    log.Error(exc, $"Could not access container in {projectObj.Name}:{program}");
-                    throw;
+                    throw new KeyNotFoundException($"Could not access program {projectObj.Name}:{program}", exc);
                 }
-                Marshal.FinalReleaseComObject(container);
+
+                var next = wrapper.Add(() => programObj.Next);
+                foreach (S7Container container in next)
+                {
+                    if (container.ConcreteType == type)
+                    {
+                        return container;
+                    }
+                    wrapper.Add(() => container);
+                }
             }
             throw new KeyNotFoundException($"Could not find container of type {type} in {projectObj.Name}:{program}");
         }
@@ -71,26 +68,20 @@ namespace S7Lib
         /// <returns>S7 Source</returns>
         internal static S7Source GetSource(S7Handle s7Handle, S7Project projectObj, string program, string source)
         {
-            S7Source sourceObj;
-            var container = GetSources(s7Handle, projectObj, program);
-            S7SWItems swItems = null;
-
-            try
+            using (var wrapper = new ReleaseWrapper())
             {
-                swItems = container.Next;
-                sourceObj = (S7Source)swItems[source];
+                var container = wrapper.Add(() => GetSources(s7Handle, projectObj, program));
+                var swItems = wrapper.Add(() => container.Next);
+                try
+                {
+                    var sourceObj = (S7Source)swItems[source];
+                    return sourceObj;
+                }
+                catch (COMException exc)
+                {
+                    throw new KeyNotFoundException($"Could not find source {source} in {program}", exc);
+                }
             }
-            catch (COMException exc)
-            {
-                throw new KeyNotFoundException($"Could not find source {source} in {projectObj.Name}:{program}", exc);
-            }
-            finally
-            {
-                Marshal.FinalReleaseComObject(swItems);
-                Marshal.FinalReleaseComObject(container);
-            }
-
-            return sourceObj;
         }
 
         /// <summary>
@@ -103,26 +94,20 @@ namespace S7Lib
         /// <returns>S7 Block</returns>
         internal static S7Block GetBlock(S7Handle s7Handle, S7Project projectObj, string program, string block)
         {
-            S7Block blockObj;
-            var container = GetBlocks(s7Handle, projectObj, program);
-            S7SWItems swItems = null;
-
-            try
+            using (var wrapper = new ReleaseWrapper())
             {
-                swItems = container.Next;
-                blockObj = (S7Block)swItems[block];
+                var container = wrapper.Add(() => GetBlocks(s7Handle, projectObj, program));
+                var swItems = wrapper.Add(() => container.Next);
+                try
+                {
+                    var blockObj = (S7Block)swItems[block];
+                    return blockObj;
+                }
+                catch (COMException exc)
+                {
+                    throw new KeyNotFoundException($"Could not find block {block} in {program}", exc);
+                }
             }
-            catch (COMException exc)
-            {
-                throw new KeyNotFoundException($"Could not find block {block} in {projectObj.Name}:{program}", exc);
-            }
-            finally
-            {
-                Marshal.FinalReleaseComObject(swItems);
-                Marshal.FinalReleaseComObject(container);
-            }
-
-            return blockObj;
         }
 
         // Helper function to search for a source in a container.
@@ -316,8 +301,7 @@ namespace S7Lib
             }
             finally
             {
-                Marshal.FinalReleaseComObject(projectObj);
-                Marshal.FinalReleaseComObject(source);
+
             }
         }
 
@@ -449,7 +433,7 @@ namespace S7Lib
         /// <param name="block">Target block to copy</param>
         /// <param name="destination">Target container onto which to copy block</param>
         /// <param name="overwrite">Overwrite existing block if present</param>
-        private static void CopyBlock(S7Handle s7Handle,
+        internal static void CopyBlock(S7Handle s7Handle,
             S7Block block, S7Container destination, bool overwrite = true)
         {
             var log = s7Handle.Log;
@@ -500,35 +484,6 @@ namespace S7Lib
             }
 
             log.Debug($"Imported block {blockName} ({blockType}) from library");
-        }
-
-        /// <summary>
-        /// Imports blocks from library into project 
-        /// </summary>
-        /// <param name="libBlocks">Source library container from which to copy block</param>
-        /// <param name="projBlocks">Target project container onto which to copy block</param>
-        /// <param name="overwrite">Overwrite existing source if present</param>
-        public static void ImportLibBlocks(S7Handle s7Handle,
-            S7Container libBlocks, S7Container projBlocks, bool overwrite = true)
-        {
-            var log = s7Handle.Log;
-            foreach (S7Block libBlock in libBlocks.Next)
-            {
-                // Note: "System data" blocks to not have SymbolicName attribute
-                if (libBlock.Name == "System data")
-                {
-                    log.Debug("Cannot copy System data block. Skipping.");
-                    continue;
-                }
-                try
-                {
-                    CopyBlock(s7Handle, libBlock, projBlocks, overwrite);
-                }
-                finally
-                {
-                    Marshal.FinalReleaseComObject(libBlock);
-                }
-            }
         }
     }
 }
