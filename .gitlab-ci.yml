@@ -28,22 +28,22 @@ build_job:
   artifacts:
     paths:
       # Library
-      - '.\S7Lib\bin\x86\Release\'
-      - '.\UnitTestS7Lib\bin\x86\Release\'
+      - '.\S7Lib\bin\Release\'
+      - '.\UnitTestS7Lib\bin\Release\'
       # CLI
-      - '.\S7Cli\bin\x86\Release\'
-      - '.\UnitTestS7Cli\bin\x86\Release\'
+      - '.\S7Cli\bin\Release\'
+      - '.\UnitTestS7Cli\bin\Release\'
       # gRPC C# server
-      - '.\Server\bin\x86\Release\'
+      - '.\Server\bin\Release\'
       # gRPC S7Service stubs
       - '.\Service\Python\'
       # Legacy s7cli
-      - '.\S7Cli_Legacy\bin\x86\Release\'
+      - '.\S7Cli_Legacy\bin\Release\'
 
 test_job:
   stage: test
   script:
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Cli\bin\x86\Release\UnitTestS7Cli.dll'
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Lib\bin\x86\Release\UnitTestS7Lib.dll'
+    - '& "$env:VSTEST_PATH" .\UnitTestS7Cli\bin\Release\UnitTestS7Cli.dll'
+    - '& "$env:VSTEST_PATH" .\UnitTestS7Lib\bin\Release\UnitTestS7Lib.dll'
   dependencies:
     - build_job
