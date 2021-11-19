@@ -67,19 +67,19 @@ namespace S7Lib
                .WriteTo.Console().CreateLogger();
         }
 
-        private bool ProjectExists(string projectName)
+        public bool ProjectExists(string projectName)
         {
             using (var wrapper = new ReleaseWrapper())
             {
                 try
                 {
-                    var projects = wrapper.Add(() => Api.Projects);
-                    var project = wrapper.Add(() => projects[projectName]);
+                    var project = wrapper.Add(() => Api.Projects[projectName]);
                     return true;
                 }
-                catch (Exception exc)
+                catch (COMException)
                 {
-                    Log.Debug($"Project {projectName} not found", exc);
+                    // Project does not exist
+                    // Log.Debug($"Project {projectName} not found", exc);
                 }
                 return false;
             }
@@ -257,18 +257,16 @@ namespace S7Lib
             {
                 try
                 {
-                    var projects = wrapper.Add(() => Api.Projects);
-                    var project = projects.Add(Name: projectName, ProjectRootDir: projectDir, Type: projectType);
+                    wrapper.Add(() => Api.Projects.Add(projectName, projectDir, projectType));
 
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
                     Log.Error(exc, $"Could not create project {projectName} in {projectDir}");
                     throw;
                 }
             }
         }
-
 
         /// <summary>
         /// Create new empty STEP 7 project
@@ -300,13 +298,11 @@ namespace S7Lib
 
             using (var wrapper = new ReleaseWrapper())
             {
-                var projects = wrapper.Add(() => Api.Projects);
                 try
                 {
-                    var project = projects.Add(Name: projectFilePath);
-
+                    wrapper.Add(() => Api.Projects.Add(projectFilePath, "", S7ProjectType.S7Project));
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
                     Log.Error(exc, $"Could not register existing project in {projectFilePath}");
                     throw;
@@ -329,7 +325,7 @@ namespace S7Lib
                 {
                     projectObj.Remove();
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
                     Log.Error(exc, $"Could not remove project {project}");
                     throw;
@@ -519,7 +515,21 @@ namespace S7Lib
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var libraryBlocks = wrapper.Add(() => S7ProgramSource.GetBlocks(this, libraryObj, libProgram));
                 var projectBlocks = wrapper.Add(() => S7ProgramSource.GetBlocks(this, projectObj, projProgram));
-                S7ProgramSource.ImportLibBlocks(this, libBlocks: libraryBlocks, projBlocks: projectBlocks, overwrite);
+
+                var container = wrapper.Add(() => libraryBlocks.Next);
+                foreach (S7Block libBlock in container)
+                {
+                    wrapper.Add(() => libBlock);
+                    // Note: "System data" blocks to not have SymbolicName attribute
+                    if (libBlock.Name == "System data")
+                    {
+                        Log.Debug("Cannot copy System data block. Skipping.");
+                        continue;
+                    }
+                    // TODO Refactor
+                    S7ProgramSource.CopyBlock(this, libBlock, projectBlocks, overwrite);
+                }
+
             }
         }
 
@@ -759,7 +769,7 @@ namespace S7Lib
         /// <param name="output">Dictionary with {projectDir, projectName} key-value pairs</param>
         public Dictionary<string, string> ListProjects()
         {
-            Log.Information($"Listing registered projects");
+            Log.Debug($"Listing registered projects");
 
             var output = new Dictionary<string, string>();
             using (var wrapper = new ReleaseWrapper())
@@ -769,7 +779,7 @@ namespace S7Lib
                 {
                     var projectObj = wrapper.Add(() => project);
                     output.Add(projectObj.LogPath, projectObj.Name);
-                    Log.Information($"Project {projectObj.Name} Path {projectObj.LogPath}");
+                    Log.Debug($"Project {projectObj.Name} Path {projectObj.LogPath}");
                 }
             }
             return output;
@@ -780,7 +790,7 @@ namespace S7Lib
         /// </summary>
         public List<string> ListPrograms(string project)
         {
-            Log.Information($"Listing programs for project {project}");
+            Log.Debug($"Listing programs for project {project}");
 
             var output = new List<string>();
             using (var wrapper = new ReleaseWrapper())
@@ -791,7 +801,7 @@ namespace S7Lib
                 {
                     var programObj = wrapper.Add(() => program);
                     output.Add(programObj.Name);
-                    Log.Information($"Program {programObj.Name}");
+                    Log.Debug($"Program {programObj.Name}");
                 }
             }
             return output;
@@ -802,7 +812,7 @@ namespace S7Lib
         /// </summary>
         public List<string> ListStations(string project)
         {
-            Log.Information($"Listing stations for project {project}");
+            Log.Debug($"Listing stations for project {project}");
 
             var output = new List<string>();
             using (var wrapper = new ReleaseWrapper())
@@ -813,7 +823,7 @@ namespace S7Lib
                 {
                     var stationObj = wrapper.Add(() => station);
                     output.Add(stationObj.Name);
-                    Log.Information($"Station {stationObj.Name}");
+                    Log.Debug($"Station {stationObj.Name}");
                 }
             }
             return output;
