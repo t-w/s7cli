@@ -21,15 +21,32 @@ namespace S7Lib
     /// Convenient wrapper to register accesses to objects in SimaticLib that
     /// allows them to be released with `Marshal.ReleaseComObject()` as soon as
     /// the wrapper is disposed of.
-    /// Skips releasing the top-level Simatic object, mostly so we can avoid
+    /// Enables a simpler logic structure while still clearing resources.
+    /// Otherwise one would have to write several nested try/catch/finally blocks.
+    /// Skips releasing instances of the Simatic class, mostly so we can avoid
     /// releasing it more than once, while keeping a convenient syntax.
-    /// </remarks>
-    /// <example>
+    ///
+    /// ```
     /// using (var wrapper = new ReleaseWrapper())
     /// {
-    ///     var projects = wrapper.Add(() => Simatic.Projects)
+    ///     simatic = new Simatic();
+    ///
+    ///     // Releases the temporary variable simatic.Projects
+    ///     // Does not attempt to release simatic, since it's explicitly ignored for convenience
+    ///     var projects = wrapper.Add(() => simatic.Projects);
+    ///
+    ///     // Releases project variable, but not Projects (or simatic)
+    ///     // This is useful when one wants to only release a resource at a higher abstraction level, e.g.
+    ///     // pass low-level COM object as an argument to function, but only release it outside the function.
+    ///     // Otherwise it could result in a double release.
+    ///     var project = simatic.Projects[0];
+    ///     wrapper.Add(() => project);
+    ///
+    ///     // Releases Projects, Projects[0], Programs and program (= Programs[0])
+    ///     var program = wrapper.Add(() => simatic.Projects[0].Programs[0]);
     /// }
-    /// </example>
+    /// ```
+    /// </remarks>
     class ReleaseWrapper : IDisposable
     {
         readonly List<object> objects = new List<object>();
@@ -42,8 +59,9 @@ namespace S7Lib
         object Walk(Expression expr)
         {
             object obj = WalkImpl(expr);
-            if (obj != null && Marshal.IsComObject(obj) && !objects.Contains(obj))
+            if (obj != null && Marshal.IsComObject(obj) && !objects.Contains(obj) && !(obj is Simatic))
             {
+                //Console.WriteLine($"Registering {Information.TypeName(obj)}");
                 objects.Add(obj);
             }
             return obj;
@@ -51,7 +69,8 @@ namespace S7Lib
 
         object[] Walk(IEnumerable<Expression> args)
         {
-            if (args == null) return null;
+            if (args == null)
+                return null;
             return args.Select(arg => Walk(arg)).ToArray();
         }
 
@@ -101,10 +120,6 @@ namespace S7Lib
         {
             foreach (object obj in objects)
             {
-                // Skip top-level Simatic object since it's released explictly in S7Handle.Dispose()
-                if (obj is Simatic)
-                    continue;
-
                 //Console.WriteLine($"Releasing {Information.TypeName(obj)}");
                 Marshal.ReleaseComObject(obj);
             }
