@@ -141,61 +141,57 @@ namespace S7Lib
         {
             var logPath = $"{project.Name}\\{programPath}";
             S7Program programObj;
-            foreach (IS7Program s7Program in project.Programs)
+
+            using (var wrapper = new ReleaseWrapper())
             {
-                if (s7Program.LogPath == logPath)
+                var programs = project.Programs;
+                wrapper.Add(() => programs);
+                foreach (IS7Program s7Program in programs)
                 {
-                    programObj = (S7Program)s7Program;
-                    Log.Debug($"Found S7Program(Name={s7Program.Name}, LogPath={s7Program.LogPath})");
-                    return programObj;
+                    if (s7Program.LogPath == logPath)
+                    {
+                        programObj = (S7Program)s7Program;
+                        Log.Debug($"Found S7Program(Name={s7Program.Name}, LogPath={s7Program.LogPath})");
+                        return programObj;
+                    }
+                    wrapper.Add(() => s7Program);
                 }
-                Marshal.FinalReleaseComObject(s7Program);
             }
             throw new KeyNotFoundException($"Could not find program in {logPath}");
         }
 
         private IS7Station GetStationImpl(S7Project project, string station)
         {
-            IS7Station stationObj;
-            IS7Stations stations = null;
-
-            try
+            using (var wrapper = new ReleaseWrapper())
             {
-                stations = project.Stations;
-                stationObj = stations[station];
+                try
+                {
+                    var stations = project.Stations;
+                    wrapper.Add(() => stations);
+                    return stations[station];
+                }
+                catch (COMException exc)
+                {
+                    throw new KeyNotFoundException($"Could not find station {station}", exc);
+                }
             }
-            catch (Exception exc)
-            {
-                throw new KeyNotFoundException($"Could not find station {station}", exc);
-            }
-            finally
-            {
-                Marshal.FinalReleaseComObject(stations);
-            }
-
-            return stationObj;
         }
 
         private S7Rack GetRackImpl(IS7Station station, string rack)
         {
-            S7Rack rackObj;
-            S7Racks racks = null;
-
-            try
+            using (var wrapper = new ReleaseWrapper())
             {
-                racks = station.Racks;
-                rackObj = racks[rack];
+                try
+                {
+                    var racks = station.Racks;
+                    wrapper.Add(() => racks);
+                    return racks[rack];
+                }
+                catch (COMException exc)
+                {
+                    throw new KeyNotFoundException($"Could not find rack {rack}", exc);
+                }
             }
-            catch (Exception exc)
-            {
-                throw new KeyNotFoundException($"Could not find rack {rack}", exc);
-            }
-            finally
-            {
-                Marshal.FinalReleaseComObject(racks);
-            }
-
-            return rackObj;
         }
 
         private IS7Module6 GetModuleImpl(S7Modules modules, string modulePath)
@@ -204,27 +200,32 @@ namespace S7Lib
             var childModules = modules;
             IS7Module6 moduleObj = null;
 
-            foreach (var part in split)
+            using (var wrapper = new ReleaseWrapper())
             {
-                try
+                foreach (var part in split)
                 {
-                    foreach (IS7Module6 child in childModules)
+                    try
                     {
-                        if (part == child.Name)
+                        foreach (IS7Module6 child in childModules)
                         {
-                            moduleObj = child;
-                            break;
+                            if (part == child.Name)
+                            {
+                                moduleObj = child;
+                                break;
+                            }
+                            else
+                            {
+                                wrapper.Add(() => child);
+                            }
                         }
-                        else
-                        {
-                            Marshal.FinalReleaseComObject(child);
-                        }
+                        childModules = moduleObj.Modules;
+                        // TODO Debug edge cases
+                        wrapper.Add(() => childModules);
                     }
-                    childModules = moduleObj.Modules;
-                }
-                catch (Exception exc)
-                {
-                    throw new KeyNotFoundException($"Could not find module {modulePath}", exc);
+                    catch (COMException exc)
+                    {
+                        throw new KeyNotFoundException($"Could not find module {modulePath}", exc);
+                    }
                 }
             }
             return moduleObj;
@@ -440,8 +441,7 @@ namespace S7Lib
 
             using (var wrapper = new ReleaseWrapper())
             {
-                var projectObj = wrapper.Add(() => GetProject(project));
-                var sourceObj = wrapper.Add(() => S7ProgramSource.GetSource(this, projectObj, program, source));
+                var sourceObj = wrapper.Add(() => S7ProgramSource.GetSource(this, project, program, source));
                 S7ProgramSource.ExportSource(this, sourceObj, sourcesDir);
             }
         }
@@ -461,10 +461,9 @@ namespace S7Lib
                 var programs = wrapper.Add(() => projectObj.Programs);
                 try
                 {
-                    var program = programs.Add(programName, Type: S7ProgramType.S7);
-                    wrapper.Add(() => program);
+                    wrapper.Add(() => programs.Add(programName, S7ProgramType.S7));
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
                     Log.Error(exc, $"Could not create S7 program {programName} in {project}");
                     throw;
@@ -605,16 +604,16 @@ namespace S7Lib
                 {
                     stationObj = wrapper.Add(() => projectObj.Stations[station]);
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
-                    Log.Error(exc, $"Could not access station {station} in project {project}");
-                    throw;
+                    throw new KeyNotFoundException($"Could not access station {station} in project {project}", exc);
                 }
+
                 try
                 {
                     stationObj.Export(exportFile);
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
                     Log.Error(exc, $"Could not export station {station} to {exportFile}");
                     throw;
@@ -690,8 +689,7 @@ namespace S7Lib
                     module.RouterActive = (bool)value ? 1 : 0;
                     break;
                 default:
-                    Log.Error($"Unknown module property {property}");
-                    break;
+                    throw new ArgumentException($"Unknown module property {property}", nameof(property));
             }
         }
 
