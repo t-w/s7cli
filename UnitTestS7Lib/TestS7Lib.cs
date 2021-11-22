@@ -253,5 +253,21 @@ namespace UnitTestS7Lib
                 api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties);
             };
         }
+
+        [TestMethod]
+        public void TestEditModuleInvalidProperty()
+        {
+            var properties = new Dictionary<string, object>()
+            {
+                {"InvalidProperty", ""},
+                {"RouterActive", true }
+            };
+
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties));
+            };
+        }
     }
 }
