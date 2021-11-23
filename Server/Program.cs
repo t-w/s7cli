@@ -2,535 +2,602 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
-using System.Threading;
-using System.IO;
 
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.ListOfString;
+using Serilog.Events;
 using Grpc.Core;
+using Google.Protobuf;
 
 using S7Service;
 using S7Lib;
+
 
 namespace Step7Server
 {
     class Step7Impl : Step7.Step7Base
     {
-        private string S7CliPath;
-        private bool S7CliVerbose;
-        static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
-        private Logger Log;
+        private readonly Logger Log;
+        private readonly bool S7CliVerbose;
+
+        // TODO Block creation of S7 Handle with semaphore?
+        //static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="s7CliPath">Path to S7Cli.exe</param>
         /// <param name="s7CliVerbose">Whether to call S7Cli with verbose flag</param>
-        public Step7Impl(string s7CliPath, bool s7CliVerbose)
+        public Step7Impl(bool s7CliVerbose)
         {
-            S7CliPath = s7CliPath;
             S7CliVerbose = s7CliVerbose;
-            Log = new LoggerConfiguration()
-                .WriteTo.Console()
-                .CreateLogger();
+            Log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         }
 
-        /// <summary>
-        /// Launches a S7Cli child process and returns its exitCode and log
-        /// </summary>
-        /// <remarks>
-        /// Spawning a separate child process is crucial for performing some S7Api requests,
-        /// as the lower-level Simatic API can lock resources and interfere with subsequent
-        /// function calls.
-        /// This way, affected resources are freed as soon as the child proccess terminates.
-        /// Additionally, only one S7Cli can be spawned at a time.
-        /// This is ensured by a semaphore.
-        /// </remarks>
-        /// <param name="log">Output ordered list of log messages</param>
-        /// <param name="arguments">Command-line arguments for S7CLi proccess</param>
-        /// <param name="timeout">Timeout for acquiring semaphore, in seconds</param>
-        /// <returns></returns>
-        private int LaunchS7Cli(ref List<string> log, List<string> arguments, int timeout = 5*60)
+        private S7Handle CreateS7Handle(ref List<string> log)
         {
-            var exitCode = -1;
-            var argString = CreateArgumentString(arguments);
-
-            try
-            {
-                Semaphore.Wait(millisecondsTimeout: timeout * 1000);
-                Log.Information($"S7Cli.exe {argString}");
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = S7CliPath,
-                    Arguments = argString,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false
-                };
-                var process = Process.Start(processStartInfo);
-                while (!process.StandardOutput.EndOfStream)
-                    log.Add(process.StandardOutput.ReadLine());
-                process.WaitForExit(milliseconds: timeout * 1000);
-                exitCode = process.ExitCode;
-            }
-            catch (Exception exc)
-            {
-                Log.Error(exc, $"Could not run {S7CliPath}");
-            }
-            finally
-            {
-                Semaphore.Release();
-            }
-            return exitCode;
-        }
-
-        /// <summary>
-        /// creates S7Cli command-line arguments
-        /// </summary>
-        /// <remarks>
-        /// Handles the escaping of spaces in arguments, as well as the verbose option
-        /// </remarks>
-        /// <param name="arguments">List of command-line arguments for S7Cli</param>
-        /// <returns></returns>
-        private string CreateArgumentString(List<string> arguments)
-        {
-            string argString = "";
-            if (S7CliVerbose) arguments.Add("-v");
-
-            foreach (var arg in arguments)
-            {
-                // Surround argument in quotes to escape space chars, if present
-                string procArg = arg.Contains(" ")? "\"" + arg + "\"" : arg;
-                argString += $" {procArg}";
-            }
-            return argString;
-        }
-
-        private S7Handle CreateApiContext(ref List<string> log)
-        {
-            var logger = new LoggerConfiguration().WriteTo.StringList(log).CreateLogger();
+            var logLevel = new LoggingLevelSwitch();
+            var logger = new LoggerConfiguration().MinimumLevel.ControlledBy(logLevel).WriteTo.StringList(log).CreateLogger();
+            logLevel.MinimumLevel = S7CliVerbose ? LogEventLevel.Verbose : LogEventLevel.Information;
             var api = new S7Handle(log: logger);
             return api;
         }
 
-        private StatusReply CreateStatusReply(int rv, ref List<string> log)
+        /// <summary>
+        /// Creates a reply message with exit code and logs
+        /// </summary>
+        /// <param name="success">Whether command was successful</param>
+        /// <param name="log">Command logs</param>
+        /// <returns></returns>
+        private StatusReply CreateStatusReply(bool success, List<string> log)
         {
-            var reply = new StatusReply { ExitCode = rv };
+            var reply = new StatusReply { ExitCode = success ? 0 : 1 };
             reply.Log.AddRange(log);
             return reply;
         }
 
-        private ListReply CreateListReply(int rv, ref List<string> log, ref List<string> list)
+        /// <summary>
+        /// Creates a reply message with exit code, logs and the return value of List* commands
+        /// </summary>
+        /// <param name="success">Whether command was successful</param>
+        /// <param name="log">Command logs</param>
+        /// <param name="list">Return value of List* command</param>
+        /// <returns></returns>
+        private ListReply CreateListReply(bool success, List<string> log, List<string> list)
         {
-            var reply = new ListReply { Status = CreateStatusReply(rv, ref log) };
+            var reply = new ListReply { Status = CreateStatusReply(success, log) };
             reply.Items.AddRange(list);
             return reply;
         }
 
         // Server commands
 
-        // List commands
+        private IMessage RunCommand(S7Handle s7Handle, List<string> log, IMessage request)
+        {
+            Log.Debug($"Running command {request}");
 
-        private ListReply ListProjectsImpl(ListProjectsRequest req)
+            switch (request)
+            {
+                case ListProjectsRequest req:
+                    return ListProjectsImpl(s7Handle, log, req);
+                case ListProgramsRequest req:
+                    return ListProgramsImpl(s7Handle, log, req);
+                case ListContainersRequest req:
+                    return ListContainersImpl(s7Handle, log, req);
+                case ListStationsRequest req:
+                    return ListStationsImpl(s7Handle, log, req);
+
+                case CreateProjectRequest req:
+                    return CreateProjectImpl(s7Handle, log, req);
+                case CreateLibraryRequest req:
+                    return CreateLibraryImpl(s7Handle, log, req);
+                case RegisterProjectRequest req:
+                    return RegisterProjectImpl(s7Handle, log, req);
+                case RemoveProjectRequest req:
+                    return RemoveProjectImpl(s7Handle, log, req);
+
+                case ImportSourceRequest req:
+                    return ImportSourceImpl(s7Handle, log, req);
+                case ImportSourcesDirRequest req:
+                    return ImportSourcesDirImpl(s7Handle, log, req);
+                case ImportLibSourcesRequest req:
+                    return ImportLibSourcesImpl(s7Handle, log, req);
+                case ExportSourceRequest req:
+                    return ExportSourceImpl(s7Handle, log, req);
+                case ExportAllSourcesRequest req:
+                    return ExportAllSourcesImpl(s7Handle, log, req);
+
+                case CompileSourceRequest req:
+                    return CompileSourceImpl(s7Handle, log, req);
+                case CompileSourcesRequest req:
+                    return CompileSourcesImpl(s7Handle, log, req);
+                case ImportLibBlocksRequest req:
+                    return ImportLibBlocksImpl(s7Handle, log, req);
+                case ImportSymbolsRequest req:
+                    return ImportSymbolsImpl(s7Handle, log, req);
+                case ExportSymbolsRequest req:
+                    return ExportSymbolsImpl(s7Handle, log, req);
+                case CompileAllStationsRequest req:
+                    return CompileAllStationsImpl(s7Handle, log, req);
+
+                case EditModuleRequest req:
+                    return EditModuleImpl(s7Handle, log, req);
+
+                case StartProgramRequest req:
+                    return StartProgramImpl(s7Handle, log, req);
+                case StopProgramRequest req:
+                    return StopProgramImpl(s7Handle, log, req);
+                case DownloadProgramBlocksRequest req:
+                    return DownloadProgramBlocksImpl(s7Handle, log, req);
+
+                default:
+                    Log.Error($"Unsupported request {request}");
+                    return CreateStatusReply(false, log);
+                    //throw new ArgumentException($"Unsupported request {request}", nameof(request));
+            }
+        }
+
+        private List<IMessage> CompleteRequests(List<IMessage> requests)
         {
             var log = new List<string>();
-            Dictionary<string, string> output = null;
-            int rv = 0;
-            using (var api = CreateApiContext(ref log))
+            var replies = new List<IMessage>();
+
+            using (var handle = CreateS7Handle(ref log))
             {
-                try
+                foreach (var request in requests)
                 {
-                    output = api.ListProjects();
+                    replies.Add(RunCommand(handle, log, request));
                 }
-                catch (Exception)
-                {
-                    rv = 1;
-                }
+                // Clear logs in between commands
+                // TODO Flush logs?
+                log.Clear();
             }
-            var projectList = new List<string>(output.Values);
-            return CreateListReply(rv, ref log, ref projectList);
+
+            return replies;
+        }
+
+        private ListReply RunListCommandHelper(IMessage req)
+        {
+            var requests = new List<IMessage>() { req };
+            var replies = CompleteRequests(requests);
+            // TODO Check if replies[0] has the correct data type?
+            return (ListReply)replies[0];
+        }
+
+        private StatusReply RunCommandHelper(IMessage req)
+        {
+            var requests = new List<IMessage>() { req };
+            var replies = CompleteRequests(requests);
+            // TODO Check if replies[0] has the correct data type?
+            return (StatusReply)replies[0];
+        }
+
+        #region Server Commands
+
+        #region List Commands
+
+        private ListReply ListProjectsImpl(S7Handle s7Handle, List<string> log, ListProjectsRequest req)
+        {
+            bool success = true;
+            List<string> projectList = null;
+            try { projectList = new List<string>(s7Handle.ListProjects().Values); }
+            catch { success = false; }
+            return CreateListReply(success, log, projectList);
         }
 
         public override Task<ListReply> ListProjects(ListProjectsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ListProjectsImpl(req));
+            return Task.FromResult(RunListCommandHelper(req));
         }
 
-        private ListReply ListProgramsImpl(ListProgramsRequest req)
+        private ListReply ListProgramsImpl(S7Handle s7Handle, List<string> log, ListProgramsRequest req)
         {
-
-            var log = new List<string>();
-            List<string> output = null;
-            int rv = 0;
-            using (var api = CreateApiContext(ref log))
-            {
-                try
-                {
-                    output = api.ListPrograms(req.Project);
-                }
-                catch (Exception)
-                {
-                    rv = 1;
-                }
-            }
-            return CreateListReply(rv, ref log, ref output);
+            bool success = true;
+            List<string> programList = null;
+            try { programList = s7Handle.ListPrograms(project: req.Project); }
+            catch { success = false; }
+            return CreateListReply(success, log, programList);
         }
 
         public override Task<ListReply> ListPrograms(ListProgramsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ListProgramsImpl(req));
+            return Task.FromResult(RunListCommandHelper(req));
         }
 
-        private ListReply ListContainersImpl(ListContainersRequest req)
+        private ListReply ListContainersImpl(S7Handle s7Handle, List<string> log, ListContainersRequest req)
         {
-            var log = new List<string>();
-            List<string> output = null;
-            int rv = 0;
-            using (var api = CreateApiContext(ref log))
-            {
-                try
-                {
-                    output = api.ListContainers(req.Project);
-                }
-                catch (Exception)
-                {
-                    rv = 1;
-                }
-            }
-            return CreateListReply(rv, ref log, ref output);
+            bool success = true;
+            List<string> programList = null;
+            try { programList = s7Handle.ListContainers(project: req.Project); }
+            catch { success = false; }
+            return CreateListReply(success, log, programList);
         }
 
         public override Task<ListReply> ListContainers(ListContainersRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ListContainersImpl(req));
+            return Task.FromResult(RunListCommandHelper(req));
         }
 
-        private ListReply ListStationsImpl(ListStationsRequest req)
+        private ListReply ListStationsImpl(S7Handle s7Handle, List<string> log, ListStationsRequest req)
         {
-            var log = new List<string>();
-            List<string> output = null;
-            int rv = 0;
-            using (var api = CreateApiContext(ref log))
-            {
-                try
-                {
-                    output = api.ListStations(req.Project);
-                }
-                catch (Exception)
-                {
-                    rv = 1;
-                }
-            }
-            return CreateListReply(rv, ref log, ref output);
+            bool success = true;
+            List<string> programList = null;
+            try { programList = s7Handle.ListStations(project: req.Project); }
+            catch { success = false; }
+            return CreateListReply(success, log, programList);
         }
 
         public override Task<ListReply> ListStations(ListStationsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ListStationsImpl(req));
+            return Task.FromResult(RunListCommandHelper(req));
         }
 
-        // Project commands
+        #endregion
 
-        private StatusReply CreateProjectImpl(CreateProjectRequest req)
+        #region Project Commands
+
+        private StatusReply CreateProjectImpl(S7Handle s7Handle, List<string> log, CreateProjectRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "createProject",
-                "--name", req.ProjectName, "--dir", req.ProjectDir };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try { s7Handle.CreateProject(req.ProjectName, req.ProjectDir); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> CreateProject(CreateProjectRequest req, ServerCallContext context)
         {
-            return Task.FromResult(CreateProjectImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply CreateLibraryImpl(CreateLibraryRequest req)
+        private StatusReply CreateLibraryImpl(S7Handle s7Handle, List<string> log, CreateLibraryRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "createLibrary",
-                "--name", req.ProjectName, "--dir", req.ProjectDir };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try { s7Handle.CreateLibrary(projectName: req.ProjectName, projectDir: req.ProjectDir); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> CreateLibrary(CreateLibraryRequest req, ServerCallContext context)
         {
-            return Task.FromResult(CreateLibraryImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply RegisterProjectImpl(RegisterProjectRequest req)
+        private StatusReply RegisterProjectImpl(S7Handle s7Handle, List<string> log, RegisterProjectRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "registerProject",
-                "--projectFilePath", req.ProjectFilePath };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try { s7Handle.RegisterProject(projectFilePath: req.ProjectFilePath); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> RegisterProject(RegisterProjectRequest req, ServerCallContext context)
         {
-            return Task.FromResult(RegisterProjectImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply RemoveProjectImpl(RemoveProjectRequest req)
+        private StatusReply RemoveProjectImpl(S7Handle s7Handle, List<string> log, RemoveProjectRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "removeProject",
-                "--force", "--project", req.Project };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try { s7Handle.RemoveProject(project: req.Project); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> RemoveProject(RemoveProjectRequest req, ServerCallContext context)
         {
-            return Task.FromResult(RemoveProjectImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        // Source commands
+        #endregion
 
-        private StatusReply ImportSourceImpl(ImportSourceRequest req)
+        #region Import/Export Commands
+
+        private StatusReply ImportSourceImpl(S7Handle s7Handle, List<string> log, ImportSourceRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "importSource",
-                "--project", req.Project, "--program", req.Program, "--source", req.Source };
-            if (req.Overwrite) arguments.Add("--overwrite");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ImportSource(project: req.Project, program: req.Program, source: req.Source,
+                                      overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ImportSource(ImportSourceRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ImportSourceImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ImportSourcesDirImpl(ImportSourcesDirRequest req)
+        private StatusReply ImportSourcesDirImpl(S7Handle s7Handle, List<string> log, ImportSourcesDirRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "importSourcesDir",
-                "--project", req.Project, "--program", req.Program, "--sourcesDir", req.SourcesDir };
-            if (req.Overwrite) arguments.Add("--overwrite");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ImportSourcesDir(project: req.Project, program: req.Program, sourcesDir: req.SourcesDir,
+                                          overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ImportSourcesDir(ImportSourcesDirRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ImportSourcesDirImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ExportAllSourcesImpl(ExportAllSourcesRequest req)
+        private StatusReply ExportSourceImpl(S7Handle s7Handle, List<string> log, ExportSourceRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "exportAllSources",
-                "--project", req.Project, "--program", req.Program, "--sourcesDir", req.SourcesDir };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ExportSource(project: req.Project, program: req.Program, source: req.Source,
+                                      sourcesDir: req.SourcesDir);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
+        }
+
+        public override Task<StatusReply> ExportSource(ExportSourceRequest req, ServerCallContext context)
+        {
+            return Task.FromResult(RunCommandHelper(req));
+        }
+
+        private StatusReply ExportAllSourcesImpl(S7Handle s7Handle, List<string> log, ExportAllSourcesRequest req)
+        {
+            bool success = true;
+            try { s7Handle.ExportAllSources(project: req.Project, program: req.Program, sourcesDir: req.SourcesDir); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ExportAllSources(ExportAllSourcesRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ExportAllSourcesImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ImportLibSourcesImpl(ImportLibSourcesRequest req)
+        private StatusReply ImportLibSourcesImpl(S7Handle s7Handle, List<string> log, ImportLibSourcesRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "importLibSources",
-                "--project", req.Project, "--library", req.Library, "--projProgram", req.ProjProgram, "--libProgram", req.LibProgram };
-            if (req.Overwrite) arguments.Add("--overwrite");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ImportLibSources(library: req.Library, libProgram: req.LibProgram, project: req.Project,
+                                          projProgram: req.ProjProgram, overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ImportLibSources(ImportLibSourcesRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ImportLibSourcesImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ImportLibBlocksImpl(ImportLibBlocksRequest req)
+        private StatusReply ImportLibBlocksImpl(S7Handle s7Handle, List<string> log, ImportLibBlocksRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "importLibBlocks",
-                "--project", req.Project, "--library", req.Library, "--projProgram", req.ProjProgram, "--libProgram", req.LibProgram };
-            if (req.Overwrite) arguments.Add("--overwrite");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ImportLibBlocks(library: req.Library, libProgram: req.LibProgram, project: req.Project,
+                                         projProgram: req.ProjProgram, overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ImportLibBlocks(ImportLibBlocksRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ImportLibBlocksImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ImportSymbolsImpl(ImportSymbolsRequest req)
+        // TODO - Refactor? perhaps it makes no sense to encode/decode enum to 2 flags
+        private void GetSymbolImportFlag(ImportSymbolsRequest.Types.SymbolImportFlag flag,
+                                         out bool overwrite, out bool nameLeading)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "importSymbols",
-                "--project", req.Project, "--programPath", req.ProgramPath, "--symbolFile", req.SymbolFile, "--flag", $"{(int)req.Flag}" };
-            if (req.AllowConflicts) arguments.Add("--allowConflicts");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            switch (flag)
+            {
+                case (ImportSymbolsRequest.Types.SymbolImportFlag.Insert):
+                    overwrite = false; nameLeading = false; break;
+                case (ImportSymbolsRequest.Types.SymbolImportFlag.OverwriteAddress):
+                    overwrite = true; nameLeading = true; break;
+                case (ImportSymbolsRequest.Types.SymbolImportFlag.OverwriteName):
+                    overwrite = true; nameLeading = false; break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(flag));
+            }
+        }
+
+        private StatusReply ImportSymbolsImpl(S7Handle s7Handle, List<string> log, ImportSymbolsRequest req)
+        {
+            bool success = true;
+            try
+            {
+                GetSymbolImportFlag(req.Flag, out bool overwrite, out bool nameLeading);
+                s7Handle.ImportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
+                                       overwrite: overwrite, nameLeading: nameLeading, allowConflicts: req.AllowConflicts);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ImportSymbols(ImportSymbolsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ImportSymbolsImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply ExportSymbolsImpl(ExportSymbolsRequest req)
+        private StatusReply ExportSymbolsImpl(S7Handle s7Handle, List<string> log, ExportSymbolsRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "exportSymbols",
-                "--project", req.Project, "--programPath", req.ProgramPath, "--symbolFile", req.SymbolFile };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.ExportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
+                                       overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> ExportSymbols(ExportSymbolsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(ExportSymbolsImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply CompileSourceImpl(CompileSourceRequest req)
+        #endregion
+
+        #region Build Commands
+
+        private StatusReply CompileSourceImpl(S7Handle s7Handle, List<string> log, CompileSourceRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "compileSource",
-                "--project", req.Project, "--program", req.Program, "--source", req.Source };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.CompileSource(project: req.Project, program: req.Program, sourceName: req.Source);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> CompileSource(CompileSourceRequest req, ServerCallContext context)
         {
-            return Task.FromResult(CompileSourceImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply CompileSourcesImpl(CompileSourcesRequest req)
+        private StatusReply CompileSourcesImpl(S7Handle s7Handle, List<string> log, CompileSourcesRequest req)
         {
-            var log = new List<string>();
-            var sources = new List<string>(req.Sources);
-            var arguments = new List<string> { "compileSources",
-                "--project", req.Project, "--program", req.Program, "--sources", string.Join(",", sources) };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.CompileSources(project: req.Project, program: req.Program,
+                                        sources: new List<string>(req.Sources));
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> CompileSources(CompileSourcesRequest req, ServerCallContext context)
         {
-            return Task.FromResult(CompileSourcesImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply CompileAllStationsImpl(CompileAllStationsRequest req)
+        private StatusReply CompileAllStationsImpl(S7Handle s7Handle, List<string> log, CompileAllStationsRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "compileAllStations", "--project", req.Project };
-            if (req.AllowFail) arguments.Add("--allowFail");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try { s7Handle.CompileAllStations(project: req.Project, allowFail: req.AllowFail); }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> CompileAllStations(CompileAllStationsRequest req, ServerCallContext context)
         {
-            return Task.FromResult(CompileAllStationsImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        /// <summary>
-        /// Parses EditModuleRequest into list of S7Cli command-line arguments
-        /// </summary>
-        /// <param name="req">Request message</param>
-        /// <param name="arguments">Output command-line arguments for S7Cli</param>
-        /// <param name="log">List of log messages</param>
-        private void ParseModuleProperties(EditModuleRequest req, ref List<string> arguments, ref List<string> log)
+        #endregion
+
+        #region Other Commands
+
+        // Produces module properties dictionary from Dictionary<string, string>
+        private Dictionary<string, object> ParseModuleProperties(Dictionary<string, string> input)
         {
-            foreach (var entry in req.Poperties)
+            var output = new Dictionary<string, object>();
+            var stringFields = new List<string>() { "IPAddress", "SubnetMask", "RouterAddress", "MACAddress" };
+            var booleanFields = new List<string>() { "IPActive", "RouterActive" };
+
+            foreach (var stringField in stringFields)
+                if (input.ContainsKey(stringField))
+                    output.Add(stringField, input[stringField]);
+
+            foreach (var booleanField in booleanFields)
+                if (input.ContainsKey(booleanField))
+                    output.Add(booleanField, bool.Parse(booleanField));
+
+            return output;
+        }
+
+        private StatusReply EditModuleImpl(S7Handle s7Handle, List<string> log, EditModuleRequest req)
+        {
+            bool success = true;
+            try
             {
-                if (entry.Key == "IPAddress")
-                    arguments.Add("--ipAddress");
-                else if (entry.Key == "SubnetMask")
-                    arguments.Add("--subnetMask");
-                else if (entry.Key == "RouterAddress")
-                    arguments.Add("--routerAddress");
-                else if (entry.Key == "MACAddress")
-                    arguments.Add("--macAddress");
-                else if (entry.Key == "IpActive")
-                    arguments.Add("--ipActive");
-                else if (entry.Key == "RouterActive")
-                    arguments.Add("--routerActive");
-                else
-                {
-                    log.Add($"[WRN] Could not parse module property {entry.Key}={entry.Value}");
-                    continue; 
-                }
-                arguments.Add(entry.Value.ToString());
+                var moduleProperties = ParseModuleProperties(new Dictionary<string, string>(req.Properties));
+                s7Handle.EditModule(project: req.Project, station: req.Station, rack: req.Station,
+                                    modulePath: req.Module, properties: moduleProperties);
             }
-        }
-
-        private StatusReply EditModuleImpl(EditModuleRequest req)
-        {
-            var log = new List<string>();
-            var arguments = new List<string> { "editModule", "--project", req.Project };
-            ParseModuleProperties(req, ref arguments, ref log);
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> EditModule(EditModuleRequest req, ServerCallContext context)
         {
-            return Task.FromResult(EditModuleImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        // Online commands
+        #endregion
 
-        private StatusReply StartProgramImpl(ProgramRequest req)
+        #region Online Commands
+
+        // TODO - Implement some protection? Maybe using context object?
+
+        private StatusReply StartProgramImpl(S7Handle s7Handle, List<string> log, StartProgramRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "startProgram",
-                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.StartProgram(project: req.Project, station: req.Station,
+                                      module: req.Module, program: req.Program);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
-        public override Task<StatusReply> StartProgram(ProgramRequest req, ServerCallContext context)
+        public override Task<StatusReply> StartProgram(StartProgramRequest req, ServerCallContext context)
         {
-            return Task.FromResult(StartProgramImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply StopProgramImpl(ProgramRequest req)
+        private StatusReply StopProgramImpl(S7Handle s7Handle, List<string> log, StopProgramRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "stopProgram",
-                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.StopProgram(project: req.Project, station: req.Station,
+                                     module: req.Module, program: req.Program);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
-        public override Task<StatusReply> StopProgram(ProgramRequest req, ServerCallContext context)
+        public override Task<StatusReply> StopProgram(StopProgramRequest req, ServerCallContext context)
         {
-            return Task.FromResult(StopProgramImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
 
-        private StatusReply DownloadProgramBlocksImpl(DownloadProgramBlocksRequest req)
+        private StatusReply DownloadProgramBlocksImpl(S7Handle s7Handle, List<string> log, DownloadProgramBlocksRequest req)
         {
-            var log = new List<string>();
-            var arguments = new List<string> { "downloadProgramBlocks",
-                "--force", "--project", req.Project, "--station", req.Station, "--module", req.Module, "--program", req.Program };
-            if (req.Overwrite) arguments.Add("--overwrite");
-            var rv = LaunchS7Cli(ref log, arguments);
-            return CreateStatusReply(rv, ref log);
+            bool success = true;
+            try
+            {
+                s7Handle.DownloadProgramBlocks(project: req.Project, station: req.Station, module: req.Module,
+                                               program: req.Program, overwrite: req.Overwrite);
+            }
+            catch { success = false; }
+            return CreateStatusReply(success, log);
         }
 
         public override Task<StatusReply> DownloadProgramBlocks(DownloadProgramBlocksRequest req, ServerCallContext context)
         {
-            return Task.FromResult(DownloadProgramBlocksImpl(req));
+            return Task.FromResult(RunCommandHelper(req));
         }
+
+        #endregion
+
+        #endregion
     }
 
     class Program
     {
         static int ServerPort;
-        static string S7CliPath;
         static bool S7CliVerbose;
 
         /// <summary>
@@ -539,41 +606,24 @@ namespace Step7Server
         /// <returns>0 on success, 1 otherwise</returns>
         public static int ReadAppConfig()
         {
-            var serverPort = ConfigurationManager.AppSettings["ServerPort"];
-            S7CliPath = ConfigurationManager.AppSettings["S7CliPath"];
-            var s7CliVerbose = ConfigurationManager.AppSettings["S7CliVerbose"];
-            if (serverPort == null || S7CliPath == null || s7CliVerbose == null)
-            {
-                Console.WriteLine("[ERR] Invalid Server.config:\nMissing keys.");
-                return 1;
-            }
-            if (!File.Exists(S7CliPath))
-            {
-                Console.WriteLine("[ERR] Invalid Server.config:\n" +
-                    $"Could not find path to S7Cli.exe {S7CliPath}");
-                return 1;
-            }
-
             try
             {
-                Program.ServerPort = int.Parse(serverPort);
-                S7CliVerbose = bool.Parse(s7CliVerbose);
+                ServerPort = int.Parse(ConfigurationManager.AppSettings["ServerPort"]);
+                S7CliVerbose = bool.Parse(ConfigurationManager.AppSettings["S7CliVerbose"]);
             }
             catch (Exception exc)
             {
-                Console.WriteLine($"[ERR] Invalid Server.config:\n{exc}");
-                return 1;
+                throw new Exception("Invalid Server.exe.config file: expected ServerPort (int) and S7CliVerbose (bool).", exc);
             }
             return 0;
         }
 
         public static void Main()
         {
-            if (ReadAppConfig() != 0) return;
-
+            ReadAppConfig();
             Server server = new Server
             {
-                Services = { Step7.BindService(new Step7Impl(S7CliPath, S7CliVerbose)) },
+                Services = { Step7.BindService(new Step7Impl(S7CliVerbose)) },
                 Ports = { new ServerPort("localhost", ServerPort, ServerCredentials.Insecure) }
             };
             server.Start();
