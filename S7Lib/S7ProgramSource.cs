@@ -266,7 +266,6 @@ namespace S7Lib
             using (var wrapper = new ReleaseWrapper())
             {
                 var source = wrapper.Add(() => GetSource(s7Handle, project, program, sourceName));
-                Console.WriteLine($"Obtained source {source.Name}");
                 var sourceType = source.ConcreteType;
 
                 if (sourceType == S7SourceType.S7SCL || sourceType == S7SourceType.S7SCLMake)
