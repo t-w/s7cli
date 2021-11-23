@@ -1,35 +1,16 @@
-﻿/************************************************************************
- * S7CompilerSCL.cs - S7 Compiler SCL class                             *
- *                                                                      *
- * Copyright (C) 2013-2019 CERN                                         *
- *                                                                      *
- * This program is free software: you can redistribute it and/or modify *
- * it under the terms of the GNU General Public License as published by *
- * the Free Software Foundation, either version 3 of the License, or    *
- * (at your option) any later version.                                  *
- *                                                                      *
- * This program is distributed in the hope that it will be useful,      *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
- * GNU General Public License for more details.                         *
- *                                                                      *
- * You should have received a copy of the GNU General Public License    *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.*
- ************************************************************************/
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 
+using Serilog;
 
 namespace S7Lib
 {
-    //////////////////////////////////////////////////////////////////////////
-    /// class S7CompilerSCL
     /// <summary>
     /// A class for interacting with an opened SCL compiler and accessing
     /// the compilation status.
     /// </summary>
+    // TODO Cleanup
     public class S7CompilerSCL
     {
         // the SCL compiler system data
@@ -41,22 +22,20 @@ namespace S7Lib
         // compiler status buffer
         List<string> statusBuffer;
 
-        public Serilog.Core.Logger Log;
+        public ILogger Log;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        ///
-        public S7CompilerSCL(S7Handle s7Handle)
+        public S7CompilerSCL(ILogger log)
         {
             nullptr = new IntPtr(0);
-            Log = s7Handle.Log;
-            var log = Log;
+            Log = log;
 
             handle = WindowsAPI.FindWindow( "AfxMDIFrame42", null );
             if (handle.Equals(null))
             {
-                log.Error("The SCL compiler window not found.");
+                Log.Error("The SCL compiler window not found.");
                 return;
             }
 
@@ -66,7 +45,7 @@ namespace S7Lib
             hProc = WindowsAPI.OpenProcess( WindowsAPI.PROCESS_WM_READ, false, (int) pid );
             if ( hProc == null )
             {
-                log.Error( "OpenProcess() accessing the SCL compiler failed.");
+                Log.Error( "OpenProcess() accessing the SCL compiler failed.");
             }
 
             statusBuffer = new List<string>();
@@ -102,10 +81,8 @@ namespace S7Lib
         /// <summary>
         /// Reads the compilation status buffer from the SCL compiler process
         /// </summary>
-        void readSclStatusBuffer()
+        void ReadSclStatusBuffer()
         {
-            var log = Log;
-
             IntPtr listbox = getSclStatusListBox();
             int itemCount = WindowsAPI.SendMessage(listbox, WindowsAPI.LB_GETCOUNT, nullptr, nullptr);
             byte[] bufferLine = new byte[128];
@@ -167,7 +144,7 @@ namespace S7Lib
 		        }
 		        else
 		        {
-			        log.Error ( "Error getting: " + i + "\n");
+			        Log.Error ( "Error getting: " + i + "\n");
 		        }
 	        }
         }
@@ -176,10 +153,10 @@ namespace S7Lib
         /// <summary>
         /// Returns the summary line of compilation from the status buffer
         /// </summary>
-        public string getSclStatusBuffer()
+        public string GetSclStatusBuffer()
         {
             if ( statusBuffer.Count < 1 )
-                readSclStatusBuffer();
+                ReadSclStatusBuffer();
             
             string buffer = "";
             for (int i = 0; i < statusBuffer.Count; i++)
@@ -192,10 +169,10 @@ namespace S7Lib
         /// <summary>
         /// Returns the summary line of compilation from the status buffer
         /// </summary>
-        public string getSclStatusLine()
+        public string GetSclStatusLine()
         {
             if (statusBuffer.Count < 1)
-                readSclStatusBuffer();
+                ReadSclStatusBuffer();
             return statusBuffer[ statusBuffer.Count - 1 ];
         }
 
@@ -203,9 +180,9 @@ namespace S7Lib
         /// <summary>
         /// Returns the number of errors (from the summary in the status buffer)
         /// </summary>
-        public int getErrorCount()
+        public int GetErrorCount()
         {
-            string [] statusLine = getSclStatusLine().Split(' ');
+            string [] statusLine = GetSclStatusLine().Split(' ');
             return Int32.Parse(statusLine[1]);
         }
 
@@ -213,9 +190,9 @@ namespace S7Lib
         /// <summary>
         /// Returns the number of warnings (from the summary in the status buffer)
         /// </summary>
-        public int getWarningCount()
+        public int GetWarningCount()
         {
-            string[] statusLine = getSclStatusLine().Split(' ');
+            string[] statusLine = GetSclStatusLine().Split(' ');
             return Int32.Parse(statusLine[3]);
         }
 
@@ -223,7 +200,7 @@ namespace S7Lib
         /// <summary>
         /// Closes the SCL compiler application / window
         /// </summary>
-        public void closeSclWindow()
+        public void CloseSclWindow()
         {
             WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
 
