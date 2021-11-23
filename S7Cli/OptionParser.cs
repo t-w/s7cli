@@ -162,7 +162,8 @@ namespace S7Cli
                     break;
                 case ImportSymbolsOptions opt:
                     Api.ImportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile,
-                                      flag: opt.Flag, allowConflicts: opt.AllowConflicts);
+                                      overwrite: opt.Overwrite, nameLeading: opt.NameLeading,
+                                      allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
                     Api.ExportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile);

@@ -532,6 +532,20 @@ namespace S7Lib
             }
         }
 
+        // - 0, S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities.
+        // - 1, S7SymImportOverwriteNameLeading - existing values with the same name are replaced.
+        // - 2, S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
+        //  Symbol names are adjusted to the specifications in the import file.
+        private static S7SymImportFlags GetSymImportFlags(bool overwrite = false, bool nameLeading = false)
+        {
+            if (!overwrite)
+                return S7SymImportFlags.S7SymImportInsert;
+            else if (nameLeading)
+                return S7SymImportFlags.S7SymImportOverwriteNameLeading;
+            else
+                return S7SymImportFlags.S7SymImportOverwriteOperandLeading;
+        }
+
         /// <summary>
         /// Imports symbols into a program from a file
         /// </summary>
@@ -540,18 +554,17 @@ namespace S7Lib
         /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
-        /// <param name="flag">Symbol import flag (S7SymImportFlags)
-        ///     - 0, S7SymImportInsert - Symbols are imported even if present, which may lead to ambiguities
-        ///     - 1, S7SymImportOverwriteNameLeading - existing values with the same name are replaced. 
-        ///         The addresses are adjusted according to the specifications in the import file.
-        ///     - 2, S7SymImportOverwriteOperandLeading - existing values with identical addresses are replaced.
-        ///         Symbol names are adjusted to the specifications in the import file.
+        /// <param name="overwrite">Whether to overwrite symbols if present</param>
+        /// <param name="nameLeading">
+        /// When overwrite is selected, defines whether symbol names or addresses are replaced as follows:
+        /// - false: entries with the same symbol address are replaced. Symbol names are adjusted to the specifications in the import file.
+        /// - true: entries with the same symbol name are replaced. The addresses are adjusted according to the specifications in the import file.
         /// </param>
         /// <param name="allowConflicts">If false, an exception is raised if a conflict is detected</param>
-        public void ImportSymbols(string project, string programPath, string symbolFile, int flag = 0, bool allowConflicts = false)
+        public void ImportSymbols(string project, string programPath, string symbolFile, bool overwrite = false, bool nameLeading = false, bool allowConflicts = false)
         {
-            // TODO: Check if symbol table file exists?
-            S7Symbols.ImportSymbols(this, project, programPath, symbolFile, flag, allowConflicts);
+            var flags = GetSymImportFlags(overwrite, nameLeading);
+            S7Symbols.ImportSymbols(this, project, programPath, symbolFile, flags, allowConflicts);
         }
 
         /// <summary>
@@ -817,9 +830,9 @@ namespace S7Lib
             {
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var stations = wrapper.Add(() => projectObj.Stations);
-                foreach (S7Station station in stations)
+                foreach (var station in stations)
                 {
-                    var stationObj = wrapper.Add(() => station);
+                    var stationObj = (IS7Station6)wrapper.Add(() => station);
                     output.Add(stationObj.Name);
                     Log.Debug($"Station {stationObj.Name}");
                 }

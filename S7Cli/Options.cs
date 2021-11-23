@@ -165,14 +165,14 @@ namespace S7Cli
         [Option("symbolFile", Required = true,
             HelpText = "Path to input symbol table file (.sdf, .asc, .dif, .seq)")]
         public string SymbolFile { get; set; }
+        [Option("overwrite", HelpText = "Whether to overwrite symbols if present")]
+        public bool Overwrite { get; set; }
+        [Option("nameLeading", HelpText = "When overwrite is selected, defines whether symbol names or addresses are replaced as follows:" +
+            " False: entries with the same symbol address are replaced. Symbol names are adjusted to the specifications in the import file." +
+            " True: entries with the same symbol name are replaced. The addresses are adjusted according to the specifications in the import file.")]
+        public bool NameLeading { get; set; }
         [Option("allowConflicts", HelpText = "Succeed even if conflits are detected")]
         public bool AllowConflicts { get; set; }
-        [Option("flag", Default = 0,
-            HelpText = "Symbol import flag {0,1,2}:\n" +
-                       " 0 Symbols are imported even if present; may lead to ambiguities.\n" +
-                       " 1 Replace conflicting symbol names with new addresses.\n" +
-                       " 2 Replace conflicting addresses with new symbol names.")]
-        public int Flag { get; set; }
     }
 
     [Verb("exportSymbols", HelpText = "Export program symbols to a file.")]
