@@ -224,8 +224,7 @@ namespace S7_cli
         {
             WindowsAPI.SendMessage(handle, WindowsAPI.WM_CLOSE, new IntPtr(0), new IntPtr(0));
 
-            // wait until the SCL compiler process dissappears
-            Process[] processes;
+            // wait until the SCL compiler process disappears
             while ( Array.Exists< Process >( Process.GetProcesses(),
                                              s => s.Id == pid ) )
             {

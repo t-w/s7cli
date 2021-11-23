@@ -13,7 +13,8 @@ namespace UnitTestS7Lib
     public class TestS7Lib
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
-        static readonly string SourcesDir = Path.GetFullPath(@"..\..\..\resources\sources\");
+        static readonly string ResourcesDir = Path.GetFullPath(@"..\..\resources\");
+        static readonly string SourcesDir = Path.Combine(ResourcesDir, @"sources\");
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
@@ -39,8 +40,15 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                //api.RemoveProject("testProj");
-                api.RemoveProject("testLib");
+                try
+                {
+                    api.RemoveProject("testProj");
+                    api.RemoveProject("testLib");
+                }
+                catch (Exception exc)
+                {
+                    Console.WriteLine(exc);
+                }
             }
         }
 
@@ -49,8 +57,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new Dictionary<string, string>();
-                api.ListProjects(ref output);
+                var projectDict = api.ListProjects();
             }
         }
 
@@ -59,8 +66,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListPrograms(ref output, "AWP_Demo07");
+                var programList = api.ListPrograms("AWP_Demo07");
             }
         }
 
@@ -69,8 +75,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListContainers(ref output, "AWP_Demo07");
+                var containerList = api.ListContainers("AWP_Demo07");
             }
         }
 
@@ -79,8 +84,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var output = new List<string>();
-                api.ListStations(ref output, "AWP_Demo07");
+                var stationList = api.ListStations("AWP_Demo07");
             }
         }
 
@@ -109,8 +113,7 @@ namespace UnitTestS7Lib
         {
             using (var api = new S7Handle())
             {
-                var projects = new Dictionary<string, string>() { };
-                api.ListProjects(ref projects);
+                var projects = api.ListProjects();
                 Assert.IsTrue(projects.ContainsValue("testProj"));
 
                 Assert.ThrowsException<ArgumentException>(
@@ -248,6 +251,22 @@ namespace UnitTestS7Lib
             using (var api = new S7Handle())
             {
                 api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties);
+            };
+        }
+
+        [TestMethod]
+        public void TestEditModuleInvalidProperty()
+        {
+            var properties = new Dictionary<string, object>()
+            {
+                {"InvalidProperty", ""},
+                {"RouterActive", true }
+            };
+
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties));
             };
         }
     }

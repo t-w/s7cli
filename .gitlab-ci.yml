@@ -1,8 +1,8 @@
 variables:
   NUGET_PATH: 'C:\Tools\Nuget\nuget.exe'
-  MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
+  MSBUILD_PATH: 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe'
   PYTHON_VENV_PATH: 'C:\Tools\venv\Scripts\activate.ps1'
-  VSTEST_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
+  VSTEST_PATH: 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\TestPlatform\vstest.console.exe'
 
 stages:
   - build
@@ -28,22 +28,22 @@ build_job:
   artifacts:
     paths:
       # Library
-      - '.\S7Lib\bin\x86\Release\'
-      - '.\UnitTestS7Lib\bin\x86\Release\'
+      - '.\S7Lib\bin\Release\'
+      - '.\UnitTestS7Lib\bin\Release\'
       # CLI
-      - '.\S7Cli\bin\x86\Release\'
-      - '.\UnitTestS7Cli\bin\x86\Release\'
+      - '.\S7Cli\bin\Release\'
+      - '.\UnitTestS7Cli\bin\Release\'
       # gRPC C# server
-      - '.\Server\bin\x86\Release\'
+      - '.\Server\bin\Release\'
       # gRPC S7Service stubs
       - '.\Service\Python\'
       # Legacy s7cli
-      - '.\S7Cli_Legacy\bin\x86\Release\'
+      - '.\S7Cli_Legacy\bin\Release\'
 
 test_job:
   stage: test
   script:
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Cli\bin\x86\Release\UnitTestS7Cli.dll'
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Lib\bin\x86\Release\UnitTestS7Lib.dll'
+    - '& "$env:VSTEST_PATH" .\UnitTestS7Cli\bin\Release\UnitTestS7Cli.dll'
+    - '& "$env:VSTEST_PATH" .\UnitTestS7Lib\bin\Release\UnitTestS7Lib.dll'
   dependencies:
     - build_job
