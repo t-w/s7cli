@@ -50,9 +50,7 @@
     </Compile>
     <Compile Include="ReleaseWrapper.cs" />
     <Compile Include="S7Handle.cs" />
-    <Compile Include="S7Symbols.cs" />
     <Compile Include="S7CompilerSCL.cs" />
-    <Compile Include="S7ProgramSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindowsAPI.cs" />
   </ItemGroup>
