@@ -105,7 +105,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    log.Error(exc, $"Could not access symbol table in {project}:{programObj.LogPath}");
+                    log.Error(exc, $"Could not access symbol table in {project}\\{programObj.LogPath}");
                     throw;
                 }
 
@@ -115,7 +115,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    log.Error(exc, $"Could not import symbol table into {project}:{programObj.LogPath} " +
+                    log.Error(exc, $"Could not import symbol table into {project}\\{programObj.LogPath} " +
                                    $"from {symbolFile}");
                     throw;
                 }
@@ -124,7 +124,7 @@ namespace S7Lib
             string report = GetImportReport(s7Handle, out int errors, out int warnings, out int conflicts);
             CloseSymbolImportationLogWindow(s7Handle);
 
-            log.Debug($"Imported {numImportedSymbols} symbols from {symbolFile} into {project}:{programPath}\n" +
+            log.Debug($"Imported {numImportedSymbols} symbols from {symbolFile} into {project}\\{programPath}\n" +
                       $"Report {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s):\n" +
                       $"{report}");
 

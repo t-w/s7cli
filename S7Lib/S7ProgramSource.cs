@@ -29,7 +29,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    throw new KeyNotFoundException($"Could not access program {projectObj.Name}:{program}", exc);
+                    throw new KeyNotFoundException($"Could not access program {projectObj.Name}\\{program}", exc);
                 }
 
                 var next = wrapper.Add(() => programObj.Next);
@@ -42,7 +42,7 @@ namespace S7Lib
                     wrapper.Add(() => container);
                 }
             }
-            throw new KeyNotFoundException($"Could not find container of type {type} in {projectObj.Name}:{program}");
+            throw new KeyNotFoundException($"Could not find container of type {type} in {projectObj.Name}\\{program}");
         }
 
         internal static S7Container GetSources(S7Handle s7Handle, S7Project projectObj, string program)

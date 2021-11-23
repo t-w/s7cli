@@ -354,7 +354,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing source in project</param>
         public void ImportSource(string project, string program, string source, bool overwrite = true)
         {
-            Log.Debug($"Importing {source} to {project}:{program}");
+            Log.Debug($"Importing {source} to {project}\\{program}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -373,7 +373,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in project</param>
         public void ImportSourcesDir(string project, string program, string sourcesDir, bool overwrite = true)
         {
-            Log.Debug($"Importing sources to {project}:{program} for {sourcesDir}");
+            Log.Debug($"Importing sources to {project}\\{program} for {sourcesDir}");
 
             var sourceFiles = GetSourcesFromDir(sourcesDir);
 
@@ -398,7 +398,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
         public void ImportLibSources(string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
-            Log.Debug($"Importing sources from {library}:{libProgram} into {project}:{projProgram}");
+            Log.Debug($"Importing sources from {library}\\{libProgram} into {project}\\{projProgram}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -506,7 +506,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
         public void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
-            Log.Debug($"Importing blocks from {library}/{libProgram} into {project}/{projProgram}");
+            Log.Debug($"Importing blocks from {library}\\{libProgram} into {project}\\{projProgram}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -582,7 +582,7 @@ namespace S7Lib
             string exportDir = Path.GetDirectoryName(symbolFile);
             if (!Directory.Exists(exportDir))
             {
-                Log.Error($"Could not export symbols from {project}:{programPath}");
+                Log.Error($"Could not export symbols from {project}\\{programPath}");
                 throw new IOException($"Output directory does not exist {exportDir}");
             }
 
@@ -590,7 +590,7 @@ namespace S7Lib
 
             if (File.Exists(symbolFile) && !overwrite)
             {
-                Log.Error($"Could not export symbols from {project}:{programPath}");
+                Log.Error($"Could not export symbols from {project}\\{programPath}");
                 throw new IOException($"Output file already exists {symbolFile}");
             }
             else if (File.Exists(symbolFile))
@@ -856,7 +856,7 @@ namespace S7Lib
                 foreach (S7Program program in projectObj.Programs)
                 {
                     var programObj = wrapper.Add(() => program);
-                    Log.Information($"Listing containers for program {project}:{programObj.Name}");
+                    Log.Information($"Listing containers for program {project}\\{programObj.Name}");
 
                     var containers = wrapper.Add(() => programObj.Next);
                     foreach (S7Container container in programObj.Next)
@@ -880,7 +880,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite of online blocks</param>
         public void DownloadProgramBlocks(string project, string station, string module, string program, bool overwrite)
         {
-            Log.Information($"[ONLINE] Downloading blocks for {project}/{station}/{module}/{program}");
+            Log.Information($"[ONLINE] Downloading blocks for {project}\\{station}\\{module}\\{program}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -895,7 +895,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, $"Could not download blocks for {programObj.Name} {programObj.LogPath}");
+                    Log.Error(exc, $"Could not download blocks for {programObj.Name}\\{programObj.LogPath}");
                     throw;
                 }
             }
@@ -910,7 +910,7 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         public void StartProgram(string project, string station, string module, string program)
         {
-            Log.Information($"[ONLINE] Starting program {project}/{station}/{module}/{program}");
+            Log.Information($"[ONLINE] Starting program {project}\\{station}\\{module}\\{program}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -929,7 +929,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, $"Could not start/restart {programObj.Name} {programObj.LogPath}");
+                    Log.Error(exc, $"Could not start/restart {programObj.Name}\\{programObj.LogPath}");
                     throw;
                 }
             }
@@ -944,7 +944,7 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         public void StopProgram(string project, string station, string module, string program)
         {
-            Log.Information($"[ONLINE] Stopping program {project}/{station}/{module}/{program}");
+            Log.Information($"[ONLINE] Stopping program {project}\\{station}\\{module}\\{program}");
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -957,7 +957,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, $"Could not stop {programObj.Name} {programObj.LogPath}");
+                    Log.Error(exc, $"Could not stop {programObj.Name}\\{programObj.LogPath}");
                     throw;
                 }
             }
