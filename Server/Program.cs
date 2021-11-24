@@ -53,7 +53,7 @@ namespace Step7Server
         private StatusReply CreateStatusReply(bool success, List<string> log)
         {
             var reply = new StatusReply { ExitCode = success ? 0 : 1 };
-            reply.Log.AddRange(log);
+            if (log != null) reply.Log.AddRange(log);
             return reply;
         }
 
@@ -67,7 +67,7 @@ namespace Step7Server
         private ListReply CreateListReply(bool success, List<string> log, List<string> list)
         {
             var reply = new ListReply { Status = CreateStatusReply(success, log) };
-            reply.Items.AddRange(list);
+            if (list != null) reply.Items.AddRange(list);
             return reply;
         }
 
@@ -75,7 +75,7 @@ namespace Step7Server
 
         private IMessage RunCommand(S7Handle s7Handle, List<string> log, IMessage request)
         {
-            Log.Debug($"Running command {request}");
+            Log.Debug($"Running command {request.GetType()} {request}");
 
             switch (request)
             {
@@ -138,6 +138,12 @@ namespace Step7Server
             }
         }
 
+        private void HandleCommandError(ref List<string> log, ref bool success, string excMessage)
+        {
+            success = false;
+            log.Add(excMessage);
+        }
+
         private List<IMessage> CompleteRequests(List<IMessage> requests)
         {
             var log = new List<string>();
@@ -182,7 +188,7 @@ namespace Step7Server
             bool success = true;
             List<string> projectList = null;
             try { projectList = new List<string>(s7Handle.ListProjects().Values); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateListReply(success, log, projectList);
         }
 
@@ -196,7 +202,7 @@ namespace Step7Server
             bool success = true;
             List<string> programList = null;
             try { programList = s7Handle.ListPrograms(project: req.Project); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateListReply(success, log, programList);
         }
 
@@ -210,7 +216,7 @@ namespace Step7Server
             bool success = true;
             List<string> programList = null;
             try { programList = s7Handle.ListContainers(project: req.Project); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateListReply(success, log, programList);
         }
 
@@ -224,7 +230,7 @@ namespace Step7Server
             bool success = true;
             List<string> programList = null;
             try { programList = s7Handle.ListStations(project: req.Project); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateListReply(success, log, programList);
         }
 
@@ -241,7 +247,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.CreateProject(req.ProjectName, req.ProjectDir); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -254,7 +260,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.CreateLibrary(projectName: req.ProjectName, projectDir: req.ProjectDir); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -267,7 +273,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.RegisterProject(projectFilePath: req.ProjectFilePath); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -280,7 +286,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.RemoveProject(project: req.Project); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -301,7 +307,7 @@ namespace Step7Server
                 s7Handle.ImportSource(project: req.Project, program: req.Program, source: req.Source,
                                       overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -318,7 +324,7 @@ namespace Step7Server
                 s7Handle.ImportSourcesDir(project: req.Project, program: req.Program, sourcesDir: req.SourcesDir,
                                           overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -335,7 +341,7 @@ namespace Step7Server
                 s7Handle.ExportSource(project: req.Project, program: req.Program, source: req.Source,
                                       sourcesDir: req.SourcesDir);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -348,7 +354,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.ExportAllSources(project: req.Project, program: req.Program, sourcesDir: req.SourcesDir); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -365,7 +371,7 @@ namespace Step7Server
                 s7Handle.ImportLibSources(library: req.Library, libProgram: req.LibProgram, project: req.Project,
                                           projProgram: req.ProjProgram, overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -382,7 +388,7 @@ namespace Step7Server
                 s7Handle.ImportLibBlocks(library: req.Library, libProgram: req.LibProgram, project: req.Project,
                                          projProgram: req.ProjProgram, overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -417,7 +423,7 @@ namespace Step7Server
                 s7Handle.ImportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
                                        overwrite: overwrite, nameLeading: nameLeading, allowConflicts: req.AllowConflicts);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -434,7 +440,7 @@ namespace Step7Server
                 s7Handle.ExportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
                                        overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -454,7 +460,7 @@ namespace Step7Server
             {
                 s7Handle.CompileSource(project: req.Project, program: req.Program, sourceName: req.Source);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -471,7 +477,7 @@ namespace Step7Server
                 s7Handle.CompileSources(project: req.Project, program: req.Program,
                                         sources: new List<string>(req.Sources));
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -484,7 +490,7 @@ namespace Step7Server
         {
             bool success = true;
             try { s7Handle.CompileAllStations(project: req.Project, allowFail: req.AllowFail); }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -524,7 +530,7 @@ namespace Step7Server
                 s7Handle.EditModule(project: req.Project, station: req.Station, rack: req.Station,
                                     modulePath: req.Module, properties: moduleProperties);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -547,7 +553,7 @@ namespace Step7Server
                 s7Handle.StartProgram(project: req.Project, station: req.Station,
                                       module: req.Module, program: req.Program);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -564,7 +570,7 @@ namespace Step7Server
                 s7Handle.StopProgram(project: req.Project, station: req.Station,
                                      module: req.Module, program: req.Program);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -581,7 +587,7 @@ namespace Step7Server
                 s7Handle.DownloadProgramBlocks(project: req.Project, station: req.Station, module: req.Module,
                                                program: req.Program, overwrite: req.Overwrite);
             }
-            catch { success = false; }
+            catch (Exception exc){ HandleCommandError(ref log, ref success, exc.ToString()); }
             return CreateStatusReply(success, log);
         }
 
@@ -628,7 +634,8 @@ namespace Step7Server
             };
             server.Start();
 
-            Console.WriteLine($"Step7 server listening on port {ServerPort}");
+            Console.WriteLine($"Step7 server listening on port {ServerPort}. " +
+                              $"Press Return to close the server.");
 
             try
             {
