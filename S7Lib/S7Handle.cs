@@ -65,7 +65,7 @@ namespace S7Lib
         public void Dispose()
         {
             if (Api != null)
-                Marshal.FinalReleaseComObject(Api);
+                Marshal.ReleaseComObject(Api);
             Log?.Dispose();
         }
 
@@ -1421,7 +1421,7 @@ namespace S7Lib
                     Log.Information($"Listing containers for program {project}\\{programObj.Name}");
 
                     var containers = wrapper.Add(() => programObj.Next);
-                    foreach (S7Container container in programObj.Next)
+                    foreach (S7Container container in containers)
                     {
                         wrapper.Add(() => container);
                         output.Add(container.Name);
