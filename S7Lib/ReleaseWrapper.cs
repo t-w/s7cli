@@ -118,10 +118,12 @@ namespace S7Lib
 
         public void Dispose()
         {
-            foreach (object obj in objects)
+            // Release in reverse order
+            for (int i = objects.Count - 1; i >= 0; i--)
             {
                 //Console.WriteLine($"Releasing {Information.TypeName(obj)}");
-                Marshal.ReleaseComObject(obj);
+                Marshal.ReleaseComObject(objects[i]);
+                objects[i] = null;
             }
             objects.Clear();
         }
