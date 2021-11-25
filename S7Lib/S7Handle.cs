@@ -24,7 +24,7 @@ namespace S7Lib
         /// <summary>
         /// Handle for the Simatic API
         /// </summary>
-        public readonly Simatic Api;
+        private Simatic Api;
         /// <summary>
         /// Handle for Serilog logger
         /// </summary>
@@ -65,7 +65,11 @@ namespace S7Lib
         public void Dispose()
         {
             if (Api != null)
+            {
+                Api.Close();
                 Marshal.ReleaseComObject(Api);
+            }
+
             Log?.Dispose();
         }
 
