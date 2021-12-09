@@ -66,7 +66,8 @@ namespace S7Lib
         {
             if (Api != null)
             {
-                Api.Close();
+                // TODO Understand why this throws a COM exception
+                //Api.Close();
                 Marshal.ReleaseComObject(Api);
             }
 
