@@ -355,11 +355,11 @@ namespace S7Lib
         /// <param name="projectType">Project type (S7Project or S7Library)</param>
         private void CreateProjectImpl(string projectName, string projectDir, S7ProjectType projectType)
         {
-            Log.Debug("Creating empty project {name} in {dir}.", projectName, projectDir);
+            Log.Debug("Creating empty project {Name} in {Dir}.", projectName, projectDir);
 
             if (projectName.Length > 8)
             {
-                Log.Error("Could not create project {name} in {dir}.", projectName, projectDir);
+                Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
                 throw new ArgumentException($"Invalid project name {projectName}: has more than 8 characters.",
                     nameof(projectName));
             }
@@ -367,7 +367,7 @@ namespace S7Lib
             if (ProjectIsRegistered(projectName))
             {
                 // Otherwise Projects.Add() spawns a blocking GUI error message
-                Log.Error("Could not create project {name} in {dir}.", projectName, projectDir);
+                Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
                 throw new ArgumentException($"Project with name {projectName} already exists.");
             }
 
@@ -380,7 +380,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not create project {name} in {dir}.", projectName, projectDir);
+                    Log.Error(exc, "Could not create project {Name} in {Dir}.", projectName, projectDir);
                     throw;
                 }
             }
@@ -409,7 +409,7 @@ namespace S7Lib
                 try
                 {
                     wrapper.Add(() => swItems[swItemName]);
-                    Log.Debug("SWItem {swItem} found in container {container}.", swItemName, container.Name);
+                    Log.Debug("SWItem {SwItem} found in container {Container}.", swItemName, container.Name);
                 }
                 catch (COMException)
                 {
@@ -422,7 +422,7 @@ namespace S7Lib
                                                 nameof(remove));
                 }
 
-                Log.Debug("SWItem {swItem} already exists. Overwriting.", swItemName);
+                Log.Debug("SWItem {SwItem} already exists. Overwriting.", swItemName);
                 try
                 {
                     swItems.Remove(swItemName);
@@ -446,7 +446,7 @@ namespace S7Lib
         {
             string sourceName = Path.GetFileNameWithoutExtension(sourceFilePath);
 
-            Log.Debug("Importing source {name} ({type}) from {filePath}.",
+            Log.Debug("Importing source {Name} ({Type}) from {FilePath}.",
                 sourceName, sourceType, sourceFilePath);
 
             SearchRemoveSwItem(container, sourceName, overwrite);
@@ -460,7 +460,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, "Could not import source {source} ({type}) from {filePath}.",
+                    Log.Error(exc, "Could not import source {Source} ({Type}) from {FilePath}.",
                         sourceName, sourceType, sourceFilePath);
                     throw;
                 }
@@ -475,7 +475,7 @@ namespace S7Lib
         /// <param name="overwrite">Overwrite existing source if present</param>
         private void CopySource(S7Source source, S7Container destination, bool overwrite = true)
         {
-            Log.Debug("Importing source {source} ({type}) to {destination}.",
+            Log.Debug("Importing source {Source} ({Type}) to {Destination}.",
                 source.Name, source.ConcreteType, destination.Name);
 
             SearchRemoveSwItem(destination, source.Name, overwrite);
@@ -489,7 +489,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not copy source {source} ({type}) to {destination}.",
+                    Log.Error(exc, "Could not copy source {Source} ({Type}) to {Destination}.",
                         source.Name, source.ConcreteType, destination.Name);
                     throw;
                 }
@@ -514,7 +514,7 @@ namespace S7Lib
             var sourceType = source.ConcreteType;
             string outputFile = Path.Combine(exportDir, source.Name);
 
-            Log.Debug("Exporting {source} ({type}) to {outputFile}.", source.Name, sourceType, outputFile);
+            Log.Debug("Exporting {Source} ({Type}) to {OutputFile}.", source.Name, sourceType, outputFile);
 
             try
             {
@@ -522,7 +522,7 @@ namespace S7Lib
             }
             catch (Exception exc)
             {
-                Log.Error(exc, "Could not export source {source} ({type}) to {outputFile}.",
+                Log.Error(exc, "Could not export source {Source} ({Type}) to {OutputFile}.",
                     source.Name, sourceType, outputFile);
                 throw;
             }
@@ -555,7 +555,7 @@ namespace S7Lib
         {
             if (File.Exists(path))
                 return File.ReadAllText(path);
-            Log.Warning("File {path} not found.", path);
+            Log.Warning("File {Path} not found.", path);
             return "";
         }
 
@@ -620,7 +620,7 @@ namespace S7Lib
             S7SymbolTable symbolTable = null;
             int numImportedSymbols = 0;
 
-            Log.Debug("Importing symbols from {symbolFile} into {project}\\{programPath}.",
+            Log.Debug("Importing symbols from {SymbolFile} into {Project}\\{ProgramPath}.",
                 symbolFile, project, programPath);
 
             using (var wrapper = new ReleaseWrapper())
@@ -632,7 +632,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not access symbol table in {project}\\{LogPath}.",
+                    Log.Error(exc, "Could not access symbol table in {Project}\\{LogPath}.",
                         project, programObj.LogPath);
                     throw;
                 }
@@ -643,7 +643,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not import symbol table into {project}\\{LogPath} from {symbolFile}.",
+                    Log.Error(exc, "Could not import symbol table into {Project}\\{LogPath} from {SymbolFile}.",
                         project, programObj.LogPath, symbolFile);
                     throw;
                 }
@@ -652,11 +652,11 @@ namespace S7Lib
             string report = GetImportReport(out int errors, out int warnings, out int conflicts);
             CloseSymbolImportationLogWindow();
 
-            Log.Debug("Imported {symbols} symbols from {file} into {project}\\{programPath}.",
+            Log.Debug("Imported {Symbols} symbols from {File} into {Project}\\{ProgramPath}.",
                 numImportedSymbols, symbolFile, project, programPath);
-            Log.Debug("Found {errors} error(s), {warnings} warning(s) and {conflicts} conflict(s).",
+            Log.Debug("Found {Errors} error(s), {Warnings} warning(s) and {Conflicts} conflict(s).",
                 errors, warnings, conflicts);
-            Log.Debug("{report}", report);
+            Log.Debug("{Report}", report);
 
             if (!allowConflicts && conflicts > 0)
                 throw new Exception($"Symbols importation finished with {conflicts} conflict(s).");
@@ -670,7 +670,7 @@ namespace S7Lib
         /// <param name="symbolFile">Path to output symbol table file</param>
         private void ExportSymbolsImpl(string project, string programPath, string symbolFile)
         {
-            Log.Debug("Exporting symbols from {project}\\{programPath} to {symbolFile}.",
+            Log.Debug("Exporting symbols from {Project}\\{ProgramPath} to {SymbolFile}.",
                 project, programPath, symbolFile);
             S7SymbolTable symbolTable = null;
 
@@ -683,7 +683,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not access symbol table in {project}\\{LogPath}.",
+                    Log.Error(exc, "Could not access symbol table in {Project}\\{LogPath}.",
                         project, programObj.LogPath);
                     throw;
                 }
@@ -694,7 +694,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not export symbols from {project}\\{LogPath} to {symbolFile}.",
+                    Log.Error(exc, "Could not export symbols from {Project}\\{LogPath} to {SymbolFile}.",
                         project, programObj.LogPath, symbolFile);
                     throw;
                 }
@@ -709,11 +709,11 @@ namespace S7Lib
         /// <param name="overwrite">Overwrite existing block if present</param>
         private void CopyBlock(S7Block block, S7Container destination, bool overwrite = true)
         {
-            Log.Debug("Copying block {block} to container {destination}.", block.Name, destination.Name);
+            Log.Debug("Copying block {Block} to container {Destination}.", block.Name, destination.Name);
 
             if (block.ConcreteType == S7BlockType.S7SDBs)
             {
-                Log.Warning($"Skiping system block {block}.", block.Name);
+                Log.Warning("Skiping system block {Block}.", block.Name);
                 return;
             }
 
@@ -763,7 +763,7 @@ namespace S7Lib
         /// <param name="projectFilePath">Path to STEP 7 project .s7p file</param>
         public void RegisterProject(string projectFilePath)
         {
-            Log.Debug("Registering existing project from {filePath}.", projectFilePath);
+            Log.Debug("Registering existing project from {FilePath}.", projectFilePath);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -773,7 +773,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not register existing project from {filepath}.", projectFilePath);
+                    Log.Error(exc, "Could not register existing project from {Filepath}.", projectFilePath);
                     throw;
                 }
             }
@@ -785,7 +785,7 @@ namespace S7Lib
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         public void RemoveProject(string project)
         {
-            Log.Information("Removing project {project}.", project);
+            Log.Information("Removing project {Project}.", project);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -796,7 +796,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not remove project {project}.", project);
+                    Log.Error(exc, "Could not remove project {Project}.", project);
                     throw;
                 }
             }
@@ -811,7 +811,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing source in project</param>
         public void ImportSource(string project, string program, string source, bool overwrite = true)
         {
-            Log.Debug("Importing {source} into {project}\\{program} with overwrite={overwrite}.",
+            Log.Debug("Importing {Source} into {Project}\\{Program} with overwrite={Overwrite}.",
                 source, project, program, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
@@ -831,7 +831,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in project</param>
         public void ImportSourcesDir(string project, string program, string sourcesDir, bool overwrite = true)
         {
-            Log.Debug("Importing sources into {project}\\{program} from {sourcesDir} with overwrite={overwrite}.",
+            Log.Debug("Importing sources into {Project}\\{Program} from {SourcesDir} with overwrite={Overwrite}.",
                 project, program, sourcesDir, overwrite);
 
             var sourceFiles = GetSourcesFromDir(sourcesDir);
@@ -858,8 +858,8 @@ namespace S7Lib
         public void ImportLibSources(string library, string libProgram, string project, string projProgram,
             bool overwrite = true)
         {
-            Log.Debug("Importing sources from {library}\\{libProgram} into {project}\\{projProgram}" +
-                " with overwrite={overwrite}.", library, libProgram, project, projProgram, overwrite);
+            Log.Debug("Importing sources from {Library}\\{LibProgram} into {Project}\\{ProjProgram}"+
+                " with overwrite={Overwrite}.", library, libProgram, project, projProgram, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -879,7 +879,7 @@ namespace S7Lib
         /// <param name="sourcesDir">Directory to which to export sources</param>
         public void ExportAllSources(string project, string program, string sourcesDir)
         {
-            Log.Debug("Exporting sources {project}/{program} to {dir}.", project, program, sourcesDir);
+            Log.Debug("Exporting sources {Project}/{Program} to {Dir}.", project, program, sourcesDir);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -898,7 +898,7 @@ namespace S7Lib
         /// <param name="sourcesDir">Directory to which to export sources</param>
         public void ExportSource(string project, string program, string source, string sourcesDir)
         {
-            Log.Debug("Exporting {source} to {dir}.", source, sourcesDir);
+            Log.Debug("Exporting {Source} to {Dir}.", source, sourcesDir);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -914,7 +914,7 @@ namespace S7Lib
         /// <param name="programName">Program name</param>
         public void CreateProgram(string project, string programName)
         {
-            Log.Debug("Creating S7 program {name} in {project}.", programName, project);
+            Log.Debug("Creating S7 program {Name} in {Project}.", programName, project);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -926,7 +926,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not create S7 program {name} in {project}.", programName, project);
+                    Log.Error(exc, "Could not create S7 program {Name} in {Project}.", programName, project);
                     throw;
                 }
             }
@@ -956,7 +956,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
         public void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
-            Log.Debug("Importing blocks from {library}\\{libProgram} into {project}\\{projProgram} with overwrite={overwrite}.",
+            Log.Debug("Importing blocks from {Library}\\{LibProgram} into {Project}\\{ProjProgram} with overwrite={Overwrite}.",
                 library, libProgram, project, projProgram, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
@@ -1016,7 +1016,7 @@ namespace S7Lib
             string exportDir = Path.GetDirectoryName(symbolFile);
             if (!Directory.Exists(exportDir))
             {
-                Log.Error("Could not export symbols from {project}\\{programPath}.", project, programPath);
+                Log.Error("Could not export symbols from {Project}\\{ProgramPath}.", project, programPath);
                 throw new IOException($"Output directory does not exist {exportDir}.");
             }
 
@@ -1024,12 +1024,12 @@ namespace S7Lib
 
             if (File.Exists(symbolFile) && !overwrite)
             {
-                Log.Error("Could not export symbols from {project}\\{programPath}.", project, programPath);
+                Log.Error("Could not export symbols from {Project}\\{ProgramPath}.", project, programPath);
                 throw new IOException($"Output file already exists {symbolFile}.");
             }
             else if (File.Exists(symbolFile))
             {
-                Log.Information("Overwriting {symbolFile}.", symbolFile);
+                Log.Information("Overwriting {SymbolFile}.", symbolFile);
             }
 
             ExportSymbolsImpl(project, programPath, symbolFile);
@@ -1062,7 +1062,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error(exc, $"Could not export station {station} to {exportFile}.");
+                    Log.Error(exc, "Could not export station {Station} to {ExportFile}.", station, exportFile);
                     throw;
                 }
             }
@@ -1102,11 +1102,11 @@ namespace S7Lib
                 try
                 {
                     SetModuleProperty(module, kvPair.Key, kvPair.Value);
-                    Log.Debug("Set {module} {key}={value}.", module.LogPath, kvPair.Key, kvPair.Value);
+                    Log.Debug("Set {Module} {Key}={Value}.", module.LogPath, kvPair.Key, kvPair.Value);
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, "Could not set {module} {key}={value}.", module.LogPath, kvPair.Key, kvPair.Value);
+                    Log.Error(exc, "Could not set {Module} {Key}={Value}.", module.LogPath, kvPair.Key, kvPair.Value);
                     throw;
                 }
             }
@@ -1187,7 +1187,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, $"Could not access stations in project {project}");
+                    Log.Error(exc, "Could not access stations in project {Project}", project);
                     throw;
                 }
 
@@ -1197,11 +1197,11 @@ namespace S7Lib
                     try
                     {
                         stationObj.Compile();
-                        Log.Debug($"Compiled HW config for {stationObj.Name}");
+                        Log.Debug("Compiled HW config for {Station}", stationObj.Name);
                     }
                     catch (Exception exc)
                     {
-                        Log.Error(exc, $"Could not compile HW config for {stationObj.Name}");
+                        Log.Error(exc, "Could not compile HW config for {Station}", stationObj.Name);
                         if (!allowFail) throw;
                     }
                 }
@@ -1216,7 +1216,7 @@ namespace S7Lib
         /// <param name="source">Source name</param>
         public void CompileSource(string project, string program, string sourceName)
         {
-           Log.Debug($"Compiling source {sourceName} in {project}\\{program}");
+            Log.Debug("Compiling source {Source} in {Project}\\{Program}", sourceName, project, program);
 
             using (var wrapper = new ReleaseWrapper())
             {
@@ -1261,13 +1261,13 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error($"Could not compile source {src.Name}.", exc);
+                    Log.Error(exc, "Could not compile source {Name}.", src.Name);
                 }
             }
 
             // get status and close the SCL compiler
             S7CompilerSCL compiler = new S7CompilerSCL(Log);
-            Log.Debug($"SCL status buffer:\n{compiler.GetSclStatusBuffer()}");
+            Log.Debug("SCL status buffer:\n{Buffer}", compiler.GetSclStatusBuffer());
             //string statusLine = compiler.getSclStatusLine();
             int errors = compiler.GetErrorCount();
             int warnings = compiler.GetWarningCount();
@@ -1279,7 +1279,7 @@ namespace S7Lib
             }
             else if (warnings > 0)
             {
-                Log.Warning($"Compiled {src.Name} with {warnings} warning(s).");
+                Log.Warning("Compiled {Source} with {Warnings} warning(s).", src.Name, warnings);
             }
         }
 
@@ -1293,7 +1293,7 @@ namespace S7Lib
             // ("quiet" compilation with status written to a log file)
             var verbLogFile = Path.GetTempFileName();
             Api.VerbLogFile = verbLogFile;
-            Log.Debug($"Set Simatic.VerbLogFile to {Api.VerbLogFile}");
+            Log.Debug("Set Simatic.VerbLogFile to {VerbLogFile}", Api.VerbLogFile);
 
             // truncate log file
             FileStream oStream = new FileStream(verbLogFile, FileMode.Open, FileAccess.ReadWrite);
@@ -1309,7 +1309,7 @@ namespace S7Lib
                 }
                 catch (COMException exc)
                 {
-                    Log.Error($"Could not compile source {src.Name}.", exc);
+                    Log.Error(exc, "Could not compile source {Name}.", src.Name);
                 }
             }
 
@@ -1320,7 +1320,7 @@ namespace S7Lib
 
             // read and show the log file
             string[] logfile = File.ReadAllLines(verbLogFile);
-            Array.ForEach<string>(logfile, s => Log.Debug(s));
+            Array.ForEach(logfile, l => Log.Debug("{Line}", l));
             File.Delete(verbLogFile);
 
             // parse status in the logfile
@@ -1351,7 +1351,7 @@ namespace S7Lib
             }
             else if (warnings > 0)
             {
-                Log.Warning($"Compiled {src.Name} with {warnings} warning(s).");
+                Log.Warning("Compiled {Name} with {Warnings} warning(s).", src.Name, warnings);
             }
         }
 
@@ -1375,7 +1375,7 @@ namespace S7Lib
                 {
                     var projectObj = wrapper.Add(() => project);
                     output.Add(projectObj.LogPath, projectObj.Name);
-                    Log.Debug("Project {name} LogPath {logPath}", projectObj.Name, projectObj.LogPath);
+                    Log.Debug("Project {Name} LogPath {LogPath}", projectObj.Name, projectObj.LogPath);
                 }
             }
             return output;
@@ -1386,7 +1386,7 @@ namespace S7Lib
         /// </summary>
         public List<string> ListPrograms(string project)
         {
-            Log.Debug("Listing programs for project {project}.", project);
+            Log.Debug("Listing programs for project {Project}.", project);
 
             var output = new List<string>();
             using (var wrapper = new ReleaseWrapper())
@@ -1397,7 +1397,7 @@ namespace S7Lib
                 {
                     var programObj = wrapper.Add(() => program);
                     output.Add(programObj.Name);
-                    Log.Debug("Program {name}", programObj.Name);
+                    Log.Debug("Program {Name}", programObj.Name);
                 }
             }
             return output;
@@ -1408,7 +1408,7 @@ namespace S7Lib
         /// </summary>
         public List<string> ListStations(string project)
         {
-            Log.Debug("Listing stations in project {project}.", project);
+            Log.Debug("Listing stations in project {Project}.", project);
 
             var output = new List<string>();
             using (var wrapper = new ReleaseWrapper())
@@ -1419,7 +1419,7 @@ namespace S7Lib
                 {
                     var stationObj = (IS7Station6)wrapper.Add(() => station);
                     output.Add(stationObj.Name);
-                    Log.Debug($"Station {stationObj.Name}");
+                    Log.Debug("Station {Name}", stationObj.Name);
                 }
             }
             return output;
@@ -1431,7 +1431,7 @@ namespace S7Lib
         /// TODO: Maybe include program name in output as well?
         public List<string> ListContainers(string project)
         {
-            Log.Debug("Listing containers in project {project}.", project);
+            Log.Debug("Listing containers in project {Project}.", project);
 
             var output = new List<string>();
             using (var wrapper = new ReleaseWrapper())
@@ -1441,14 +1441,14 @@ namespace S7Lib
                 foreach (S7Program program in projectObj.Programs)
                 {
                     var programObj = wrapper.Add(() => program);
-                    Log.Information("Listing containers for program {project}\\{program}.", project, programObj.Name);
+                    Log.Information("Listing containers for program {Project}\\{Program}.", project, programObj.Name);
 
                     var containers = wrapper.Add(() => programObj.Next);
                     foreach (S7Container container in containers)
                     {
                         wrapper.Add(() => container);
                         output.Add(container.Name);
-                        Log.Information("Container {name} ({type})", container.Name, container.ConcreteType);
+                        Log.Information("Container {Name} ({Type})", container.Name, container.ConcreteType);
                     }
                 }
             }
@@ -1469,7 +1469,7 @@ namespace S7Lib
         /// <param name="overwrite">Force overwrite of online blocks</param>
         public void DownloadProgramBlocks(string project, string station, string module, string program, bool overwrite)
         {
-            Log.Information("[ONLINE] Downloading blocks for {project}\\{station}\\{module}\\{program}.",
+            Log.Information("[ONLINE] Downloading blocks for {Project}\\{Station}\\{Module}\\{Program}.",
                 project, station, module, program);
 
             using (var wrapper = new ReleaseWrapper())
@@ -1485,7 +1485,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, $"Could not download blocks for {programObj.Name}\\{programObj.LogPath}.");
+                    Log.Error(exc, "Could not download blocks to {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
                     throw;
                 }
             }
@@ -1500,7 +1500,7 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         public void StartProgram(string project, string station, string module, string program)
         {
-            Log.Information("[ONLINE] Starting program {project}\\{station}\\{module}\\{program}.",
+            Log.Information("[ONLINE] Starting program {Project}\\{Station}\\{Module}\\{Program}.",
                 project, station, module, program);
 
             using (var wrapper = new ReleaseWrapper())
@@ -1514,13 +1514,13 @@ namespace S7Lib
                     }
                     else
                     {
-                        Log.Debug("{program} is already in RUN mode. Restarting.", programObj.Name);
+                        Log.Debug("{Program} is already in RUN mode. Restarting.", programObj.Name);
                         programObj.Restart();
                     }
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, "Could not start/restart {program} in {LogPath}.", programObj.Name, programObj.LogPath);
+                    Log.Error(exc, "Could not start/restart {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
                     throw;
                 }
             }
@@ -1535,7 +1535,7 @@ namespace S7Lib
         /// <param name="program">Program name</param>
         public void StopProgram(string project, string station, string module, string program)
         {
-            Log.Information("[ONLINE] Stopping program {project}\\{station}\\{module}\\{program}.",
+            Log.Information("[ONLINE] Stopping program {Project}\\{Station}\\{Module}\\{Program}.",
                 project, station, module, program);
 
             using (var wrapper = new ReleaseWrapper())
@@ -1549,7 +1549,7 @@ namespace S7Lib
                 }
                 catch (Exception exc)
                 {
-                    Log.Error(exc, "Could not stop {program} in {LogPath}.", programObj.Name, programObj.LogPath);
+                    Log.Error(exc, "Could not stop {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
                     throw;
                 }
             }
