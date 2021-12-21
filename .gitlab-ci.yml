@@ -18,32 +18,30 @@ build_job:
     - '& "$env:NUGET_PATH" restore'
     - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /clp:ErrorsOnly'
     # Build gRPC stubs for Python
-    - python -m grpc_tools.protoc ./Service/protos/s7service/step7.proto
-      -I ./Service/protos/
-      --python_out=./Service/Python/
-      --grpc_python_out=./Service/Python/
+    - python -m grpc_tools.protoc ./S7Service/protos/s7service/step7.proto
+      -I ./S7Service/protos/
+      --python_out=./S7Service/Python/
+      --grpc_python_out=./S7Service/Python/
     # Build Python s7service package with setuptools
-    - cd ./Service/Python/
+    - cd ./S7Service/Python/
     - python setup.py sdist bdist_wheel
   artifacts:
     paths:
       # Library
       - '.\S7Lib\bin\Release\'
-      - '.\UnitTestS7Lib\bin\Release\'
+      - '.\S7LibTests\bin\Release\'
       # CLI
       - '.\S7Cli\bin\Release\'
-      - '.\UnitTestS7Cli\bin\Release\'
+      - '.\S7CliTests\bin\Release\'
       # gRPC C# server
-      - '.\Server\bin\Release\'
+      - '.\S7Server\bin\Release\'
       # gRPC S7Service stubs
-      - '.\Service\Python\'
-      # Legacy s7cli
-      - '.\S7Cli_Legacy\bin\Release\'
+      - '.\S7Service\Python\'
 
 test_job:
   stage: test
   script:
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Cli\bin\Release\UnitTestS7Cli.dll'
-    - '& "$env:VSTEST_PATH" .\UnitTestS7Lib\bin\Release\UnitTestS7Lib.dll'
+    - '& "$env:VSTEST_PATH" .\S7CliTests\bin\Release\S7CliTests.dll'
+    - '& "$env:VSTEST_PATH" .\S7LibTests\bin\Release\S7LibTests.dll'
   dependencies:
     - build_job

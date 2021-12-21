@@ -85,9 +85,9 @@
       <Project>{900817d5-8c15-470b-b099-fb23824cd0bb}</Project>
       <Name>S7Lib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Service\Service.csproj">
+    <ProjectReference Include="..\S7Service\S7Service.csproj">
       <Project>{d059cff9-de71-478a-b31c-b71346ff3e88}</Project>
-      <Name>Service</Name>
+      <Name>S7Service</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
