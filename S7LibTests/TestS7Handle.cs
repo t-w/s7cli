@@ -7,10 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S7Lib;
 
 
-namespace UnitTestS7Lib
+namespace S7LibTests
 {
     [TestClass]
-    public class TestS7Lib
+    public class TestS7Handle
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
         static readonly string ResourcesDir = Path.GetFullPath(@"..\..\resources\");

@@ -144,7 +144,7 @@ namespace S7Lib
 		        }
 		        else
 		        {
-			        Log.Error ( "Error getting: " + i + "\n");
+			        Log.Error("Error getting: {I}", i);
 		        }
 	        }
         }

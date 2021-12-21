@@ -3,10 +3,10 @@ using System;
 
 using S7Cli;
 
-namespace UnitTestS7Cli
+namespace S7CliTests
 {
     [TestClass]
-    public class TestS7Cli
+    public class UnitTestOptionParser
     {
         static OptionParser Parser = null;
 

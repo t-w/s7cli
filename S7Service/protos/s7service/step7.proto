@@ -26,7 +26,7 @@ service Step7 {
   // Import sources from a library into project
   rpc ImportLibSources (ImportLibSourcesRequest) returns (StatusReply) {}
   // Exports a source from a program to a directory
-  rpc ExportSouce (ExportSourceRequest) returns (StatusReply) {}
+  rpc ExportSource (ExportSourceRequest) returns (StatusReply) {}
   // Exports all sources from a program to a directory
   rpc ExportAllSources (ExportAllSourcesRequest) returns (StatusReply) {}
 
@@ -60,9 +60,9 @@ service Step7 {
   rpc EditModule (EditModuleRequest) returns (StatusReply) {}
 
   // [ONLINE] Starts/restarts a program
-  rpc StartProgram (ProgramRequest) returns (StatusReply) {}
+  rpc StartProgram (StartProgramRequest) returns (StatusReply) {}
   // [ONLINE] Stops a program
-  rpc StopProgram (ProgramRequest) returns (StatusReply) {}
+  rpc StopProgram (StopProgramRequest) returns (StatusReply) {}
   // [ONLINE] Downloads all the blocks under a Program
   rpc DownloadProgramBlocks (DownloadProgramBlocksRequest) returns (StatusReply) {}
 }
@@ -239,7 +239,18 @@ message ListContainersRequest {
   string project = 1;
 }
 
-message ProgramRequest {
+message StartProgramRequest {
+  // Project identifier, path to .s7p (unique) or project name
+  string project = 1;
+  // Station name
+  string station = 2;
+  // Parent module name
+  string module = 3;
+  // Program name
+  string program = 4;
+}
+
+message StopProgramRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
   // Station name
@@ -273,7 +284,7 @@ message EditModuleRequest {
   // Logical path to module
   string module = 4;
   // New module properties
-  map<string, string> poperties = 5;
+  map<string, string> properties = 5;
 }
 
 // Reply messages

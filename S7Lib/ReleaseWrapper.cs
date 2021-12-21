@@ -35,7 +35,7 @@ namespace S7Lib
     ///     // Does not attempt to release simatic, since it's explicitly ignored for convenience
     ///     var projects = wrapper.Add(() => simatic.Projects);
     ///
-    ///     // Releases project variable, but not Projects (or simatic)
+    ///     // Releases project variable, but not simatic.Projects (or simatic)
     ///     // This is useful when one wants to only release a resource at a higher abstraction level, e.g.
     ///     // pass low-level COM object as an argument to function, but only release it outside the function.
     ///     // Otherwise it could result in a double release.
@@ -46,11 +46,40 @@ namespace S7Lib
     ///     var program = wrapper.Add(() => simatic.Projects[0].Programs[0]);
     /// }
     /// ```
+    /// Finally, implementing a run-time list of ignored types is non-trivial, since
+    /// the `is` operator can only be used for constant (build-time) types.
     /// </remarks>
     class ReleaseWrapper : IDisposable
     {
         readonly List<object> objects = new List<object>();
 
+        /// <summary>
+        /// Registers COM objects in expression so they can be released
+        /// when wrapper is disposed of.
+        /// </summary>
+        /// <remarks>
+        /// The expression is walked recursively, and all of the COM objects
+        /// encountered along the way will be registered for release
+        /// (unless explicitly ignored e.g. instances of PServerPro).
+        /// The following expression types are supported:
+        /// ```
+        /// // Local variables
+        /// wrapper.Add(() => local);
+        /// // Object constructors
+        /// wrapper.Add(() => new Class());
+        /// // Member access
+        /// wrapper.Add(() => map[key]);
+        /// // Function calls that return a COM object
+        /// wrapper.Add(() => Function(arg));
+        /// ```
+        /// It's also possible to nest expressions:
+        /// ```
+        /// wrapper.Add(() => Function(map[key].ComputeValue());
+        /// ```
+        /// </remarks>
+        /// <typeparam name="T">Return type of expression</typeparam>
+        /// <param name="func">Target expression</param>
+        /// <returns>Object returned by expression</returns>
         public T Add<T>(Expression<Func<T>> func)
         {
             return (T)Walk(func.Body);
@@ -118,10 +147,12 @@ namespace S7Lib
 
         public void Dispose()
         {
-            foreach (object obj in objects)
+            // Release in reverse order
+            for (int i = objects.Count - 1; i >= 0; i--)
             {
                 //Console.WriteLine($"Releasing {Information.TypeName(obj)}");
-                Marshal.ReleaseComObject(obj);
+                Marshal.ReleaseComObject(objects[i]);
+                objects[i] = null;
             }
             objects.Clear();
         }
