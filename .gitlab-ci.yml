@@ -35,6 +35,7 @@ build_job:
       - '.\S7CliTests\bin\Release\'
       # gRPC C# server
       - '.\S7Server\bin\Release\'
+      - .\S7ServerTests\bin\x86\Release\
       # gRPC S7Service stubs
       - '.\S7Service\Python\'
 
@@ -42,6 +43,7 @@ test_job:
   stage: test
   script:
     - '& "$env:VSTEST_PATH" .\S7CliTests\bin\Release\S7CliTests.dll'
+    - '& "$env:VSTEST_PATH" .\S7ServerTests\bin\x86\Release\net6.0\S7ServerTests.dll'
     - '& "$env:VSTEST_PATH" .\S7LibTests\bin\Release\S7LibTests.dll'
   dependencies:
     - build_job

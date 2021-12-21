@@ -70,7 +70,7 @@ namespace S7Server
 
         // Server commands
 
-        private void RunCommand(IS7Handle s7Handle, IMessage request)
+        public void RunCommand(IS7Handle s7Handle, IMessage request)
         {
             Logger.Debug($"Running command {request.GetType()} {request}");
 
@@ -169,7 +169,7 @@ namespace S7Server
         /// </summary>
         /// <param name="listRequest">Request message for list command</param>
         /// <returns>Command result</returns>
-        public ListReply HandleListRequest(IMessage listRequest)
+        private ListReply HandleListRequest(IMessage listRequest)
         {
             CreateClientLogger(out ILogger clientLogger, out List<string> messages);
             List<string> output = null;
@@ -196,7 +196,7 @@ namespace S7Server
         /// <remarks>Creates a single S7Handle which is used for all requests.</remarks>
         /// <param name="requests">List or request messages</param>
         /// <returns>Summary of the execution of the requests</returns>
-        public StatusReply HandleRequests(List<IMessage> requests)
+        private StatusReply HandleRequests(List<IMessage> requests)
         {
             Logger.Debug("Processing {NumRequests} request(s).", requests.Count);
 
