@@ -110,7 +110,7 @@ namespace S7Cli
 
         private void RunCommand(object options)
         {
-            Api = new S7Handle(log: Log);
+            Api = new S7Handle(logger: Log);
 
             switch (options)
             {
