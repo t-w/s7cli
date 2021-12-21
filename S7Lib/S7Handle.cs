@@ -15,9 +15,9 @@ using S7HCOM_XLib;
 namespace S7Lib
 {
     /// <summary>
-    /// Handle for S7Lib functions
+    /// Implements handle that provides functions to interact with Simatic
     /// </summary>
-    public sealed class S7Handle : IDisposable
+    public sealed class S7Handle : IS7Handle, IDisposable
     {
         #region Class Attributes, Ctor and Dispose
 
@@ -28,7 +28,7 @@ namespace S7Lib
         /// <summary>
         /// Handle for Serilog logger
         /// </summary>
-        public readonly Logger Log;
+        public readonly ILogger Log;
 
         // Default path for symbol import report file
         private static readonly string ReportFilePath = @"C:\ProgramData\Siemens\Automation\Step7\S7Tmp\sym_imp.txt";
@@ -47,10 +47,10 @@ namespace S7Lib
         /// (for methods such as Add, Copy, or Remove, with which objects are added or deleted)
         /// as well as for name changes.
         /// </remarks>
-        /// <param name="log">Configured logger object</param>
+        /// <param name="logger">Configured logger object</param>
         /// <param name="serverMode">UnattandedServerMode surpress GUI messages</param>
         /// <param name="automaticSave">Save project automatically</param>
-        public S7Handle(Logger log = null, bool serverMode = true, bool automaticSave = true)
+        public S7Handle(ILogger logger = null, bool serverMode = true, bool automaticSave = true)
         {
             Api = new Simatic
             {
@@ -58,9 +58,9 @@ namespace S7Lib
                 AutomaticSave = automaticSave ? 1 : 0
             };
 
-            if (log == null)
-                log = CreateConsoleLogger();
-            Log = log;
+            if (logger == null)
+                logger = CreateConsoleLogger();
+            Log = logger;
         }
         public void Dispose()
         {
@@ -70,8 +70,6 @@ namespace S7Lib
                 //Api.Close();
                 Marshal.ReleaseComObject(Api);
             }
-
-            Log?.Dispose();
         }
 
         // Simple default console logger for testing purposes
@@ -737,30 +735,19 @@ namespace S7Lib
 
         #region Public Commands
 
-        /// <summary>
-        /// Create new empty STEP 7 project
-        /// </summary>
-        /// <param name="projectName">Project name (max 8 characters)</param>
-        /// <param name="projectDir">Path to project's parent directory</param>
+        /// <inheritdoc/>
         public void CreateProject(string projectName, string projectDir)
         {
             CreateProjectImpl(projectName, projectDir, S7ProjectType.S7Project);
         }
 
-        /// <summary>
-        /// Create new empty STEP 7 library
-        /// </summary>
-        /// <param name="projectName">Library name (max 8 characters)</param>
-        /// <param name="projectDir">Path to library's parent directory</param>
+        /// <inheritdoc/>
         public void CreateLibrary(string projectName, string projectDir)
         {
             CreateProjectImpl(projectName, projectDir, S7ProjectType.S7Library);
         }
 
-        /// <summary>
-        /// Registers existing STEP 7 project given the path to its .s7p file
-        /// </summary>
-        /// <param name="projectFilePath">Path to STEP 7 project .s7p file</param>
+        /// <inheritdoc/>
         public void RegisterProject(string projectFilePath)
         {
             Log.Debug("Registering existing project from {FilePath}.", projectFilePath);
@@ -779,10 +766,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Removes STEP 7 project and deletes all of its files
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <inheritdoc/>
         public void RemoveProject(string project)
         {
             Log.Information("Removing project {Project}.", project);
@@ -802,13 +786,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Import source into a program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="source">Path to source file</param>
-        /// <param name="overwrite">Force overwrite existing source in project</param>
+        /// <inheritdoc/>
         public void ImportSource(string project, string program, string source, bool overwrite = true)
         {
             Log.Debug("Importing {Source} into {Project}\\{Program} with overwrite={Overwrite}.",
@@ -822,13 +800,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Import sources from a directory into a program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="sourcesDir">Directory from which to import sources</param>
-        /// <param name="overwrite">Force overwrite existing sources in project</param>
+        /// <inheritdoc/>
         public void ImportSourcesDir(string project, string program, string sourcesDir, bool overwrite = true)
         {
             Log.Debug("Importing sources into {Project}\\{Program} from {SourcesDir} with overwrite={Overwrite}.",
@@ -847,14 +819,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Import sources from a library into a program
-        /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
-        /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
-        /// <param name="projProgram">Destination program name</param>
-        /// <param name="overwrite">Force overwrite existing sources in destination project</param>
+        /// <inheritdoc/>
         public void ImportLibSources(string library, string libProgram, string project, string projProgram,
             bool overwrite = true)
         {
@@ -871,12 +836,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Exports all sources from a program to a directory
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="sourcesDir">Directory to which to export sources</param>
+        /// <inheritdoc/>
         public void ExportAllSources(string project, string program, string sourcesDir)
         {
             Log.Debug("Exporting sources {Project}/{Program} to {Dir}.", project, program, sourcesDir);
@@ -889,13 +849,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Exports a source from a program to a directory
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="source">Source name</param>
-        /// <param name="sourcesDir">Directory to which to export sources</param>
+        /// <inheritdoc/>
         public void ExportSource(string project, string program, string source, string sourcesDir)
         {
             Log.Debug("Exporting {Source} to {Dir}.", source, sourcesDir);
@@ -907,11 +861,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Creates a new empty S7 program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="programName">Program name</param>
+        /// <inheritdoc/>
         public void CreateProgram(string project, string programName)
         {
             Log.Debug("Creating S7 program {Name} in {Project}.", programName, project);
@@ -932,12 +882,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Compiles multiple source, in order
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="sources">Ordered list of source names</param>
+        /// <inheritdoc/>
         public void CompileSources(string project, string program, List<string> sources)
         {
             foreach (var source in sources)
@@ -946,14 +891,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Import blocks from a directory into a project
-        /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
-        /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
-        /// <param name="projProgram">Destination program name</param>
-        /// <param name="overwrite">Force overwrite existing sources in destination project</param>
+        /// <inheritdoc/>
         public void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true)
         {
             Log.Debug("Importing blocks from {Library}\\{LibProgram} into {Project}\\{ProjProgram} with overwrite={Overwrite}.",
@@ -981,36 +919,14 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Imports symbols into a program from a file
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="programPath">Logical path to program (not including project name)</param>
-        /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
-        ///     Supported extensions .asc, .dif, .sdf, .seq
-        /// </param>
-        /// <param name="overwrite">Whether to overwrite symbols if present</param>
-        /// <param name="nameLeading">
-        /// When overwrite is selected, defines whether symbol names or addresses are replaced as follows:
-        /// - false: entries with the same symbol address are replaced. Symbol names are adjusted to the specifications in the import file.
-        /// - true: entries with the same symbol name are replaced. The addresses are adjusted according to the specifications in the import file.
-        /// </param>
-        /// <param name="allowConflicts">If false, an exception is raised if a conflict is detected</param>
+        /// <inheritdoc/>
         public void ImportSymbols(string project, string programPath, string symbolFile, bool overwrite = false, bool nameLeading = false, bool allowConflicts = false)
         {
             var flags = GetSymImportFlags(overwrite, nameLeading);
             ImportSymbolsImpl(project, programPath, symbolFile, flags, allowConflicts);
         }
 
-        /// <summary>
-        /// Exports symbols from program from into a file
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="programPath">Logical path to program (not including project name)</param>
-        /// <param name="symbolFile">Path to output symbol table file (usually .sdf)
-        ///     Supported extensions .asc, .dif, .sdf, .seq
-        /// </param>
-        /// <param name="overwrite">Overwrite output file if it exists</param>
+        /// <inheritdoc/>
         public void ExportSymbols(string project, string programPath, string symbolFile, bool overwrite = false)
         {
             string exportDir = Path.GetDirectoryName(symbolFile);
@@ -1035,12 +951,7 @@ namespace S7Lib
             ExportSymbolsImpl(project, programPath, symbolFile);
         }
 
-        /// <summary>
-        /// Exports the hardware configuration of a target station
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Name of target station to export</param>
-        /// <param name="exportFile">Path to output export file (generally .cfg file)</param>
+        /// <inheritdoc/>
         public void ExportStation(string project, string station, string exportFile)
         {
             using (var wrapper = new ReleaseWrapper())
@@ -1068,21 +979,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Edit properties of target module
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Name of parent station</param>
-        /// <param name="rack">Name of parent rack</param>
-        /// <param name="modulePath">Path to targt module</param>
-        /// <param name="properties">Module properties as key-value pairs, e.g.
-        /// {"IPAddress", "127.0.0.1"}
-        /// {"SubnetMask", "255.255.255.192"}
-        /// {"RouterAdress", "127.0.0.2"}
-        /// {"MACAddress", "080006010000"}
-        /// {"IPActive", true}
-        /// {"RouterActive", false}
-        /// </param>
+        /// <inheritdoc/>
         public void EditModule(string project, string station, string rack, string modulePath, Dictionary<string, object> properties)
         {
             using (var wrapper = new ReleaseWrapper())
@@ -1169,11 +1066,7 @@ namespace S7Lib
 
         #region Compile Methods
 
-        /// <summary>
-        /// Compiles the HW configuration for each of the stations in a project
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="allowFail">If false, an exception is thrown if a station fials to compile</param>
+        /// <inheritdoc/>
         public void CompileAllStations(string project, bool allowFail = true)
         {
             IS7Stations stations = null;
@@ -1208,12 +1101,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Compile source
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="source">Source name</param>
+        /// <inheritdoc/>
         public void CompileSource(string project, string program, string sourceName)
         {
             Log.Debug("Compiling source {Source} in {Project}\\{Program}", sourceName, project, program);
@@ -1359,10 +1247,7 @@ namespace S7Lib
 
         #region List Commands
 
-        /// <summary>
-        /// Returns dictionary with {projectDir, projectName} key-value pairs
-        /// </summary>
-        /// <param name="output">Dictionary with {projectDir, projectName} key-value pairs</param>
+        /// <inheritdoc/>
         public Dictionary<string, string> ListProjects()
         {
             Log.Debug($"Listing registered projects.");
@@ -1381,9 +1266,7 @@ namespace S7Lib
             return output;
         }
 
-        /// <summary>
-        /// Returns list with programs in a given project
-        /// </summary>
+        /// <inheritdoc/>
         public List<string> ListPrograms(string project)
         {
             Log.Debug("Listing programs for project {Project}.", project);
@@ -1403,9 +1286,7 @@ namespace S7Lib
             return output;
         }
 
-        /// <summary>
-        /// Returns list with stations in a given project
-        /// </summary>
+        /// <inheritdoc/>
         public List<string> ListStations(string project)
         {
             Log.Debug("Listing stations in project {Project}.", project);
@@ -1425,10 +1306,8 @@ namespace S7Lib
             return output;
         }
 
-        /// <summary>
-        /// Creates List with containers for each program in a given project
-        /// </summary>
-        /// TODO: Maybe include program name in output as well?
+        /// <inheritdoc/>
+        // TODO: Maybe include program name in output as well?
         public List<string> ListContainers(string project)
         {
             Log.Debug("Listing containers in project {Project}.", project);
@@ -1459,14 +1338,7 @@ namespace S7Lib
 
         #region Online Commands
 
-        /// <summary>
-        /// Downloads all the blocks under an S7Program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="overwrite">Force overwrite of online blocks</param>
+        /// <inheritdoc/>
         public void DownloadProgramBlocks(string project, string station, string module, string program, bool overwrite)
         {
             Log.Information("[ONLINE] Downloading blocks for {Project}\\{Station}\\{Module}\\{Program}.",
@@ -1491,13 +1363,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Starts/restarts a program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
+        /// <inheritdoc/>
         public void StartProgram(string project, string station, string module, string program)
         {
             Log.Information("[ONLINE] Starting program {Project}\\{Station}\\{Module}\\{Program}.",
@@ -1526,13 +1392,7 @@ namespace S7Lib
             }
         }
 
-        /// <summary>
-        /// Stops a program
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
+        /// <inheritdoc/>
         public void StopProgram(string project, string station, string module, string program)
         {
             Log.Information("[ONLINE] Stopping program {Project}\\{Station}\\{Module}\\{Program}.",
