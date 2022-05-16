@@ -471,7 +471,7 @@ namespace S7Lib
         /// <param name="source">Target source to copy</param>
         /// <param name="destination">Target container onto which to copy source</param>
         /// <param name="overwrite">Overwrite existing source if present</param>
-        private void CopySource(S7Source source, S7Container destination, bool overwrite = true)
+        private void CopySource(S7Container destination, S7Source source, bool overwrite = true)
         {
             Log.Debug("Importing source {Source} ({Type}) to {Destination}.",
                 source.Name, source.ConcreteType, destination.Name);
@@ -494,7 +494,7 @@ namespace S7Lib
             }
         }
 
-        private void ImportLibSourcesImpl(S7Container libSources, S7Container projSources, bool overwrite = true)
+        private void ImportLibSourcesImpl(S7Container projSources, S7Container libSources, bool overwrite = true)
         {
             using (var wrapper = new ReleaseWrapper())
             {
@@ -502,7 +502,7 @@ namespace S7Lib
                 wrapper.Add(() => swItems);
                 foreach (S7Source libSource in swItems)
                 {
-                    CopySource(libSource, projSources, overwrite);
+                    CopySource(destination: projSources, source: libSource, overwrite: overwrite);
                 }
             }
         }
@@ -702,10 +702,10 @@ namespace S7Lib
         /// <summary>
         /// Copies S7Block to destination S7SWItems container
         /// </summary>
-        /// <param name="block">Target block to copy</param>
         /// <param name="destination">Target container onto which to copy block</param>
+        /// <param name="block">Target block to copy</param>
         /// <param name="overwrite">Overwrite existing block if present</param>
-        private void CopyBlock(S7Block block, S7Container destination, bool overwrite = true)
+        private void CopyBlock(S7Container destination, S7Block block, bool overwrite = true)
         {
             Log.Debug("Copying block {Block} to container {Destination}.", block.Name, destination.Name);
 
@@ -820,7 +820,7 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void ImportLibSources(string library, string libProgram, string project, string projProgram,
+        public void ImportLibSources(string project, string projProgram, string library, string libProgram,
             bool overwrite = true)
         {
             Log.Debug("Importing sources from {Library}\\{LibProgram} into {Project}\\{ProjProgram}"+
@@ -832,7 +832,7 @@ namespace S7Lib
                 var libraryObj = wrapper.Add(() => GetProject(library));
                 var projectContainer = wrapper.Add(() => GetSources(projectObj, projProgram));
                 var libraryContainer = wrapper.Add(() => GetSources(libraryObj, libProgram));
-                ImportLibSourcesImpl(libSources: libraryContainer, projSources: projectContainer, overwrite);
+                ImportLibSourcesImpl(projSources: projectContainer, libSources: libraryContainer, overwrite: overwrite);
             }
         }
 
@@ -892,7 +892,7 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true)
+        public void ImportLibBlocks(string project, string projProgram, string library, string libProgram, bool overwrite = true)
         {
             Log.Debug("Importing blocks from {Library}\\{LibProgram} into {Project}\\{ProjProgram} with overwrite={Overwrite}.",
                 library, libProgram, project, projProgram, overwrite);
@@ -914,7 +914,7 @@ namespace S7Lib
                         Log.Debug("Cannot copy System data block. Skipping.");
                         continue;
                     }
-                    CopyBlock(libBlock, projectBlocks, overwrite);
+                    CopyBlock(destination: projectBlocks, block: libBlock, overwrite: overwrite);
                 }
             }
         }

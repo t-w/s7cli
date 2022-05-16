@@ -54,13 +54,12 @@ namespace S7Lib
         /// <summary>
         /// Import sources from a library into a program
         /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
+        /// <param name="libProgram">Source library program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
-        void ImportLibSources(string library, string libProgram, string project, string projProgram,
-            bool overwrite = true);
+        void ImportLibSources(string project, string projProgram, string library, string libProgram, bool overwrite = true);
 
         /// <summary>
         /// Exports all sources from a program to a directory
@@ -97,12 +96,12 @@ namespace S7Lib
         /// <summary>
         /// Import blocks from a directory into a project
         /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
+        /// <param name="libProgram">Source library program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
-        void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true);
+        void ImportLibBlocks(string project, string projProgram, string library, string libProgram, bool overwrite = true);
 
         /// <summary>
         /// Imports symbols into a program from a file
