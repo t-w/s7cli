@@ -115,16 +115,24 @@ namespace S7Cli
             switch (options)
             {
                 case ListProjectsOptions _:
-                    Api.ListProjects();
+                    var projects = Api.ListProjects();
+                    foreach (var item in projects)
+                        Log.Information("Project={Name}, LogPath={LogPath}", item.Value, item.Key);
                     break;
                 case ListProgramsOptions opt:
-                    Api.ListPrograms(opt.Project);
+                    var programs = Api.ListPrograms(opt.Project);
+                    foreach (var program in programs)
+                        Log.Information("Program={Program}", program);
                     break;
                 case ListContainersOptions opt:
-                    Api.ListContainers(opt.Project);
+                    var containers = Api.ListContainers(opt.Project);
+                    foreach (var container in containers)
+                        Log.Information("Container={Container}", container);
                     break;
                 case ListStationsOptions opt:
-                    Api.ListStations(opt.Project);
+                    var stations = Api.ListStations(opt.Project);
+                    foreach (var station in stations)
+                        Log.Information("Station={Station}", station);
                     break;
                 case CreateProjectOptions opt:
                     Api.CreateProject(opt.ProjectName, opt.ProjectDir);

@@ -1260,7 +1260,7 @@ namespace S7Lib
                 {
                     var projectObj = wrapper.Add(() => project);
                     output.Add(projectObj.LogPath, projectObj.Name);
-                    Log.Debug("Project {Name} LogPath {LogPath}", projectObj.Name, projectObj.LogPath);
+                    Log.Debug("Project={Name}, LogPath={LogPath}", projectObj.Name, projectObj.LogPath);
                 }
             }
             return output;
@@ -1320,14 +1320,14 @@ namespace S7Lib
                 foreach (S7Program program in projectObj.Programs)
                 {
                     var programObj = wrapper.Add(() => program);
-                    Log.Information("Listing containers for program {Project}\\{Program}.", project, programObj.Name);
+                    Log.Debug("Listing containers for program {Project}\\{Program}.", project, programObj.Name);
 
                     var containers = wrapper.Add(() => programObj.Next);
                     foreach (S7Container container in containers)
                     {
                         wrapper.Add(() => container);
                         output.Add(container.Name);
-                        Log.Information("Container {Name} ({Type})", container.Name, container.ConcreteType);
+                        Log.Debug("Container {Name} ({Type})", container.Name, container.ConcreteType);
                     }
                 }
             }
