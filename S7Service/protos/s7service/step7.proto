@@ -96,7 +96,7 @@ message RemoveProjectRequest {
 message ImportSourceRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Path to source file
   string source = 3;
@@ -107,7 +107,7 @@ message ImportSourceRequest {
 message ImportSourcesDirRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Directory from which to import sources
   string sourcesDir = 3;
@@ -131,7 +131,7 @@ message ImportLibSourcesRequest {
 message ExportAllSourcesRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Directory to which to export sources
   string sourcesDir = 3;
@@ -140,7 +140,7 @@ message ExportAllSourcesRequest {
 message ExportSourceRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Source name
   string source = 3;
@@ -151,7 +151,7 @@ message ExportSourceRequest {
 message CompileSourceRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Source name
   string source = 3;
@@ -160,7 +160,7 @@ message CompileSourceRequest {
 message CompileSourcesRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 2;
   // Ordered list of source names
   repeated string sources = 3;
@@ -182,8 +182,8 @@ message ImportLibBlocksRequest {
 message ImportSymbolsRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Logical path to program
-  string programPath = 2;
+  // Target S7 program
+  string program = 2;
   // Path to input symbol table file (usually .sdf)
   //   Supported extensions .asc, .dif, .sdf, .seq
   string symbolFile = 3;
@@ -206,8 +206,8 @@ message ImportSymbolsRequest {
 message ExportSymbolsRequest {
   // Project identifier, path to .s7p (unique) or project name
   string project = 1;
-  // Logical path to program
-  string programPath = 2;
+  // Target S7 program
+  string program = 2;
   // Path to output symbol table file (usually .sdf)
   // Supported extensions .asc, .dif, .sdf, .seq
   string symbolFile = 3;
@@ -246,7 +246,7 @@ message StartProgramRequest {
   string station = 2;
   // Parent module name
   string module = 3;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 4;
 }
 
@@ -257,7 +257,7 @@ message StopProgramRequest {
   string station = 2;
   // Parent module name
   string module = 3;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 4;
 }
 
@@ -268,7 +268,7 @@ message DownloadProgramBlocksRequest {
   string station = 2;
   // Parent module name
   string module = 3;
-  // Program name
+  // Target S7 program specified by its name or logical path (excluding project name)
   string program = 4;
   // Force overwrite of online blocks
   bool overwrite = 5;

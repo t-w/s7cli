@@ -169,12 +169,12 @@ namespace S7Cli
                                         overwrite: opt.Overwrite);
                     break;
                 case ImportSymbolsOptions opt:
-                    Api.ImportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile,
+                    Api.ImportSymbols(opt.Project, opt.Program, opt.SymbolFile,
                                       overwrite: opt.Overwrite, nameLeading: opt.NameLeading,
                                       allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    Api.ExportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile);
+                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile);
                     break;
                 case CompileSourceOptions opt:
                     Api.CompileSource(opt.Project, opt.Program, opt.Source);
@@ -191,21 +191,21 @@ namespace S7Cli
                     break;
                 case StartProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Start {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.StartProgram(opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StartProgram(opt.Project, opt.Program);
                     break;
                 case StopProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Stop {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.StopProgram(opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StopProgram(opt.Project, opt.Program);
                     break;
                 case DownloadProgramBlocksOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.DownloadProgramBlocks(opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
+                    Api.DownloadProgramBlocks(opt.Project, opt.Program, opt.Overwrite);
                     break;
                 default:
                     throw new ArgumentException($"Unknown options {options}", nameof(options));

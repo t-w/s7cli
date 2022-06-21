@@ -29,31 +29,17 @@ namespace S7Cli
     /// </summary>
     class ProgramOptions : ProjectOptions
     {
-        [Option("program", Required = true, HelpText = "Program name")]
+        [Option("program", Required = true, HelpText = "Target S7 Program. " +
+            "Program name or logical path to program (excluding project name), " +
+            "e.g. `SIMATIC 300(1)\\CPU 319 - 3 PN/DP\\S7 Program`")]
         public string Program { get; set; }
-    }
-
-    /// <summary>
-    /// Options for every command that requires a program to be specified by its logical path
-    /// </summary>
-    class ProgramPathOptions : ProjectOptions
-    {
-        [Option("programPath", Required = true, HelpText = "Logical path to program")]
-        public string ProgramPath { get; set; }
     }
 
     /// <summary>
     /// Options for every online command that requires a program to be specified
     /// </summary>
-    class OnlineProgramOptions : ProjectOptions
+    class OnlineProgramOptions : ProgramOptions
     {
-        [Option("station", Required = true, HelpText = "Station name")]
-        public string Station { get; set; }
-        [Option("module", Required = true, HelpText = "Parent module name")]
-        public string Module { get; set; }
-        [Option("program", Required = true, HelpText = "Program name")]
-        public string Program { get; set; }
-
         [Option('f', "force", HelpText = "Run command without confirmation")]
         public bool Force { get; set; }
     }
@@ -160,7 +146,7 @@ namespace S7Cli
     }
 
     [Verb("importSymbols", HelpText = "Import symbols into a program from a file.")]
-    class ImportSymbolsOptions : ProgramPathOptions
+    class ImportSymbolsOptions : ProgramOptions
     {
         [Option("symbolFile", Required = true,
             HelpText = "Path to input symbol table file (.sdf, .asc, .dif, .seq)")]
@@ -176,7 +162,7 @@ namespace S7Cli
     }
 
     [Verb("exportSymbols", HelpText = "Export program symbols to a file.")]
-    class ExportSymbolsOptions : ProgramPathOptions
+    class ExportSymbolsOptions : ProgramOptions
     {
         [Option("symbolFile", Required = true,
             HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]

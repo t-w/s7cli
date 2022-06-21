@@ -410,7 +410,7 @@ namespace S7Server
         private void ImportSymbolsImpl(IS7Handle s7Handle, ImportSymbolsRequest req)
         {
             GetSymbolImportFlag(req.Flag, out bool overwrite, out bool nameLeading);
-            s7Handle.ImportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
+            s7Handle.ImportSymbols(project: req.Project, program: req.Program, symbolFile: req.SymbolFile,
                                    overwrite: overwrite, nameLeading: nameLeading, allowConflicts: req.AllowConflicts);
         }
 
@@ -422,7 +422,7 @@ namespace S7Server
 
         private void ExportSymbolsImpl(IS7Handle s7Handle, ExportSymbolsRequest req)
         {
-            s7Handle.ExportSymbols(project: req.Project, programPath: req.ProgramPath, symbolFile: req.SymbolFile,
+            s7Handle.ExportSymbols(project: req.Project, program: req.Program, symbolFile: req.SymbolFile,
                                    overwrite: req.Overwrite);
         }
 
@@ -513,8 +513,7 @@ namespace S7Server
 
         private void StartProgramImpl(IS7Handle s7Handle, StartProgramRequest req)
         {
-            s7Handle.StartProgram(project: req.Project, station: req.Station,
-                                  module: req.Module, program: req.Program);
+            s7Handle.StartProgram(project: req.Project, program: req.Program);
         }
 
         public override Task<StatusReply> StartProgram(StartProgramRequest req, ServerCallContext context)
@@ -525,8 +524,7 @@ namespace S7Server
 
         private void StopProgramImpl(IS7Handle s7Handle, StopProgramRequest req)
         {
-            s7Handle.StopProgram(project: req.Project, station: req.Station,
-                                 module: req.Module, program: req.Program);
+            s7Handle.StopProgram(project: req.Project, program: req.Program);
         }
 
         public override Task<StatusReply> StopProgram(StopProgramRequest req, ServerCallContext context)
@@ -537,8 +535,7 @@ namespace S7Server
 
         private void DownloadProgramBlocksImpl(IS7Handle s7Handle, DownloadProgramBlocksRequest req)
         {
-            s7Handle.DownloadProgramBlocks(project: req.Project, station: req.Station, module: req.Module,
-                program: req.Program, overwrite: req.Overwrite);
+            s7Handle.DownloadProgramBlocks(project: req.Project, program: req.Program, overwrite: req.Overwrite);
         }
 
         public override Task<StatusReply> DownloadProgramBlocks(DownloadProgramBlocksRequest req, ServerCallContext context)
