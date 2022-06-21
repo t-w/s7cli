@@ -115,16 +115,24 @@ namespace S7Cli
             switch (options)
             {
                 case ListProjectsOptions _:
-                    Api.ListProjects();
+                    var projects = Api.ListProjects();
+                    foreach (var item in projects)
+                        Log.Information("Project={Name}, LogPath={LogPath}", item.Value, item.Key);
                     break;
                 case ListProgramsOptions opt:
-                    Api.ListPrograms(opt.Project);
+                    var programs = Api.ListPrograms(opt.Project);
+                    foreach (var program in programs)
+                        Log.Information("Program={Program}", program);
                     break;
                 case ListContainersOptions opt:
-                    Api.ListContainers(opt.Project);
+                    var containers = Api.ListContainers(opt.Project);
+                    foreach (var container in containers)
+                        Log.Information("Container={Container}", container);
                     break;
                 case ListStationsOptions opt:
-                    Api.ListStations(opt.Project);
+                    var stations = Api.ListStations(opt.Project);
+                    foreach (var station in stations)
+                        Log.Information("Station={Station}", station);
                     break;
                 case CreateProjectOptions opt:
                     Api.CreateProject(opt.ProjectName, opt.ProjectDir);
@@ -161,12 +169,12 @@ namespace S7Cli
                                         overwrite: opt.Overwrite);
                     break;
                 case ImportSymbolsOptions opt:
-                    Api.ImportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile,
+                    Api.ImportSymbols(opt.Project, opt.Program, opt.SymbolFile,
                                       overwrite: opt.Overwrite, nameLeading: opt.NameLeading,
                                       allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    Api.ExportSymbols(opt.Project, opt.ProgramPath, opt.SymbolFile);
+                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile);
                     break;
                 case CompileSourceOptions opt:
                     Api.CompileSource(opt.Project, opt.Program, opt.Source);
@@ -183,21 +191,21 @@ namespace S7Cli
                     break;
                 case StartProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Start {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Start {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.StartProgram(opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StartProgram(opt.Project, opt.Program);
                     break;
                 case StopProgramOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Stop {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Stop {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.StopProgram(opt.Project, opt.Station, opt.Module, opt.Program);
+                    Api.StopProgram(opt.Project, opt.Program);
                     break;
                 case DownloadProgramBlocksOptions opt:
                     if (!opt.Force)
-                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}:{opt.Station}:{opt.Module}:{opt.Program}"))
+                        if (!Confirm($"[ONLINE] Download blocks in {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.DownloadProgramBlocks(opt.Project, opt.Station, opt.Module, opt.Program, opt.Overwrite);
+                    Api.DownloadProgramBlocks(opt.Project, opt.Program, opt.Overwrite);
                     break;
                 default:
                     throw new ArgumentException($"Unknown options {options}", nameof(options));

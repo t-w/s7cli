@@ -5,6 +5,14 @@ namespace S7Lib
     /// <summary>
     /// Provides functions to interact with Simatic
     /// </summary>
+    /// <remarks>
+    /// Some method arguments can be specified in more than one way, such as `project` and `program`.
+    /// This is so users can conveniently refer to names they know are unique in their system or project.
+    /// However, neither project names nor program names are enforced to be unique.
+    /// For this reason, whenever possible, the STEP 7 project should be specified by the path to the .s7p file.
+    /// Similarly, the program should be preferably specified by its logical path
+    /// (`logPath = $"{station}\\{module}\\{program}"`) e.g. `"SIMATIC 300(1)\CPU 319-3 PN/DP\S7 Program"`.
+    /// </remarks>
     public interface IS7Handle
     {
         /// <summary>
@@ -37,7 +45,7 @@ namespace S7Lib
         /// Import source into a program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="source">Path to source file</param>
         /// <param name="overwrite">Force overwrite existing source in project</param>
         void ImportSource(string project, string program, string source, bool overwrite = true);
@@ -46,7 +54,7 @@ namespace S7Lib
         /// Import sources from a directory into a program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="sourcesDir">Directory from which to import sources</param>
         /// <param name="overwrite">Force overwrite existing sources in project</param>
         void ImportSourcesDir(string project, string program, string sourcesDir, bool overwrite = true);
@@ -54,19 +62,18 @@ namespace S7Lib
         /// <summary>
         /// Import sources from a library into a program
         /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
-        /// <param name="projProgram">Destination program name</param>
+        /// <param name="projProgram">Destination S7 program</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
+        /// <param name="libProgram">Source library S7 program</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
-        void ImportLibSources(string library, string libProgram, string project, string projProgram,
-            bool overwrite = true);
+        void ImportLibSources(string project, string projProgram, string library, string libProgram, bool overwrite = true);
 
         /// <summary>
         /// Exports all sources from a program to a directory
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="sourcesDir">Directory to which to export sources</param>
         void ExportAllSources(string project, string program, string sourcesDir);
 
@@ -74,7 +81,7 @@ namespace S7Lib
         /// Exports a source from a program to a directory
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="source">Source name</param>
         /// <param name="sourcesDir">Directory to which to export sources</param>
         void ExportSource(string project, string program, string source, string sourcesDir);
@@ -90,25 +97,25 @@ namespace S7Lib
         /// Compiles multiple source, in order
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="sources">Ordered list of source names</param>
         void CompileSources(string project, string program, List<string> sources);
 
         /// <summary>
         /// Import blocks from a directory into a project
         /// </summary>
-        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
         /// <param name="project">Destination project id, path to .s7p (unique) or project name</param>
-        /// <param name="libProgram">Source library program name</param>
         /// <param name="projProgram">Destination program name</param>
+        /// <param name="library">Source library id, path to .s7l (unique) or library name</param>
+        /// <param name="libProgram">Source library program name</param>
         /// <param name="overwrite">Force overwrite existing sources in destination project</param>
-        void ImportLibBlocks(string library, string libProgram, string project, string projProgram, bool overwrite = true);
+        void ImportLibBlocks(string project, string projProgram, string library, string libProgram, bool overwrite = true);
 
         /// <summary>
         /// Imports symbols into a program from a file
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="programPath">Logical path to program (not including project name)</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="symbolFile">Path to input symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
@@ -119,19 +126,19 @@ namespace S7Lib
         /// - true: entries with the same symbol name are replaced. The addresses are adjusted according to the specifications in the import file.
         /// </param>
         /// <param name="allowConflicts">If false, an exception is raised if a conflict is detected</param>
-        void ImportSymbols(string project, string programPath, string symbolFile, bool overwrite = false,
+        void ImportSymbols(string project, string program, string symbolFile, bool overwrite = false,
             bool nameLeading = false, bool allowConflicts = false);
 
         /// <summary>
         /// Exports symbols from program from into a file
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="programPath">Logical path to program (not including project name)</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="symbolFile">Path to output symbol table file (usually .sdf)
         ///     Supported extensions .asc, .dif, .sdf, .seq
         /// </param>
         /// <param name="overwrite">Overwrite output file if it exists</param>
-        void ExportSymbols(string project, string programPath, string symbolFile, bool overwrite = false);
+        void ExportSymbols(string project, string program, string symbolFile, bool overwrite = false);
 
         /// <summary>
         /// Exports the hardware configuration of a target station
@@ -169,8 +176,8 @@ namespace S7Lib
         /// Compile source
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Program name</param>
-        /// <param name="source">Source name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
+        /// <param name="sourceName">Source name</param>
         void CompileSource(string project, string program, string sourceName);
 
         /// <summary>
@@ -197,28 +204,22 @@ namespace S7Lib
         /// Downloads all the blocks under an S7Program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         /// <param name="overwrite">Force overwrite of online blocks</param>
-        void DownloadProgramBlocks(string project, string station, string module, string program, bool overwrite);
+        void DownloadProgramBlocks(string project, string program, bool overwrite);
 
         /// <summary>
         /// Starts/restarts a program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
-        void StartProgram(string project, string station, string module, string program);
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
+        void StartProgram(string project, string program);
 
         /// <summary>
         /// Stops a program
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="station">Station name</param>
-        /// <param name="module">Parent module name</param>
-        /// <param name="program">Program name</param>
-        void StopProgram(string project, string station, string module, string program);
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
+        void StopProgram(string project, string program);
     }
 }

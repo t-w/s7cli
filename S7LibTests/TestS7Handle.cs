@@ -19,7 +19,7 @@ namespace S7LibTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
         {
-            Directory.CreateDirectory(WorkspaceDir);
+            var workspace = Directory.CreateDirectory(WorkspaceDir);
             using (var api = new S7Handle())
             {
                 try
@@ -171,8 +171,12 @@ namespace S7LibTests
             using (var api = new S7Handle())
             {
                 api.CompileSource("AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
+                // Specify program by name
                 api.ImportLibBlocks(library: "AWP_Demo01", libProgram: "S7-Programm",
                                     project: "testProj", projProgram: "testProgram");
+                // Specify program by name logical path
+                api.ImportLibBlocks(library: "AWP_Demo01", libProgram: "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm",
+                    project: "testProj", projProgram: "testProgram");
             }
         }
 
@@ -205,8 +209,12 @@ namespace S7LibTests
             using (var api = new S7Handle())
             {
                 var symbolFile = Path.Combine(WorkspaceDir, "awp_demo01.sdf");
+                // Specify program by name
+                api.ExportSymbols("AWP_Demo01", "S7-Programm", symbolFile, overwrite: true);
+                api.ImportSymbols("testProj", "testProgram", symbolFile, overwrite: true);
+                // Specify program by name logical path
                 api.ExportSymbols("AWP_Demo01", "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm", symbolFile, overwrite: true);
-                api.ImportSymbols("testProj", "testProgram", symbolFile);
+                api.ImportSymbols("testProj", "testProgram", symbolFile, overwrite: true);
             }
         }
 
