@@ -581,16 +581,27 @@ namespace S7Lib
         /// <returns>Report string</returns>
         private string GetImportReport(out int errors, out int warnings, out int conflicts)
         {
+            Log.Debug("Reading import report in {ReportFile}.", ReportFilePath);
+
             string report = ReadFile(ReportFilePath);
-            string[] split = report.Split('\n');
+            string pattern = @"Error: (\d+)[\n\r]+Warning\(s\): (\d+)[\n\r]+Conflict\(s\): (\d+)";
+            var matches = Regex.Matches(report, pattern, RegexOptions.Multiline);
+            if (matches.Count != 1 || matches[0].Groups.Count != 4)
+            {
+                throw new Exception("Could not extract error count from import report.");
+            }
 
-            int errorIndex = Array.FindIndex<string>(split, s => Regex.IsMatch(s, "^Error:.*"));
-            int warningsIndex = errorIndex + 1;
-            int conflictsIndex = errorIndex + 2;
-
-            errors = Int32.Parse(split[errorIndex].Split(' ')[1]);
-            warnings = Int32.Parse(split[warningsIndex].Split(' ')[1]);
-            conflicts = Int32.Parse(split[conflictsIndex].Split(' ')[1]);
+            try
+            {
+                errors = Int32.Parse(matches[0].Groups[1].Value);
+                warnings = Int32.Parse(matches[0].Groups[2].Value);
+                conflicts = Int32.Parse(matches[0].Groups[3].Value);
+            }
+            catch (Exception)
+            {
+                Log.Error("Could not extract error count from report in {ReportFile}.", ReportFilePath);
+                throw;
+            }
 
             return report;
         }
