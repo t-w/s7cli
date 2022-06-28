@@ -246,6 +246,8 @@ namespace S7LibTests
         }
 
         [TestMethod]
+        [Ignore]
+        // TODO Remove dependency on local project PIC_LAB864
         public void TestEditModule()
         {
             var properties = new Dictionary<string, object>()
@@ -263,6 +265,8 @@ namespace S7LibTests
         }
 
         [TestMethod]
+        [Ignore]
+        // TODO Remove dependency on local project PIC_LAB864
         public void TestEditModuleInvalidProperty()
         {
             var properties = new Dictionary<string, object>()
