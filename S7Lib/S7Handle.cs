@@ -766,6 +766,113 @@ namespace S7Lib
             CreateProjectImpl(projectName, projectDir, S7ProjectType.S7Project);
         }
 
+        /// <summary>
+        /// Initializes existing project with basic elements.
+        ///
+        /// Concretely, creates a station (either S7-300 or S7-400) with a rack and a CPU.
+        /// Adds a subnetwork and a PN-IO subsystem attached to it and the CPU's PN-IO submodule.
+        /// Optionally adds an S7 connection for connecting to a remote server, e.g. a WinCC OA SCADA server.
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="plcName">Name of PLC station</param>
+        /// <param name="plcType">Type of PLC station {"S7-300", "S7-400"}</param>
+        /// <param name="cpuName">Name of CPU</param>
+        /// <param name="cpuOrderNumber">CPU order number or MLFB (Machine-Readable Product Designation)</param>
+        /// <param name="cpuFirmwareVersion">CPU firmware version</param>
+        /// <param name="cpuIpAddress">IP address for CPU's PN-IO submodule</param>
+        /// <param name="cpuSubnetMask">Subnetwork mask for CPU's PN-IO submodule</param>
+        /// <param name="cpuRouterAddress">Router address for CPU's PN-IO submodule. By default it's not used.</param>
+        /// <param name="remoteIpAddress">Address for S7 connection with remote server. By default it's not created.</param>
+        /// <exception cref="ArgumentException"></exception>
+        public void InitializeProject(string project, string plcName, string plcType,
+            string cpuName, string cpuOrderNumber, string cpuFirmwareVersion,
+            string cpuIpAddress, string cpuSubnetMask, string cpuRouterAddress = "",
+            string remoteIpAddress = "")
+        {
+            // Derived parameters
+            var stationType = S7StationType.S7300Station;
+            if (plcType.Equals("S7-300"))
+                stationType = S7StationType.S7300Station;
+            else if (plcType.Equals("S7-400"))
+                stationType = S7StationType.S7400Station;
+            else
+                throw new ArgumentException("Unsupported PLC type. Chose from {`S7-300`,`S7-400`}", nameof(plcType));
+
+            bool routerActive = !string.IsNullOrEmpty(cpuRouterAddress);
+
+            string rackName, rackOrderNumber, rackVersion;
+            if (stationType == S7StationType.S7300Station)
+            {
+                rackName = "UR";
+                rackOrderNumber = "6ES7 390-1???0-0AA0";
+                rackVersion = "";
+            }
+            else
+            {
+                // TODO What should the default rack be? Turn into parameter?
+                rackName = "UR1";
+                rackOrderNumber = "6ES7 400-1TA00-0AA0";
+                rackVersion = "";
+            }
+
+            // Constants
+            const int RackSubstationNumber = 0;
+            const int CpuSlot = 2;
+            const string EthernetName = "ETHERNET(1)";
+            const string SubnetId = "006A00000005";
+            const int PnIoSubSystemIndex = 100;
+
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var projectObj = wrapper.Add(() => GetProject(project));
+
+                Log.Debug("Adding S7Station for PLC {Name} ({Type}).", plcName, stationType);
+                var station = wrapper.Add(() => projectObj.Stations.Add(plcName, stationType)) as IS7Station5;
+
+                Log.Debug("Adding rack to station.");
+                var racks = wrapper.Add(() => station.Racks);
+                var rack = racks.Add(rackName, rackOrderNumber, rackVersion, RackSubstationNumber);
+                wrapper.Add(() => rack);
+                var modules = wrapper.Add(() => rack.Modules);
+
+                Log.Debug("Adding CPU {Name} ({OrderNumber}) {FWVersion}.", cpuName, cpuOrderNumber, cpuFirmwareVersion);
+                var cpu = modules.Add(cpuName, cpuOrderNumber, cpuFirmwareVersion, CpuSlot) as IS7Module6;
+                wrapper.Add(() => cpu);
+
+                Log.Debug("Adding subnetwork {EthernetName}.", EthernetName);
+                var ethernetSubnet = wrapper.Add(() => station.Subnets.Add(EthernetName, S7SubnetType.INDUSTRIAL_ETHERNET));
+                ethernetSubnet.Attribute["NET_ID"] = SubnetId;
+
+                Log.Debug("Adding PN/IO subsystem to CPU's PN-IO submodule.");
+                var pnIoModule = GetModuleImpl(cpu.Modules, "PN-IO");
+                wrapper.Add(() => pnIoModule);
+                var pnIoSubSystem = pnIoModule.AddSubSystem(EthernetName, PnIoSubSystemIndex);
+                wrapper.Add(() => pnIoSubSystem);
+                pnIoSubSystem.Attribute["NAME"] = "PROFINET IO System";
+
+                Log.Debug("Setting PN/IO subnetwork attributes.");
+                pnIoModule.IPAddress = AddressToHex(cpuIpAddress);
+                pnIoModule.SubnetMask = AddressToHex(cpuSubnetMask);
+                pnIoModule.RouterActive = routerActive ? 1 : 0;
+                pnIoModule.RouterAddress = AddressToHex(cpuRouterAddress);
+                cpu.LinkSubnet(ethernetSubnet);
+
+                if (string.IsNullOrEmpty(remoteIpAddress))
+                    return;
+
+                Log.Debug("Adding S7 connection for WinCC OA project.");
+                var remoteConnection = wrapper.Add(() => cpu.Conns.Add(S7ConnType.S7_CONNECTION, null));
+                remoteConnection.Attribute["UNSPECIFIED"] = 1;
+                // Do not establish active connection
+                remoteConnection.Attribute["ACTIVE_CONN_SETUP"] = 0;
+                remoteConnection.Attribute["REMOTE_ADDRESS"] = AddressToHex(remoteIpAddress);
+
+                // Force save changes to disk. Otherwise users can run into cryptic errors like
+                //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
+                Api.Save();
+            }
+        }
+
         /// <inheritdoc/>
         public void CreateLibrary(string projectName, string projectDir)
         {
