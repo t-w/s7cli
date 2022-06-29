@@ -866,10 +866,6 @@ namespace S7Lib
                 // Do not establish active connection
                 remoteConnection.Attribute["ACTIVE_CONN_SETUP"] = 0;
                 remoteConnection.Attribute["REMOTE_ADDRESS"] = AddressToHex(remoteIpAddress);
-
-                // Force save changes to disk. Otherwise users can run into cryptic errors like
-                //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
-                Api.Save();
             }
         }
 

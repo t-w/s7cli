@@ -31,12 +31,19 @@ namespace S7LibTests
         [ClassCleanup]
         public static void ClassCleanup()
         {
-
+            using (var api = new S7Handle())
+            {
+                try { api.RemoveProject("S7Api300"); } catch { }
+                try { api.RemoveProject("S7Api400"); } catch { }
+            }
         }
 
         [TestMethod]
         public void TestCreateAndInitS7300Project()
         {
+            // TODO Hotfix
+            //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
+            Thread.Sleep(1000);
             using (var api = new S7Handle())
             {
                 var projectName = "S7Api300";
@@ -59,6 +66,9 @@ namespace S7LibTests
         [TestMethod]
         public void TestCreateAndInitS7400Project()
         {
+            // TODO Hotfix
+            //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
+            Thread.Sleep(1000);
             using (var api = new S7Handle())
             {
                 var projectName = "S7Api400";
