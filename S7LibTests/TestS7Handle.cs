@@ -13,7 +13,8 @@ namespace S7LibTests
     public class TestS7Handle
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
-        static readonly string ResourcesDir = Path.GetFullPath(@"..\..\resources\");
+        static readonly string CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        static readonly string ResourcesDir = Path.GetFullPath(CurrentDirectory + @"\..\..\resources\");
         static readonly string SourcesDir = Path.Combine(ResourcesDir, @"sources\");
 
         [ClassInitialize]
