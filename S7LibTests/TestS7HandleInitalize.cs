@@ -14,13 +14,11 @@ namespace S7LibTests
     public class TestS7HandleInitialize
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
-        static readonly string ResourcesDir = Path.GetFullPath(@"..\..\resources\");
-        static readonly string SourcesDir = Path.Combine(ResourcesDir, @"sources\");
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
         {
-            var workspace = Directory.CreateDirectory(WorkspaceDir);
+            var _ = Directory.CreateDirectory(WorkspaceDir);
             using (var api = new S7Handle())
             {
                 try { api.RemoveProject("S7Api300"); } catch { }
@@ -43,7 +41,7 @@ namespace S7LibTests
         {
             // TODO Hotfix
             //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             using (var api = new S7Handle())
             {
                 var projectName = "S7Api300";
@@ -68,7 +66,7 @@ namespace S7LibTests
         {
             // TODO Hotfix
             //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             using (var api = new S7Handle())
             {
                 var projectName = "S7Api400";
@@ -87,5 +85,49 @@ namespace S7LibTests
                     cpuIpAddress, cpuSubnetMask, cpuRouterAddress, wccIpAddress);
             }
         }
+
+        [TestMethod]
+        public void TestEditModule()
+        {
+            // TODO Rely on S7300 project fixture?
+            // TODO Hotfix
+            //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
+            Thread.Sleep(3000);
+
+            var properties = new Dictionary<string, object>()
+            {
+                {"IPAddress", "137.138.25.92"},
+                {"SubnetMask", "255.255.255.128"},
+                {"RouterAddress", "137.138.25.65"},
+                {"RouterActive", true }
+            };
+
+            using (var api = new S7Handle())
+            {
+                api.EditModule("S7Api300", "PLCCOIS20", "UR", "S7-315-2PN/DP", properties);
+            };
+        }
+
+        [TestMethod]
+        public void TestEditModuleInvalidProperty()
+        {
+            // TODO Rely on S7300 project fixture?
+            // TODO Hotfix
+            //  System.InvalidCastException: Unable to cast COM object of type 'System.__ComObject' to interface type 'S7HCOM_XLib.*'
+            Thread.Sleep(3000);
+
+            var properties = new Dictionary<string, object>()
+            {
+                {"InvalidProperty", ""},
+                {"RouterActive", true }
+            };
+
+            using (var api = new S7Handle())
+            {
+                Assert.ThrowsException<ArgumentException>(
+                    () => api.EditModule("S7Api300", "PLCCOIS20", "UR", "S7-315-2PN/DP", properties));
+            };
+        }
+
     }
 }

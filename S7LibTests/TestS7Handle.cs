@@ -239,42 +239,5 @@ namespace S7LibTests
                 api.CompileAllStations("AWP_Demo01");
             }
         }
-
-        [TestMethod]
-        [Ignore]
-        // TODO Remove dependency on local project PIC_LAB864
-        public void TestEditModule()
-        {
-            var properties = new Dictionary<string, object>()
-            {
-                {"IPAddress", "137.138.25.92"},
-                {"SubnetMask", "255.255.255.128"},
-                {"RouterAddress", "137.138.25.65"},
-                {"RouterActive", true }
-            };
-
-            using (var api = new S7Handle())
-            {
-                api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties);
-            };
-        }
-
-        [TestMethod]
-        [Ignore]
-        // TODO Remove dependency on local project PIC_LAB864
-        public void TestEditModuleInvalidProperty()
-        {
-            var properties = new Dictionary<string, object>()
-            {
-                {"InvalidProperty", ""},
-                {"RouterActive", true }
-            };
-
-            using (var api = new S7Handle())
-            {
-                Assert.ThrowsException<ArgumentException>(
-                    () => api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties));
-            };
-        }
     }
 }
