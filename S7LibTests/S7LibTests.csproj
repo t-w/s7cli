@@ -52,7 +52,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="TestS7HandleInitalize.cs" />
+    <Compile Include="TestExperimentalS7Handle.cs" />
     <Compile Include="TestS7Handle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

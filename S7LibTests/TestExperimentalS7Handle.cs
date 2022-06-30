@@ -10,8 +10,11 @@ using S7Lib;
 
 namespace S7LibTests
 {
+    /// <summary>
+    /// Tests experimental features of S7Lib
+    /// </summary>
     [TestClass]
-    public class TestS7HandleInitialize
+    public class TestExperimentalS7Handle
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
 
