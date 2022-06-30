@@ -20,15 +20,12 @@ namespace S7LibTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
         {
-            var workspace = Directory.CreateDirectory(WorkspaceDir);
+            var _ = Directory.CreateDirectory(WorkspaceDir);
             using (var api = new S7Handle())
             {
-                try
-                {
-                    api.RemoveProject("testProj");
-                    api.RemoveProject("testLib");
-                }
-                catch { }
+                try { api.RemoveProject("testProj"); } catch { }
+                try { api.RemoveProject("testProject"); } catch { }
+                try { api.RemoveProject("testLib"); } catch { }
 
                 api.CreateProject("testProj", WorkspaceDir);
                 api.CreateProgram("testProj", "testProgram");
@@ -41,15 +38,9 @@ namespace S7LibTests
         {
             using (var api = new S7Handle())
             {
-                try
-                {
-                    api.RemoveProject("testProj");
-                    api.RemoveProject("testLib");
-                }
-                catch (Exception exc)
-                {
-                    Console.WriteLine(exc);
-                }
+                try { api.RemoveProject("testProj"); } catch { }
+                try { api.RemoveProject("testProject"); } catch { }
+                try { api.RemoveProject("testLib"); } catch { }
             }
         }
 
@@ -100,12 +91,15 @@ namespace S7LibTests
         }
 
         [TestMethod]
-        public void TestCreateInvalidProject()
+        public void TestCreateProjectLongName()
         {
             using (var api = new S7Handle())
             {
-                Assert.ThrowsException<ArgumentException>(
-                    () => api.CreateProject("testProject", WorkspaceDir));
+                var projectName = "testProject";
+                api.CreateProject("testProject", WorkspaceDir);
+                var shortName = projectName.Substring(0, 8);
+                var projectPath = Path.Combine(WorkspaceDir, $"{shortName}\\{shortName}.s7p");
+                Assert.IsTrue(File.Exists(projectPath));
             }
         }
 

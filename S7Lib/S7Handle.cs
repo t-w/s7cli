@@ -371,24 +371,23 @@ namespace S7Lib
 
             if (projectName.Length > 8)
             {
-                Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
-                throw new ArgumentException($"Invalid project name {projectName}: has more than 8 characters.",
-                    nameof(projectName));
+                Log.Warning("Provided project name {Name} is longer than 8 characters. " +
+                    "The name of the parent directory and .s7p file will be shortened.", projectName);
             }
 
             if (ProjectIsRegistered(projectName))
             {
                 // Otherwise Projects.Add() spawns a blocking GUI error message
                 Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
-                throw new ArgumentException($"Project with name {projectName} already exists.");
+                throw new ArgumentException($"Project with name {projectName} already exists.", nameof(projectName));
             }
 
             using (var wrapper = new ReleaseWrapper())
             {
                 try
                 {
-                    wrapper.Add(() => Api.Projects.Add(projectName, projectDir, projectType));
-
+                    var project = wrapper.Add(() => Api.Projects.Add(projectName, projectDir, projectType));
+                    Log.Information("Created empty project {Name} in {LogPath}.", project.Name, project.LogPath);
                 }
                 catch (COMException exc)
                 {
