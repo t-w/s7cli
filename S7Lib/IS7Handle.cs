@@ -201,7 +201,7 @@ namespace S7Lib
         List<string> ListContainers(string project);
 
         /// <summary>
-        /// Downloads all the blocks under an S7Program
+        /// Downloads all the blocks under an S7Program to an online CPU
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
@@ -209,17 +209,34 @@ namespace S7Lib
         void DownloadProgramBlocks(string project, string program, bool overwrite);
 
         /// <summary>
-        /// Starts/restarts a program
+        /// Starts/restarts a program in the online CPU
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         void StartProgram(string project, string program);
 
         /// <summary>
-        /// Stops a program
+        /// Stops a program in the online CPU
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
         void StopProgram(string project, string program);
+
+        /// <summary>
+        /// Resets the program memory in the online CPU
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
+        void ResetProgram(string project, string program);
+
+        /// <summary>
+        /// Compresses the program memory in the online CPU
+        /// </summary>
+        /// <remarks>
+        /// Clears memory still occupied by already deleted blocks.
+        /// </remarks>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
+        void CompressProgram(string project, string program);
     }
 }

@@ -13,21 +13,19 @@ namespace S7LibTests
     public class TestS7Handle
     {
         static readonly string WorkspaceDir = Path.Combine(Path.GetTempPath(), "UnitTestS7");
-        static readonly string ResourcesDir = Path.GetFullPath(@"..\..\resources\");
+        static readonly string CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        static readonly string ResourcesDir = Path.GetFullPath(CurrentDirectory + @"\..\..\resources\");
         static readonly string SourcesDir = Path.Combine(ResourcesDir, @"sources\");
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
         {
-            var workspace = Directory.CreateDirectory(WorkspaceDir);
+            var _ = Directory.CreateDirectory(WorkspaceDir);
             using (var api = new S7Handle())
             {
-                try
-                {
-                    api.RemoveProject("testProj");
-                    api.RemoveProject("testLib");
-                }
-                catch { }
+                try { api.RemoveProject("testProj"); } catch { }
+                try { api.RemoveProject("testProject"); } catch { }
+                try { api.RemoveProject("testLib"); } catch { }
 
                 api.CreateProject("testProj", WorkspaceDir);
                 api.CreateProgram("testProj", "testProgram");
@@ -40,15 +38,9 @@ namespace S7LibTests
         {
             using (var api = new S7Handle())
             {
-                try
-                {
-                    api.RemoveProject("testProj");
-                    api.RemoveProject("testLib");
-                }
-                catch (Exception exc)
-                {
-                    Console.WriteLine(exc);
-                }
+                try { api.RemoveProject("testProj"); } catch { }
+                try { api.RemoveProject("testProject"); } catch { }
+                try { api.RemoveProject("testLib"); } catch { }
             }
         }
 
@@ -99,12 +91,15 @@ namespace S7LibTests
         }
 
         [TestMethod]
-        public void TestCreateInvalidProject()
+        public void TestCreateProjectLongName()
         {
             using (var api = new S7Handle())
             {
-                Assert.ThrowsException<ArgumentException>(
-                    () => api.CreateProject("testProject", WorkspaceDir));
+                var projectName = "testProject";
+                api.CreateProject("testProject", WorkspaceDir);
+                var shortName = projectName.Substring(0, 8);
+                var projectPath = Path.Combine(WorkspaceDir, $"{shortName}\\{shortName}.s7p");
+                Assert.IsTrue(File.Exists(projectPath));
             }
         }
 
@@ -243,43 +238,6 @@ namespace S7LibTests
             {
                 api.CompileAllStations("AWP_Demo01");
             }
-        }
-
-        [TestMethod]
-        [Ignore]
-        // TODO Remove dependency on local project PIC_LAB864
-        public void TestEditModule()
-        {
-            var properties = new Dictionary<string, object>()
-            {
-                {"IPAddress", "137.138.25.92"},
-                {"SubnetMask", "255.255.255.128"},
-                {"RouterAddress", "137.138.25.65"},
-                {"RouterActive", true }
-            };
-
-            using (var api = new S7Handle())
-            {
-                api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties);
-            };
-        }
-
-        [TestMethod]
-        [Ignore]
-        // TODO Remove dependency on local project PIC_LAB864
-        public void TestEditModuleInvalidProperty()
-        {
-            var properties = new Dictionary<string, object>()
-            {
-                {"InvalidProperty", ""},
-                {"RouterActive", true }
-            };
-
-            using (var api = new S7Handle())
-            {
-                Assert.ThrowsException<ArgumentException>(
-                    () => api.EditModule("PIC_LAB864_AL8", "SIMATIC 300(1)", "UR", "CPU 319-3 PN/DP\\PN-IO", properties));
-            };
         }
     }
 }
