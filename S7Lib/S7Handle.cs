@@ -1539,6 +1539,48 @@ namespace S7Lib
             }
         }
 
+        /// <inheritdoc/>
+        public void ResetProgram(string project, string program)
+        {
+            Log.Information("[ONLINE] Resetting program {Project}\\{Program}.", project, program);
+
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var programObj = wrapper.Add(() => GetProgram(project, program));
+
+                try
+                {
+                    programObj.Reset();
+                }
+                catch (Exception exc)
+                {
+                    Log.Error(exc, "Could not reset {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
+                    throw;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public void CompressProgram(string project, string program)
+        {
+            Log.Information("[ONLINE] Compressing program {Project}\\{Program}.", project, program);
+
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var programObj = wrapper.Add(() => GetProgram(project, program));
+
+                try
+                {
+                    programObj.Compress();
+                }
+                catch (Exception exc)
+                {
+                    Log.Error(exc, "Could not compress {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
+                    throw;
+                }
+            }
+        }
+
         #endregion
 
         #endregion
