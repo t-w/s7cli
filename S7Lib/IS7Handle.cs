@@ -201,7 +201,7 @@ namespace S7Lib
         List<string> ListContainers(string project);
 
         /// <summary>
-        /// Downloads all the blocks under an S7Program to an online CPU
+        /// Downloads all the blocks under a program to an online CPU
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
@@ -223,20 +223,13 @@ namespace S7Lib
         void StopProgram(string project, string program);
 
         /// <summary>
-        /// Resets the program memory in the online CPU
-        /// </summary>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
-        /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
-        void ResetProgram(string project, string program);
-
-        /// <summary>
-        /// Compresses the program memory in the online CPU
+        /// Removes user blocks under a program in the online CPU
         /// </summary>
         /// <remarks>
-        /// Clears memory still occupied by already deleted blocks.
+        /// Skips system blocks, such as SFC, SFB, SDB and SDBs.
         /// </remarks>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
-        void CompressProgram(string project, string program);
+        void RemoveProgramOnlineBlocks(string project, string program);
     }
 }
