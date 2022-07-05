@@ -220,12 +220,15 @@ namespace S7Cli
     [Verb("stopProgram", HelpText = "[ONLINE] Stop running a program.")]
     class StopProgramOptions : OnlineProgramOptions { }
 
-    [Verb("downloadProgramBlocks", HelpText = "[ONLINE] Download all the blocks under an S7Program.")]
+    [Verb("downloadProgramBlocks", HelpText = "[ONLINE] Download all the blocks under a program.")]
     class DownloadProgramBlocksOptions : OnlineProgramOptions
     {
         [Option("overwrite", HelpText = "Force overwrite of online blocks")]
         public bool Overwrite { get; set; }
     }
+
+    [Verb("removeProgramOnlineBlocks", HelpText = "[ONLINE] Removes all the user blocks under a program.")]
+    class removeProgramOnlineBlocksOptions : OnlineProgramOptions { }
 
     /// <summary>
     /// Class for obtaining the types of each options class

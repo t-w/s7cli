@@ -46,6 +46,12 @@ namespace S7Lib
             "sym_imp - Notepad", "sym_imp.txt - Notepad"
         };
 
+        // Block types considered as system, or non-user blocks
+        private static readonly HashSet<S7BlockType> SystemBlockTypes = new HashSet<S7BlockType>()
+        {
+            S7BlockType.S7SDB, S7BlockType.S7SDBs, S7BlockType.S7SFB, S7BlockType.S7SFC
+        };
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -74,8 +80,9 @@ namespace S7Lib
         {
             if (Api != null)
             {
-                // TODO Understand why this throws a COM exception
-                //Api.Close();
+                // It's unsafe to use `Api.Close()`. As per the official documentation:
+                //  "If a station or another hardware object is accessed during the process runtime,
+                //  the Close method cannot be used."
                 Marshal.ReleaseComObject(Api);
             }
         }
@@ -1540,43 +1547,41 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void ResetProgram(string project, string program)
+        public void RemoveProgramOnlineBlocks(string project, string program)
         {
-            Log.Information("[ONLINE] Resetting program {Project}\\{Program}.", project, program);
+            Log.Information("[ONLINE] Removing blocks {Project}\\{Program}.", project, program);
 
             using (var wrapper = new ReleaseWrapper())
             {
                 var programObj = wrapper.Add(() => GetProgram(project, program));
+                var onlineBlocks = wrapper.Add(() => programObj.OnlineBlocks);
+
+                // Improve performance by stopping program
+                try { programObj.Stop(); } catch (COMException) { }
+                // Improve performance by preventing automatic project saves on `block.Remove()`
+                var prevAutomaticSave = Api.AutomaticSave;
+                Api.AutomaticSave = 0;
 
                 try
                 {
-                    programObj.Reset();
+                    foreach (var onlineBlock in onlineBlocks)
+                    {
+                        var block = onlineBlock as IS7Block3;
+                        wrapper.Add(() => block);
+                        if (SystemBlockTypes.Contains(block.ConcreteType))
+                            continue;
+                        Log.Debug("Removing online block {Name}.", block.Name);
+                        block.Remove();
+                    }
                 }
-                catch (Exception exc)
+                catch (COMException exc)
                 {
-                    Log.Error(exc, "Could not reset {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
+                    Log.Error(exc, "Could not remove blocks in {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
                     throw;
                 }
-            }
-        }
-
-        /// <inheritdoc/>
-        public void CompressProgram(string project, string program)
-        {
-            Log.Information("[ONLINE] Compressing program {Project}\\{Program}.", project, program);
-
-            using (var wrapper = new ReleaseWrapper())
-            {
-                var programObj = wrapper.Add(() => GetProgram(project, program));
-
-                try
+                finally
                 {
-                    programObj.Compress();
-                }
-                catch (Exception exc)
-                {
-                    Log.Error(exc, "Could not compress {Program} in {LogPath}.", programObj.Name, programObj.LogPath);
-                    throw;
+                    Api.AutomaticSave = prevAutomaticSave;
                 }
             }
         }
