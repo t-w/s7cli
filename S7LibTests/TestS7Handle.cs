@@ -156,7 +156,7 @@ namespace S7LibTests
             using (var api = new S7Handle())
             {
                 api.ImportLibSources(library: "AWP_Demo01", libProgram: "S7-Programm",
-                                     project: "testProj", projProgram: "testProgram");
+                                     project: "testProj", program: "testProgram");
             }
         }
 
@@ -168,10 +168,10 @@ namespace S7LibTests
                 api.CompileSource("AWP_Demo01", "S7-Programm", "AWP_DB333.AWL");
                 // Specify program by name
                 api.ImportLibBlocks(library: "AWP_Demo01", libProgram: "S7-Programm",
-                                    project: "testProj", projProgram: "testProgram");
+                                    project: "testProj", program: "testProgram");
                 // Specify program by name logical path
                 api.ImportLibBlocks(library: "AWP_Demo01", libProgram: "SIMATIC 300(1)\\CPU 319-3 PN/DP\\S7-Programm",
-                    project: "testProj", projProgram: "testProgram");
+                    project: "testProj", program: "testProgram");
             }
         }
 

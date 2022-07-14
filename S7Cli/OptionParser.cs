@@ -160,12 +160,12 @@ namespace S7Cli
                     break;
                 case ImportLibSourcesOptions opt:
                     Api.ImportLibSources(library: opt.Library, libProgram: opt.LibProgram,
-                                         project: opt.Project, projProgram: opt.ProjProgram,
+                                         project: opt.Project, program: opt.Program,
                                          overwrite: opt.Overwrite);
                     break;
                 case ImportLibBlocksOptions opt:
                     Api.ImportLibBlocks(library: opt.Library, libProgram: opt.LibProgram,
-                                        project: opt.Project, projProgram: opt.ProjProgram,
+                                        project: opt.Project, program: opt.Program,
                                         overwrite: opt.Overwrite);
                     break;
                 case ImportSymbolsOptions opt:

@@ -379,7 +379,7 @@ namespace S7Lib
             if (projectName.Length > 8)
             {
                 Log.Warning("Provided project name {Name} is longer than 8 characters. " +
-                    "The name of the parent directory and .s7p file will be shortened.", projectName);
+                    "The name of the parent directory and .s7p/.s7l file will be shortened.", projectName);
             }
 
             if (ProjectIsRegistered(projectName))
@@ -954,17 +954,17 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void ImportLibSources(string project, string projProgram, string library, string libProgram,
+        public void ImportLibSources(string project, string program, string library, string libProgram,
             bool overwrite = true)
         {
             Log.Debug("Importing sources from {Library}\\{LibProgram} into {Project}\\{ProjProgram}"+
-                " with overwrite={Overwrite}.", library, libProgram, project, projProgram, overwrite);
+                " with overwrite={Overwrite}.", library, libProgram, project, program, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
             {
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var libraryObj = wrapper.Add(() => GetProject(library));
-                var projectContainer = wrapper.Add(() => GetSources(projectObj, projProgram));
+                var projectContainer = wrapper.Add(() => GetSources(projectObj, program));
                 var libraryContainer = wrapper.Add(() => GetSources(libraryObj, libProgram));
                 ImportLibSourcesImpl(projSources: projectContainer, libSources: libraryContainer, overwrite: overwrite);
             }
@@ -1026,17 +1026,17 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void ImportLibBlocks(string project, string projProgram, string library, string libProgram, bool overwrite = true)
+        public void ImportLibBlocks(string project, string program, string library, string libProgram, bool overwrite = true)
         {
             Log.Debug("Importing blocks from {Library}\\{LibProgram} into {Project}\\{ProjProgram} with overwrite={Overwrite}.",
-                library, libProgram, project, projProgram, overwrite);
+                library, libProgram, project, program, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
             {
                 var libraryObj = wrapper.Add(() => GetProject(library));
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var libraryBlocks = wrapper.Add(() => GetBlocks(libraryObj, libProgram));
-                var projectBlocks = wrapper.Add(() => GetBlocks(projectObj, projProgram));
+                var projectBlocks = wrapper.Add(() => GetBlocks(projectObj, program));
 
                 var container = wrapper.Add(() => libraryBlocks.Next);
                 foreach (S7Block libBlock in container)

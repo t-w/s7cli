@@ -118,12 +118,12 @@ message ImportSourcesDirRequest {
 message ImportLibSourcesRequest {
   // Source library id, path to .s7l (unique) or library name
   string library = 1;
-  // Source library program name
+  // Source library program
   string libProgram = 2;
   // Destination project id, path to .s7p (unique) or project name
   string project = 3;
-  // Destination program name
-  string projProgram = 4;
+  // Destination program
+  string program = 4;
   // Force overwrite existing sources in destination project
   bool overwrite = 5;
 }
@@ -169,12 +169,12 @@ message CompileSourcesRequest {
 message ImportLibBlocksRequest {
   // Source library id, path to .s7l (unique) or library name
   string library = 1;
-  // Source library program name
+  // Source library program
   string libProgram = 2;
   // Destination project id, path to .s7p (unique) or project name
   string project = 3;
-  // Destination program name
-  string projProgram = 4;
+  // Destination program
+  string program = 4;
   // Force overwrite existing blocks in destination project
   bool overwrite = 5;
 }
