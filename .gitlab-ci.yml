@@ -56,17 +56,18 @@ test_job:
 
 release_job:
   stage: release
+  # Job should be run in shared linux runner
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
     - if: $CI_COMMIT_TAG
   script:
     - echo "Creating a release for $CI_COMMIT_TAG."
   release:
-    tag_name: '$env:CI_COMMIT_TAG'
-    description: '$env:CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
     assets:
       links:
         - name: 'Binaries'
-          url: 'https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7cli/-/jobs/artifacts/$env:CI_COMMIT_TAG/download?job=build_job'
+          url: 'https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7cli/-/jobs/artifacts/$CI_COMMIT_TAG/download?job=build_job'
         - name: 'API Documentation'
           url: 'https://s7api.web.cern.ch/s7api/index.html'
