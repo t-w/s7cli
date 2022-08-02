@@ -63,6 +63,6 @@ release_job:
     assets:
       links:
         - name: 'Binaries'
-        url: 'https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7cli/-/jobs/artifacts/$env:CI_COMMIT_TAG/download?job=build_job'
+          url: 'https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7cli/-/jobs/artifacts/$env:CI_COMMIT_TAG/download?job=build_job'
         - name: 'API Documentation'
-        url: 'https://s7api.web.cern.ch/s7api/index.html'
+          url: 'https://s7api.web.cern.ch/s7api/index.html'
