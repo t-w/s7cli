@@ -7,6 +7,7 @@ variables:
 stages:
   - build
   - test
+  - release
 
 build_job:
   stage: build
@@ -48,3 +49,20 @@ test_job:
     - '& "$env:VSTEST_PATH" .\S7LibTests\bin\Release\S7LibTests.dll /Tests:TestS7Handle'
   dependencies:
     - build_job
+
+release_job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $env:CI_COMMIT_TAG
+  script:
+    - echo "Creating a release for $CI_COMMIT_TAG."
+  release:
+    tag_name: '$env:CI_COMMIT_TAG'
+    description: '$env:CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'Binaries'
+        url: 'https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7cli/-/jobs/artifacts/$env:CI_COMMIT_TAG/download?job=build_job'
+        - name: 'API Documentation'
+        url: 'https://s7api.web.cern.ch/s7api/index.html'
