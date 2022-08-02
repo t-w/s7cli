@@ -1,5 +1,5 @@
 import os
-import packaging
+from packaging.version import parse as parse_version
 from argparse import ArgumentParser
 
 
@@ -11,7 +11,7 @@ def main():
     args = parser.parse_args()
 
     version_str = os.environ.get("CI_COMMIT_TAG") or "1.0.0"
-    version = version.parse(version_str)
+    version = parse_version(version_str)
     # See https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/versioning
     # Only include major version in assembly version
     assembly_version = f"{version.major}.0.0.0"
