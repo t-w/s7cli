@@ -11,6 +11,8 @@ stages:
 
 build_job:
   stage: build
+  tags:
+    - cvw-plc-s7
   script:
     # Generate correct shared assembly version configuration
     - '& "$env:PYTHON_VENV_PATH"'
@@ -42,6 +44,8 @@ build_job:
 
 test_job:
   stage: test
+  tags:
+    - cvw-plc-s7
   script:
     - '& "$env:VSTEST_PATH" .\S7CliTests\bin\Release\S7CliTests.dll'
     - '& "$env:VSTEST_PATH" .\S7ServerTests\bin\x86\Release\net6.0\S7ServerTests.dll'
