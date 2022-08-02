@@ -54,7 +54,7 @@ release_job:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
-    - if: $env:CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG
   script:
     - echo "Creating a release for $CI_COMMIT_TAG."
   release:
