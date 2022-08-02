@@ -15,7 +15,7 @@ def main():
     # See https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/versioning
     # Only include major version in assembly version
     assembly_version = f"{version.major}.0.0.0"
-    ci_id = os.environ.get("$CI_PIPELINE_IID") or 0
+    ci_id = os.environ.get("CI_PIPELINE_IID") or 0
     assembly_file_version = f"{version.major}.{version.minor}.{version.micro}.{ci_id}"
 
     content = (
