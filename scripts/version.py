@@ -22,6 +22,7 @@ def main():
         f'using System.Reflection;\n\n'
         f'[assembly: AssemblyVersion("{assembly_version}")]\n'
         f'[assembly: AssemblyFileVersion("{assembly_file_version}")]'
+        f'[assembly: AssemblyInformationalVersion("{version}")]'
     )
 
     with open(args.filename,'w') as out:
