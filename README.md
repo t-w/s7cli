@@ -1,11 +1,25 @@
 # S7 API
 
-Refactoring [s7cli] into a layered API.
-The main objectives include
+Set of utilities to interact with Siemens Step7 PLC projects.
 
-- Creating a stateless high-level interface to Siemens' Simatic API for STEP 7 projects
-- Decoupling core logic from application
-- Creating a proper way to programmatically interface with the C# API (as opposed to spawning s7cli processes)
-- Language-agnostic RPC specification, from which we can auto-generate client-side libraries in Python, Java, ...
+ - S7Lib - C# library written on top of SimaticLib (and S7HCOM_XLib).
+ - S7Cli - CLI wrapper of S7Lib.
+ - Step7 gRPC Service and C# Server - Service specification and server implementation for operating on S7 projects.
 
-[s7cli]: https://gitlab.cern.ch/jpechirr/s7cli/-/tree/master
+Initially a fork of TE-CRG's [s7cli].
+
+## Installation
+
+Download the latest binaries from the [Releases] page.
+
+## Documentation
+
+The automatic documentation for the latest release is available in https://s7api.web.cern.ch/.
+
+It can be generated with `Doxygen` as follows:
+```
+doxygen Doxyfile
+```
+
+[s7cli]: https://gitlab.cern.ch/cryo-controls/utils/s7cli
+[Releases]: https://gitlab.cern.ch/industrial-controls/services/plc-automation/s7-api/-/releases

@@ -47,15 +47,11 @@ namespace S7Cli
     /// <summary>
     /// Options for import sources/blocks from library commands
     /// </summary>
-    class ImportFromLibraryOptions : Options
+    class ImportFromLibraryOptions : ProgramOptions
     {
-        [Option("project", Required = true, HelpText = "Path to .s7p project file or project name")]
-        public string Project { get; set; }
-        [Option("library", Required = true, HelpText = "Path to .s7p library project file or library name")]
+        [Option("library", Required = true, HelpText = "Path to .s7l library project file or library name")]
         public string Library { get; set; }
-        [Option("projProgram", Required = true, HelpText = "Destination program name")]
-        public string ProjProgram { get; set; }
-        [Option("libProgram", Required = true, HelpText = "Source library program name")]
+        [Option("libProgram", Required = true, HelpText = "Source library program")]
         public string LibProgram { get; set; }
     }
 

@@ -369,7 +369,7 @@ namespace S7Server
         private void ImportLibSourcesImpl(IS7Handle s7Handle, ImportLibSourcesRequest req)
         {
             s7Handle.ImportLibSources(library: req.Library, libProgram: req.LibProgram, project: req.Project,
-                                      projProgram: req.ProjProgram, overwrite: req.Overwrite);
+                                      program: req.Program, overwrite: req.Overwrite);
         }
 
         public override Task<StatusReply> ImportLibSources(ImportLibSourcesRequest req, ServerCallContext context)
@@ -381,7 +381,7 @@ namespace S7Server
         private void ImportLibBlocksImpl(IS7Handle s7Handle, ImportLibBlocksRequest req)
         {
             s7Handle.ImportLibBlocks(library: req.Library, libProgram: req.LibProgram, project: req.Project,
-                                     projProgram: req.ProjProgram, overwrite: req.Overwrite);
+                                     program: req.Program, overwrite: req.Overwrite);
         }
 
         public override Task<StatusReply> ImportLibBlocks(ImportLibBlocksRequest req, ServerCallContext context)

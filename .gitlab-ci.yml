@@ -7,9 +7,12 @@ variables:
 stages:
   - build
   - test
+  - release
 
 build_job:
   stage: build
+  tags:
+    - cvw-plc-s7
   script:
     # Generate correct shared assembly version configuration
     - '& "$env:PYTHON_VENV_PATH"'
@@ -26,6 +29,7 @@ build_job:
     - cd ./S7Service/Python/
     - python setup.py sdist bdist_wheel
   artifacts:
+    name: 'S7Api_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHORT_SHA}'
     paths:
       # Library
       - '.\S7Lib\bin\Release\'
@@ -41,6 +45,8 @@ build_job:
 
 test_job:
   stage: test
+  tags:
+    - cvw-plc-s7
   script:
     - '& "$env:VSTEST_PATH" .\S7CliTests\bin\Release\S7CliTests.dll'
     - '& "$env:VSTEST_PATH" .\S7ServerTests\bin\x86\Release\net6.0\S7ServerTests.dll'
@@ -48,3 +54,21 @@ test_job:
     - '& "$env:VSTEST_PATH" .\S7LibTests\bin\Release\S7LibTests.dll /Tests:TestS7Handle'
   dependencies:
     - build_job
+
+release_job:
+  stage: release
+  # Job should be run in shared linux runner
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Creating a release for $CI_COMMIT_TAG."
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: 'Binaries'
+          url: 'https://gitlab.cern.ch/$CI_PROJECT_PATH/-/jobs/artifacts/$CI_COMMIT_TAG/download?job=build_job'
+        - name: 'API Documentation'
+          url: 'https://s7api.web.cern.ch/s7api/index.html'
