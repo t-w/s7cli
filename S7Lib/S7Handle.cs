@@ -290,6 +290,26 @@ namespace S7Lib
             return GetContainer(projectObj, program, S7ContainerType.S7BlockContainer);
         }
 
+        /// <summary>
+        /// Traverses modules recursively and appends their name to list
+        /// </summary>
+        /// <param name="moduleNames">Output list of module names</param>
+        /// <param name="modules">Modules root</param>
+        //
+        private void GetModuleNames(List<string> moduleNames, IS7Modules modules)
+        {
+            using (var wrapper = new ReleaseWrapper())
+            {
+                wrapper.Add(() => modules);
+                foreach (var module in modules)
+                {
+                    var moduleObj = (IS7Module)wrapper.Add(() => module);
+                    Log.Debug("Module {Name} Path={LogPath}", moduleObj.Name, moduleObj.LogPath);
+                    moduleNames.Add(moduleObj.Name);
+                    GetModuleNames(moduleNames, moduleObj.Modules);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a S7Source object from a program
@@ -1414,7 +1434,31 @@ namespace S7Lib
                 {
                     var programObj = wrapper.Add(() => program);
                     output.Add(programObj.Name);
-                    Log.Debug("Program {Name}", programObj.Name);
+                    Log.Debug("Program {Name} Path={LogPath}", programObj.Name, programObj.LogPath);
+                }
+            }
+            return output;
+        }
+
+        /// <inheritdoc/>
+        public List<string> ListModules(string project)
+        {
+            Log.Debug("Listing modules for project {Project}.", project);
+
+            var output = new List<string>();
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var projectObj = wrapper.Add(() => GetProject(project));
+                var stations = wrapper.Add(() => projectObj.Stations);
+                foreach (var station in stations)
+                {
+                    var stationObj = (IS7Station6)wrapper.Add(() => station);
+                    var racks = wrapper.Add(() => stationObj.Racks);
+                    foreach (var rack in racks)
+                    {
+                        var rackObj = (IS7Rack)wrapper.Add(() => rack);
+                        GetModuleNames(output, (IS7Modules)rackObj.Modules);
+                    }
                 }
             }
             return output;

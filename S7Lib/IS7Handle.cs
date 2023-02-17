@@ -196,6 +196,11 @@ namespace S7Lib
         List<string> ListStations(string project);
 
         /// <summary>
+        /// Returns list with the names of every module in a given project
+        /// </summary>
+        List<string> ListModules(string project);
+
+        /// <summary>
         /// Returns list with the names of every container in a given project
         /// </summary>
         List<string> ListContainers(string project);

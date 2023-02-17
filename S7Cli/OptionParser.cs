@@ -134,6 +134,11 @@ namespace S7Cli
                     foreach (var station in stations)
                         Log.Information("Station={Station}", station);
                     break;
+                case ListModulesOptions opt:
+                    var modules = Api.ListModules(opt.Project);
+                    foreach (var module in modules)
+                        Log.Information("Module={Module}", module);
+                    break;
                 case CreateProjectOptions opt:
                     Api.CreateProject(opt.ProjectName, opt.ProjectDir);
                     break;

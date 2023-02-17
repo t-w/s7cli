@@ -81,6 +81,15 @@ namespace S7LibTests
         }
 
         [TestMethod]
+        public void TestListModules()
+        {
+            using (var api = new S7Handle())
+            {
+                var stationList = api.ListModules("AWP_Demo07");
+            }
+        }
+
+        [TestMethod]
         public void TestRegisterProject()
         {
             using (var api = new S7Handle())
