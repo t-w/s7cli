@@ -102,6 +102,9 @@ namespace S7Cli
     [Verb("listContainers", HelpText = "List available containers in Simatic project/library.")]
     class ListContainersOptions : ProjectOptions { }
 
+    [Verb("listModules", HelpText = "List available modules in Simatic project/library.")]
+    class ListModulesOptions : ProjectOptions { }
+
     [Verb("importSource", HelpText = "Import source into a program.")]
     class ImportSourceOptions : ProgramOptions
     {
