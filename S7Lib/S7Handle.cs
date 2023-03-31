@@ -11,6 +11,7 @@ using Serilog.Core;
 
 using SimaticLib;
 using S7HCOM_XLib;
+using Newtonsoft.Json;
 
 namespace S7Lib
 {
@@ -1421,7 +1422,7 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public List<string> ListPrograms(string project)
+        public List<string> ListPrograms(string project, bool json = true)
         {
             Log.Debug("Listing programs for project {Project}.", project);
 
@@ -1430,13 +1431,17 @@ namespace S7Lib
             {
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var programs = wrapper.Add(() => projectObj.Programs);
+                var programStr = new List<string>(); 
                 foreach (S7Program program in programs)
                 {
                     var programObj = wrapper.Add(() => program);
-                    output.Add(programObj.Name);
                     Log.Debug("Program {Name} Path={LogPath}", programObj.Name, programObj.LogPath);
+                    var programEntry = json? JsonConvert.SerializeObject(new { name = programObj.Name, logPath = programObj.LogPath })
+                        : programObj.Name;
+                    output.Add(programEntry);
                 }
             }
+
             return output;
         }
 
