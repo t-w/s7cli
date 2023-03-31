@@ -94,7 +94,11 @@ namespace S7Cli
     class ListProjectsOptions : Options { }
 
     [Verb("listPrograms", HelpText = "List available programs in Simatic project/library.")]
-    class ListProgramsOptions : ProjectOptions { }
+    class ListProgramsOptions : ProjectOptions
+    {
+        [Option("json", HelpText = "Produce JSON output to stdout")]
+        public bool Json { get; set; }
+    }
 
     [Verb("listStations", HelpText = "List available stations in Simatic project/library.")]
     class ListStationsOptions : ProjectOptions { }
