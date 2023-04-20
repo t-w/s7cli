@@ -198,7 +198,7 @@ namespace S7Cli
                                       allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile);
+                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile, overwrite: opt.Overwrite);
                     break;
                 case CompileSourceOptions opt:
                     Api.CompileSource(opt.Project, opt.Program, opt.Source);

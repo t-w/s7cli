@@ -170,6 +170,8 @@ namespace S7Cli
         [Option("symbolFile", Required = true,
             HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]
         public string SymbolFile { get; set; }
+        [Option("overwrite", HelpText = "Overwrite output file if it exists.")]
+        public bool Overwrite { get; set; }
     }
 
     [Verb("compileSource", HelpText = "Compile source.")]
