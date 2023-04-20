@@ -52,7 +52,6 @@
   <ItemGroup>
     <Compile Include="TestExperimentalS7Handle.cs" />
     <Compile Include="TestS7Handle.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -64,6 +63,9 @@
       <Project>{900817d5-8c15-470b-b099-fb23824cd0bb}</Project>
       <Name>S7Lib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
