@@ -20,13 +20,11 @@ namespace S7LibTests
         [ClassInitialize]
         public static void ClassInitialize(TestContext testCtx)
         {
+            try { Directory.Delete(WorkspaceDir, recursive: true); } catch { }
+
             var _ = Directory.CreateDirectory(WorkspaceDir);
             using (var api = new S7Handle())
             {
-                try { api.RemoveProject("testProj"); } catch { }
-                try { api.RemoveProject("testProject"); } catch { }
-                try { api.RemoveProject("testLib"); } catch { }
-
                 api.CreateProject("testProj", WorkspaceDir);
                 api.CreateProgram("testProj", "testProgram");
                 api.CreateLibrary("testLib", WorkspaceDir);
@@ -38,9 +36,7 @@ namespace S7LibTests
         {
             using (var api = new S7Handle())
             {
-                try { api.RemoveProject("testProj"); } catch { }
-                try { api.RemoveProject("testProject"); } catch { }
-                try { api.RemoveProject("testLib"); } catch { }
+                try { Directory.Delete(WorkspaceDir, recursive: true); } catch { }
             }
         }
 
