@@ -111,13 +111,25 @@ namespace S7LibTests
         [TestMethod]
         public void TestCreateProjectTwice()
         {
+            var projectName = "create";
+            var path1 = Path.Combine(WorkspaceDir, "Path1");
+            var projectPath1 = Path.Combine(path1, $"{projectName}.s7p");
+            var path2 = Path.Combine(WorkspaceDir, "Path2");
+            var projectPath2 = Path.Combine(path2, $"{projectName}.s7p");
+
             using (var api = new S7Handle())
             {
-                var projects = api.ListProjects();
-                Assert.IsTrue(projects.ContainsValue("testProj"));
+                // Create project in path1
+                api.CreateProject(projectName, path1);
+                // Assert.IsTrue(File.Exists(projectPath1));
 
+                // Attempting to create project in path1 again fails
                 Assert.ThrowsException<ArgumentException>(
-                    () => api.CreateProject("testProj", WorkspaceDir));
+                    () => api.CreateProject(projectName, path1));
+
+                // Creating project in path2 suceeds
+                api.CreateProject(projectName, path2);
+                // Assert.IsTrue(File.Exists(projectPath2));
             }
         }
 

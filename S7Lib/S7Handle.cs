@@ -376,6 +376,7 @@ namespace S7Lib
                 try
                 {
                     var project = wrapper.Add(() => Api.Projects[projectName]);
+                    Log.Debug("Found project {Name} in {Path}.", project.Name, project.LogPath);
                     return true;
                 }
                 catch (COMException)
@@ -390,6 +391,11 @@ namespace S7Lib
         /// <summary>
         /// Internal function to create STEP 7 project or library
         /// </summary>
+        /// <remarks>
+        /// If the project name is longer than 8 characters it will be shortened.
+        /// It's impossible to create projects with the same name in the same directory.
+        /// However, it's possible to create them if they exist in different directories.
+        /// </remarks>
         /// <param name="projectName">Project name (max 8 characters)</param>
         /// <param name="projectDir">Path to project's parent directory</param>
         /// <param name="projectType">Project type (S7Project or S7Library)</param>
@@ -397,17 +403,22 @@ namespace S7Lib
         {
             Log.Debug("Creating empty project {Name} in {Dir}.", projectName, projectDir);
 
+            var projectRootDir = Path.Combine(projectDir, projectName);
             if (projectName.Length > 8)
             {
                 Log.Warning("Provided project name {Name} is longer than 8 characters. " +
                     "The name of the parent directory and .s7p/.s7l file will be shortened.", projectName);
+                projectRootDir = Path.Combine(projectDir, projectName.Substring(0, 8));
             }
-
             if (ProjectIsRegistered(projectName))
             {
-                // Otherwise Projects.Add() spawns a blocking GUI error message
-                Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
-                throw new ArgumentException($"Project with name {projectName} already exists.", nameof(projectName));
+                Log.Warning("Project with the name {Name} already exists.", projectName);
+                if (Directory.Exists(projectRootDir))
+                {
+                    // Otherwise Projects.Add() spawns a blocking GUI error message
+                    Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
+                    throw new ArgumentException($"Project with name {projectName} already exists in {projectDir}.", nameof(projectName));
+                }
             }
 
             using (var wrapper = new ReleaseWrapper())
