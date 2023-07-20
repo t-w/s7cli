@@ -55,6 +55,32 @@ test_job:
   dependencies:
     - build_job
 
+test_docs_job:
+  image: alpine
+  stage: test
+  before_script:
+    - apk update
+    - apk add doxygen
+  script:
+    - doxygen ./Doxyfile
+  rules:
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+
+pages:
+  image: alpine
+  stage: release
+  before_script:
+    - apk update
+    - apk add doxygen
+  script:
+  - doxygen ./Doxyfile
+  - mv Doc/html/ public/
+  artifacts:
+    paths:
+    - public
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
 release_job:
   stage: release
   # Job should be run in shared linux runner
