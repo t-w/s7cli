@@ -11,6 +11,7 @@ using Serilog.Core;
 
 using SimaticLib;
 using S7HCOM_XLib;
+using Newtonsoft.Json;
 
 namespace S7Lib
 {
@@ -290,6 +291,26 @@ namespace S7Lib
             return GetContainer(projectObj, program, S7ContainerType.S7BlockContainer);
         }
 
+        /// <summary>
+        /// Traverses modules recursively and appends their name to list
+        /// </summary>
+        /// <param name="moduleNames">Output list of module names</param>
+        /// <param name="modules">Modules root</param>
+        //
+        private void GetModuleNames(List<string> moduleNames, IS7Modules modules)
+        {
+            using (var wrapper = new ReleaseWrapper())
+            {
+                wrapper.Add(() => modules);
+                foreach (var module in modules)
+                {
+                    var moduleObj = (IS7Module)wrapper.Add(() => module);
+                    Log.Debug("Module {Name} Path={LogPath}", moduleObj.Name, moduleObj.LogPath);
+                    moduleNames.Add(moduleObj.Name);
+                    GetModuleNames(moduleNames, moduleObj.Modules);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a S7Source object from a program
@@ -355,6 +376,7 @@ namespace S7Lib
                 try
                 {
                     var project = wrapper.Add(() => Api.Projects[projectName]);
+                    Log.Debug("Found project {Name} in {Path}.", project.Name, project.LogPath);
                     return true;
                 }
                 catch (COMException)
@@ -369,6 +391,11 @@ namespace S7Lib
         /// <summary>
         /// Internal function to create STEP 7 project or library
         /// </summary>
+        /// <remarks>
+        /// If the project name is longer than 8 characters it will be shortened.
+        /// It's impossible to create projects with the same name in the same directory.
+        /// However, it's possible to create them if they exist in different directories.
+        /// </remarks>
         /// <param name="projectName">Project name (max 8 characters)</param>
         /// <param name="projectDir">Path to project's parent directory</param>
         /// <param name="projectType">Project type (S7Project or S7Library)</param>
@@ -376,17 +403,22 @@ namespace S7Lib
         {
             Log.Debug("Creating empty project {Name} in {Dir}.", projectName, projectDir);
 
+            var projectRootDir = Path.Combine(projectDir, projectName);
             if (projectName.Length > 8)
             {
                 Log.Warning("Provided project name {Name} is longer than 8 characters. " +
                     "The name of the parent directory and .s7p/.s7l file will be shortened.", projectName);
+                projectRootDir = Path.Combine(projectDir, projectName.Substring(0, 8));
             }
-
             if (ProjectIsRegistered(projectName))
             {
-                // Otherwise Projects.Add() spawns a blocking GUI error message
-                Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
-                throw new ArgumentException($"Project with name {projectName} already exists.", nameof(projectName));
+                Log.Warning("Project with the name {Name} already exists.", projectName);
+                if (Directory.Exists(projectRootDir))
+                {
+                    // Otherwise Projects.Add() spawns a blocking GUI error message
+                    Log.Error("Could not create project {Name} in {Dir}.", projectName, projectDir);
+                    throw new ArgumentException($"Project with name {projectName} already exists in {projectDir}.", nameof(projectName));
+                }
             }
 
             using (var wrapper = new ReleaseWrapper())
@@ -1401,7 +1433,7 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public List<string> ListPrograms(string project)
+        public List<string> ListPrograms(string project, bool json = true)
         {
             Log.Debug("Listing programs for project {Project}.", project);
 
@@ -1410,11 +1442,39 @@ namespace S7Lib
             {
                 var projectObj = wrapper.Add(() => GetProject(project));
                 var programs = wrapper.Add(() => projectObj.Programs);
+                var programStr = new List<string>(); 
                 foreach (S7Program program in programs)
                 {
                     var programObj = wrapper.Add(() => program);
-                    output.Add(programObj.Name);
-                    Log.Debug("Program {Name}", programObj.Name);
+                    Log.Debug("Program {Name} Path={LogPath}", programObj.Name, programObj.LogPath);
+                    var programEntry = json? JsonConvert.SerializeObject(new { name = programObj.Name, logPath = programObj.LogPath })
+                        : programObj.Name;
+                    output.Add(programEntry);
+                }
+            }
+
+            return output;
+        }
+
+        /// <inheritdoc/>
+        public List<string> ListModules(string project)
+        {
+            Log.Debug("Listing modules for project {Project}.", project);
+
+            var output = new List<string>();
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var projectObj = wrapper.Add(() => GetProject(project));
+                var stations = wrapper.Add(() => projectObj.Stations);
+                foreach (var station in stations)
+                {
+                    var stationObj = (IS7Station6)wrapper.Add(() => station);
+                    var racks = wrapper.Add(() => stationObj.Racks);
+                    foreach (var rack in racks)
+                    {
+                        var rackObj = (IS7Rack)wrapper.Add(() => rack);
+                        GetModuleNames(output, (IS7Modules)rackObj.Modules);
+                    }
                 }
             }
             return output;

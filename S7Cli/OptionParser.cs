@@ -8,7 +8,7 @@ using Serilog.Core;
 using Serilog.Events;
 
 using S7Lib;
-
+using Newtonsoft.Json;
 
 namespace S7Cli
 {
@@ -108,6 +108,26 @@ namespace S7Cli
                 LogEventLevel.Verbose : LogEventLevel.Information;
         }
 
+        /// <summary>
+        /// Logs the output of a List* function to either console or Log with Information level
+        /// </summary>
+        /// <param name="results">Output of List* function</param>
+        /// <param name="resultName">Name of result to be prefixed to log output</param>
+        /// <param name="json">Whether to produce JSON output to Console (true) or to Loh (false)</param>
+        private void LogListResult(IList<String> results, string resultName="", bool json = false)
+        {
+            if (json)
+            {
+                Console.Write(JsonConvert.SerializeObject(results));
+            }
+            else
+            {
+                var logLines = results.Select(result => $"{resultName}={result}").ToList();
+                foreach (var logLine in logLines)
+                    Log.Information(logLine);
+            }
+        }
+
         private void RunCommand(object options)
         {
             Api = new S7Handle(logger: Log);
@@ -120,9 +140,8 @@ namespace S7Cli
                         Log.Information("Project={Name}, LogPath={LogPath}", item.Value, item.Key);
                     break;
                 case ListProgramsOptions opt:
-                    var programs = Api.ListPrograms(opt.Project);
-                    foreach (var program in programs)
-                        Log.Information("Program={Program}", program);
+                    var programs = Api.ListPrograms(opt.Project, opt.Json);
+                    LogListResult(programs, "Program", opt.Json);
                     break;
                 case ListContainersOptions opt:
                     var containers = Api.ListContainers(opt.Project);
@@ -133,6 +152,11 @@ namespace S7Cli
                     var stations = Api.ListStations(opt.Project);
                     foreach (var station in stations)
                         Log.Information("Station={Station}", station);
+                    break;
+                case ListModulesOptions opt:
+                    var modules = Api.ListModules(opt.Project);
+                    foreach (var module in modules)
+                        Log.Information("Module={Module}", module);
                     break;
                 case CreateProjectOptions opt:
                     Api.CreateProject(opt.ProjectName, opt.ProjectDir);
@@ -174,7 +198,7 @@ namespace S7Cli
                                       allowConflicts: opt.AllowConflicts);
                     break;
                 case ExportSymbolsOptions opt:
-                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile);
+                    Api.ExportSymbols(opt.Project, opt.Program, opt.SymbolFile, overwrite: opt.Overwrite);
                     break;
                 case CompileSourceOptions opt:
                     Api.CompileSource(opt.Project, opt.Program, opt.Source);

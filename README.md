@@ -14,7 +14,7 @@ Download the latest binaries from the [Releases] page.
 
 ## Documentation
 
-The automatic documentation for the latest release is available in https://s7api.web.cern.ch/.
+The automatic documentation for the latest release is available in https://s7-api.docs.cern.ch/.
 
 It can be generated with `Doxygen` as follows:
 ```

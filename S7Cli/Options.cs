@@ -94,13 +94,20 @@ namespace S7Cli
     class ListProjectsOptions : Options { }
 
     [Verb("listPrograms", HelpText = "List available programs in Simatic project/library.")]
-    class ListProgramsOptions : ProjectOptions { }
+    class ListProgramsOptions : ProjectOptions
+    {
+        [Option("json", HelpText = "Produce JSON output to stdout")]
+        public bool Json { get; set; }
+    }
 
     [Verb("listStations", HelpText = "List available stations in Simatic project/library.")]
     class ListStationsOptions : ProjectOptions { }
 
     [Verb("listContainers", HelpText = "List available containers in Simatic project/library.")]
     class ListContainersOptions : ProjectOptions { }
+
+    [Verb("listModules", HelpText = "List available modules in Simatic project/library.")]
+    class ListModulesOptions : ProjectOptions { }
 
     [Verb("importSource", HelpText = "Import source into a program.")]
     class ImportSourceOptions : ProgramOptions
@@ -163,6 +170,8 @@ namespace S7Cli
         [Option("symbolFile", Required = true,
             HelpText = "Path to output symbol table file (.sdf, .asc, .dif, .seq)")]
         public string SymbolFile { get; set; }
+        [Option("overwrite", HelpText = "Overwrite output file if it exists.")]
+        public bool Overwrite { get; set; }
     }
 
     [Verb("compileSource", HelpText = "Compile source.")]

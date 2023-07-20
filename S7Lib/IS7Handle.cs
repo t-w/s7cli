@@ -188,12 +188,19 @@ namespace S7Lib
         /// <summary>
         /// Returns list with the names of every program in a given project
         /// </summary>
-        List<string> ListPrograms(string project);
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="json">Whether to produce JSON output</param>
+        List<string> ListPrograms(string project, bool json = false);
 
         /// <summary>
         /// Returns list with the names of every station in a given project
         /// </summary>
         List<string> ListStations(string project);
+
+        /// <summary>
+        /// Returns list with the names of every module in a given project
+        /// </summary>
+        List<string> ListModules(string project);
 
         /// <summary>
         /// Returns list with the names of every container in a given project
