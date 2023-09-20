@@ -74,4 +74,19 @@
     <Error Condition="!Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets'))" />
   </Target>
   <Import Project="..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets" Condition="Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" />
+	<!--Add Version parameter for AssemblyVersion-->
+	<Target Name="BeforeBuild">
+		<ItemGroup>
+			<AssemblyAttributes Include="AssemblyVersion">
+				<_Parameter1>$(Version)</_Parameter1>
+			</AssemblyAttributes>
+		</ItemGroup>
+		<MakeDir Directories="$(IntermediateOutputPath)" />
+		<WriteCodeFragment Language="C#"
+							OutputFile="$(IntermediateOutputPath)Version.cs"
+							AssemblyAttributes="@(AssemblyAttributes)" />
+		<ItemGroup>
+			<Compile Include="$(IntermediateOutputPath)Version.cs" />
+		</ItemGroup>
+	</Target>
 </Project>
