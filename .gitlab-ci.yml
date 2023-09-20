@@ -30,7 +30,7 @@ build_job:
     # Build gRPC stubs for Python
     - python -m grpc_tools.protoc ./S7Service/protos/s7service/step7.proto
       -I ./S7Service/protos/
-      --python_out=./S7Service/Python/ v
+      --python_out=./S7Service/Python/
       --grpc_python_out=./S7Service/Python/
     # Build Python s7service package with setuptools
     - cd ./S7Service/Python/
