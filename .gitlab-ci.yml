@@ -19,14 +19,14 @@ build_job:
     - python .\scripts\version.py -f .\SharedAssemblyInfo.cs
     # Fetch assembly version from git tag
     - If ($env:CI_COMMIT_TAG) {
-        $env:VERSION = $env:CI_COMMIT_TAG | Select-String '(\d+.\d+.\d+)(?:(a|b|rc)\d+)?' | ForEach-Object { $_.Matches[0].Groups[1].Value };
-        $env:VERSION += '.0'
+        $env:ASSEMBLY_VERSION = $env:CI_COMMIT_TAG | Select-String '(\d+.\d+.\d+)(?:(a|b|rc)\d+)?' | ForEach-Object { $_.Matches[0].Groups[1].Value };
+        $env:ASSEMBLY_VERSION += '.0'
       } Else {
-        $env:VERSION = '1.0.0.0'
+        $env:ASSEMBLY_VERSION = '1.0.0.0'
       }
     # Build solution
     - '& "$env:NUGET_PATH" restore'
-    - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /p:Version=$env:VERSION /clp:ErrorsOnly'
+    - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /p:Version=$env:ASSEMBLY_VERSION /clp:ErrorsOnly'
     # Build gRPC stubs for Python
     - python -m grpc_tools.protoc ./S7Service/protos/s7service/step7.proto
       -I ./S7Service/protos/
