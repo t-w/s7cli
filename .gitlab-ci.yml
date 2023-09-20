@@ -21,6 +21,8 @@ build_job:
     - If ($env:CI_COMMIT_TAG) {
         $env:VERSION = $env:CI_COMMIT_TAG | Select-String '(\d+.\d+.\d+)(?:(a|b|rc)\d+)?' | ForEach-Object { $_.Matches[0].Groups[1].Value };
         $env:VERSION += '.0'
+      } Else {
+        $env:VERSION = 1.0.0.0
       }
     # Build solution
     - '& "$env:NUGET_PATH" restore'
