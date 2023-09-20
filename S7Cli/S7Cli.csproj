@@ -1,79 +1,71 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props" Condition="Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2589A61E-B7A8-4586-ABAE-FA251F51B146}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>S7Cli</RootNamespace>
-    <AssemblyName>S7Cli</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\Release\</OutputPath>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="CommandLine, Version=2.9.1.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommandLineParser.2.9.1\lib\net461\CommandLine.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.2.12.0\lib\net47\Serilog.dll</HintPath>
-    </Reference>
-    <Reference Include="Serilog.Sinks.Console, Version=4.1.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.Sinks.Console.4.1.0\lib\net45\Serilog.Sinks.Console.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="OptionParser.cs" />
-    <Compile Include="Options.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\S7Lib\S7Lib.csproj">
-      <Project>{900817d5-8c15-470b-b099-fb23824cd0bb}</Project>
-      <Name>S7Lib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props'))" />
-    <Error Condition="!Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets'))" />
-  </Target>
-  <Import Project="..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets" Condition="Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" />
+	<Import Project="..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props" Condition="Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props')" />
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{2589A61E-B7A8-4586-ABAE-FA251F51B146}</ProjectGuid>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>S7Cli</RootNamespace>
+		<AssemblyName>S7Cli</AssemblyName>
+		<TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+		<TargetFrameworkProfile />
+		<NuGetPackageImportStamp>
+		</NuGetPackageImportStamp>
+		<Version Condition="'$(Version)' == ''">1.0.0.0</Version>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+		<PlatformTarget>x86</PlatformTarget>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>TRACE;DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+		<PlatformTarget>x86</PlatformTarget>
+		<OutputPath>bin\Release\</OutputPath>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="CommandLine, Version=2.9.1.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+			<HintPath>..\packages\CommandLineParser.2.9.1\lib\net461\CommandLine.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+			<HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+		<Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+			<HintPath>..\packages\Serilog.2.12.0\lib\net47\Serilog.dll</HintPath>
+		</Reference>
+		<Reference Include="Serilog.Sinks.Console, Version=4.1.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+			<HintPath>..\packages\Serilog.Sinks.Console.4.1.0\lib\net45\Serilog.Sinks.Console.dll</HintPath>
+		</Reference>
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="System.Data.DataSetExtensions" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Net.Http" />
+		<Reference Include="System.Xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="OptionParser.cs" />
+		<Compile Include="Options.cs" />
+		<Compile Include="Program.cs" />
+		<Compile Include="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="App.config" />
+		<None Include="packages.config" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\S7Lib\S7Lib.csproj">
+			<Project>{900817d5-8c15-470b-b099-fb23824cd0bb}</Project>
+			<Name>S7Lib</Name>
+		</ProjectReference>
+	</ItemGroup>
 	<!--Add Version parameter for AssemblyVersion-->
 	<Target Name="BeforeBuild">
 		<ItemGroup>
@@ -89,4 +81,13 @@
 			<Compile Include="$(IntermediateOutputPath)Version.cs" />
 		</ItemGroup>
 	</Target>
+	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+	<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+		<PropertyGroup>
+			<ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+		</PropertyGroup>
+		<Error Condition="!Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.props'))" />
+		<Error Condition="!Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets'))" />
+	</Target>
+	<Import Project="..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets" Condition="Exists('..\packages\MSBuildGitHash.2.0.2\build\MSBuildGitHash.targets')" />
 </Project>
