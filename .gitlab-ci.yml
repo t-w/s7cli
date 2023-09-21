@@ -25,6 +25,7 @@ build_job:
     - '& "$env:NUGET_PATH" restore'
     - '& "$env:MSBUILD_PATH" /p:Configuration=Release /p:Platform=x86 /p:Version=$env:ASSEMBLY_VERSION /clp:ErrorsOnly'
     # Build gRPC stubs for Python
+    - '& "$env:PYTHON_VENV_PATH"'
     - python -m grpc_tools.protoc ./S7Service/protos/s7service/step7.proto
       -I ./S7Service/protos/
       --python_out=./S7Service/Python/
