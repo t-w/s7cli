@@ -14,9 +14,6 @@ build_job:
   tags:
     - cvw-plc-s7
   script:
-    # TODO remove? Generate correct shared assembly version configuration
-    - '& "$env:PYTHON_VENV_PATH"'
-    - python .\scripts\version.py -f .\SharedAssemblyInfo.cs
     # Fetch assembly version from git tag
     - If ($env:CI_COMMIT_TAG) {
         $env:ASSEMBLY_VERSION = $env:CI_COMMIT_TAG | Select-String '(\d+.\d+.\d+)(?:(a|b|rc)\d+)?' | ForEach-Object { $_.Matches[0].Groups[1].Value };
