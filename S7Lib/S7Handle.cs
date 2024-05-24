@@ -118,12 +118,13 @@ namespace S7Lib
                     // Detect if a path was provided
                     if (Path.HasExtension(project))
                     {
+                        if (Path.GetExtension(project) == ".s7l")
+                        {
+                            return (S7Project)projects.Add(Name: project, Type: S7ProjectType.S7Library);
+                        }
                         return (S7Project)projects.Add(Name: project);
                     }
-                    else
-                    {
-                        return (S7Project)projects[project];
-                    }
+                    return (S7Project)projects[project];
                 }
                 catch (COMException exc)
                 {
