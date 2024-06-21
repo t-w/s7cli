@@ -100,13 +100,13 @@ namespace S7Lib
         #region Internal Get Helpers
 
         /// <summary>
-        /// Obtains a project object, from the path to its .s7p project file or its name
+        /// Obtains a project or library object, from the path to its .s7p/.s7l file or its name
         /// </summary>
         /// <remarks>
-        /// Project names are not guaranteed to be unique.
-        /// However, the path to .s7p project file is, and is therefore preferred as a projectId.
+        /// Project and library names are not guaranteed to be unique.
+        /// However, the path to .s7p/.s7l files is, and is therefore preferred as identifier.
         /// </remarks>
-        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="project">Project or library identifier, path to .s7p or .s7l (unique) or project/library name</param>
         /// <returns>S7Project object on success</returns>
         private S7Project GetProject(string project)
         {
@@ -118,16 +118,21 @@ namespace S7Lib
                     // Detect if a path was provided
                     if (Path.HasExtension(project))
                     {
-                        return (S7Project)projects.Add(Name: project);
+                        if (Path.GetExtension(project) == ".s7l")
+                        {
+                            return (S7Project)projects.Add(Name: project, Type: S7ProjectType.S7Library);
+                        }
+                        else if (Path.GetExtension(project) == ".s7p")
+                        {
+                            return (S7Project)projects.Add(Name: project);
+                        }
                     }
-                    else
-                    {
-                        return (S7Project)projects[project];
-                    }
+                    return (S7Project)projects[project];
                 }
                 catch (COMException exc)
                 {
-                    throw new KeyNotFoundException($"Could not get project {project}.", exc);
+                    throw new KeyNotFoundException($"Could not get project {project}. " +
+                        $"Make sure that the path points to a .s7p or .s7l.", exc);
                 }
             }
         }
