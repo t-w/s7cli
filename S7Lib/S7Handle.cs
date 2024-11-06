@@ -1612,7 +1612,7 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
-        public void RemoveProgramOnlineBlocks(string project, string program)
+        public void RemoveProgramOnlineBlocks(string project, string program, bool compressAfterwards)
         {
             Log.Information("[ONLINE] Removing blocks {Project}\\{Program}.", project, program);
 
@@ -1638,6 +1638,8 @@ namespace S7Lib
                         Log.Debug("Removing online block {Name}.", block.Name);
                         block.Remove();
                     }
+                    if (compressAfterwards)
+                        programObj.Compress();
                 }
                 catch (COMException exc)
                 {

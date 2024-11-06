@@ -235,7 +235,7 @@ namespace S7Cli
                     if (!opt.Force)
                         if (!Confirm($"[ONLINE] Remove user blocks in {opt.Project}\\{opt.Program}"))
                             break;
-                    Api.RemoveProgramOnlineBlocks(opt.Project, opt.Program);
+                    Api.RemoveProgramOnlineBlocks(opt.Project, opt.Program, opt.Compress);
                     break;
                 default:
                     throw new ArgumentException($"Unknown options {options}", nameof(options));

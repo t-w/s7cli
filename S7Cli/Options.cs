@@ -233,7 +233,11 @@ namespace S7Cli
     }
 
     [Verb("removeProgramOnlineBlocks", HelpText = "[ONLINE] Removes all the user blocks under a program.")]
-    class removeProgramOnlineBlocksOptions : OnlineProgramOptions { }
+    class removeProgramOnlineBlocksOptions : OnlineProgramOptions
+    {
+        [Option('c', "compress", HelpText = "Compress the CPU memory after removing the blocks")]
+        public bool Compress { get; set; }
+    }
 
     /// <summary>
     /// Class for obtaining the types of each options class

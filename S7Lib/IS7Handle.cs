@@ -237,6 +237,7 @@ namespace S7Lib
         /// </remarks>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
         /// <param name="program">Target S7 program specified by its name or logical path (excluding project name)</param>
-        void RemoveProgramOnlineBlocks(string project, string program);
+        /// <param name="compressAfterwards">Compress the CPU memory after removing the blocks</param>
+        void RemoveProgramOnlineBlocks(string project, string program, bool compressAfterwards);
     }
 }
