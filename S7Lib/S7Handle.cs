@@ -504,14 +504,36 @@ namespace S7Lib
             Log.Debug("Importing source {Name} ({Type}) from {FilePath}.",
                 sourceName, sourceType, sourceFilePath);
 
-            SearchRemoveSwItem(container, sourceName, overwrite);
-
             using (var wrapper = new ReleaseWrapper())
             {
                 var swItems = container.Next;
+                wrapper.Add(() => swItems);
                 try
                 {
-                    wrapper.Add(() => swItems.Add(sourceName, sourceType, sourceFilePath));
+                    try
+                    {
+                        wrapper.Add(() => swItems.Add(sourceName, sourceType, sourceFilePath));
+                    }
+                    catch (COMException exc) when (exc.Message.Equals("Source file object with this name already exists."))
+                    {
+                        if (overwrite)
+                        {
+                            try
+                            {
+                                swItems.Remove(sourceName);
+                            }
+                            catch (COMException exc2)
+                            {
+                                throw new ArgumentException($"Could not remove existing SWItem {sourceName}.", exc2);
+                            }
+                            wrapper.Add(() => swItems.Add(sourceName, sourceType, sourceFilePath));
+                        }
+                        else
+                        {
+                            throw new ArgumentException($"SWItem {sourceName} already exists and overwrite is disabled.",
+                                                nameof(overwrite));
+                        }
+                    }
                 }
                 catch (Exception exc)
                 {
@@ -533,14 +555,38 @@ namespace S7Lib
             Log.Debug("Importing source {Source} ({Type}) to {Destination}.",
                 source.Name, source.ConcreteType, destination.Name);
 
-            SearchRemoveSwItem(destination, source.Name, overwrite);
-
             using (var wrapper = new ReleaseWrapper())
             {
                 try
                 {
-                    var copy = source.Copy(destination);
-                    wrapper.Add(() => copy);
+                    try
+                    {
+                        var copy = source.Copy(destination);
+                        wrapper.Add(() => copy);
+                    }
+                    catch (ArgumentException exc) when (exc.Message.Equals("In the call of function 'Copy' the parameter 'pParent' contains an invalid value."))
+                    {
+                        if (overwrite)
+                        {
+                            var swItems = destination.Next;
+                            wrapper.Add(() => swItems);
+                            try
+                            {
+                                swItems.Remove(source.Name);
+                            }
+                            catch (COMException exc2)
+                            {
+                                throw new ArgumentException($"Could not remove existing SWItem {source.Name}.", exc2);
+                            }
+                            var copy = source.Copy(destination);
+                            wrapper.Add(() => copy);
+                        }
+                        else
+                        {
+                            throw new ArgumentException($"SWItem {source.Name} already exists and overwrite is disabled.",
+                                                nameof(overwrite));
+                        }
+                    }
                 }
                 catch (COMException exc)
                 {
@@ -783,13 +829,15 @@ namespace S7Lib
                 return;
             }
 
+            // must check presence before attempting to copy, otherwise a popup will appear, asking to overwrite
             SearchRemoveSwItem(destination, block.Name, overwrite);
 
             using (var wrapper = new ReleaseWrapper())
             {
                 try
                 {
-                    var item = block.Copy(destination);
+                    var copy = block.Copy(destination);
+                    wrapper.Add(() => copy);
                 }
                 catch (Exception exc)
                 {
