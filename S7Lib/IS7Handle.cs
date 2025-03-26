@@ -149,6 +149,43 @@ namespace S7Lib
         void ExportStation(string project, string station, string exportFile);
 
         /// <summary>
+        /// Creates a new S7 connection
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="station">Name of parent station</param>
+        /// <param name="rack">Name of parent rack</param>
+        /// <param name="cpu">Name of the CPU</param>
+        /// <param name="partnerName">Name of the partner, connection identifier</param>
+        /// <param name="isActive">Whether to establish an active connection</param>
+        /// <param name="partnerAddress">Partner IP address</param>
+        /// <param name="localConnResource">Local connection resource</param>
+        /// <param name="partnerRack">Partner rack</param>
+        /// <param name="partnerSlot">Partner slot</param>
+        /// <param name="partnerConnResource">Partner connection resource</param>
+        void CreateConnection(string project, string station, string rack, string cpu,
+                                    string partnerName, bool isActive, string partnerAddress,
+                                    string localConnResource, int partnerRack, int partnerSlot, string partnerConnResource);
+
+        /// <summary>
+        /// Edit properties of target S7 connection
+        /// </summary>
+        /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>
+        /// <param name="station">Name of parent station</param>
+        /// <param name="rack">Name of parent rack</param>
+        /// <param name="cpu">Name of the CPU</param>
+        /// <param name="partnerName">Name of the partner, connection identifier</param>
+        /// <param name="properties">Connection properties as key-value pairs, e.g.
+        /// {"IsActive", false}
+        /// {"PartnerAddress", "127.0.0.1"}
+        /// {"LocalConnRes", "10"}
+        /// {"PartnerRack", 0}
+        /// {"PartnerSlot", 0}
+        /// {"PartnerConnRes", "A0"}
+        /// </param>
+        void EditConnection(string project, string station, string rack, string cpu,
+                                    string partnerName, Dictionary<string, object> properties);
+
+        /// <summary>
         /// Edit properties of target module
         /// </summary>
         /// <param name="project">Project identifier, path to .s7p (unique) or project name</param>

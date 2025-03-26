@@ -1151,6 +1151,99 @@ namespace S7Lib
         }
 
         /// <inheritdoc/>
+        public void CreateConnection(string project, string station, string rack, string cpu,
+                                    string partnerName, bool isActive, string partnerAddress,
+                                    string localConnResource, int partnerRack, int partnerSlot, string partnerConnResource)
+        {
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var projectObj = wrapper.Add(() => GetProject(project));
+                var stationObj = wrapper.Add(() => GetStationImpl(projectObj, station));
+                var rackObj = wrapper.Add(() => GetRackImpl(stationObj, rack));
+                var cpuObj = wrapper.Add(() => GetModuleImpl(rackObj.Modules, cpu));
+
+                var connections = wrapper.Add(() => cpuObj.Conns);
+                var newConnection = wrapper.Add(() => connections.Add(S7ConnType.S7_CONNECTION, null));
+                newConnection.Attribute["UNSPECIFIED"] = 1; // must be set first !
+                newConnection.Attribute["REMOTE_PARTNER"] = partnerName;
+                newConnection.Attribute["REMOTE_PARTNER_INFO"] = partnerName;
+                newConnection.Attribute["ACTIVE_CONN_SETUP"] = isActive ? 1 : 0;
+                newConnection.Attribute["REMOTE_ADDRESS"] = AddressToHex(partnerAddress);
+                newConnection.Attribute["LFD_NO"] = Byte.Parse(localConnResource, System.Globalization.NumberStyles.HexNumber);
+                newConnection.Attribute["REMMOD_RACKNO"] = partnerRack;
+                newConnection.Attribute["REMMOD_SLOTNO"] = partnerSlot;
+                newConnection.Attribute["REMMOD_LFDNR"] = Byte.Parse(partnerConnResource, System.Globalization.NumberStyles.HexNumber);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void EditConnection(string project, string station, string rack, string cpu,
+                                    string partnerName, Dictionary<string, object> properties)
+        {
+            using (var wrapper = new ReleaseWrapper())
+            {
+                var projectObj = wrapper.Add(() => GetProject(project));
+                var stationObj = wrapper.Add(() => GetStationImpl(projectObj, station));
+                var rackObj = wrapper.Add(() => GetRackImpl(stationObj, rack));
+                var cpuObj = wrapper.Add(() => GetModuleImpl(rackObj.Modules, cpu));
+
+                var connections = wrapper.Add(() => cpuObj.Conns);
+                foreach (S7Conn conn in connections)
+                {
+                    wrapper.Add(() => conn);
+                    if (partnerName == conn.Attribute["REMOTE_PARTNER"])
+                    {
+                        SetConnectionProperties(conn, properties);
+                    }
+                }
+            }
+        }
+
+        private void SetConnectionProperties(IS7Conn connection, Dictionary<string, object> properties)
+        {
+            foreach (var kvPair in properties)
+            {
+                try
+                {
+                    SetConnectionProperty(connection, kvPair.Key, kvPair.Value);
+                    Log.Debug("Set {Connection} {Key}={Value}.", connection.LogPath, kvPair.Key, kvPair.Value);
+                }
+                catch (Exception exc)
+                {
+                    Log.Error(exc, "Could not set {Connection} {Key}={Value}.", connection.LogPath, kvPair.Key, kvPair.Value);
+                    throw;
+                }
+            }
+        }
+
+        private void SetConnectionProperty(IS7Conn connection, string property, object value)
+        {
+            switch (property)
+            {
+                case "IsActive":
+                    connection.Attribute["ACTIVE_CONN_SETUP"] = (bool)value ? 1 : 0;
+                    break;
+                case "PartnerAddress":
+                    connection.Attribute["REMOTE_ADDRESS"] = AddressToHex((string)value);
+                    break;
+                case "LocalConnRes":
+                    connection.Attribute["LFD_NO"] = Byte.Parse((string)value, System.Globalization.NumberStyles.HexNumber);
+                    break;
+                case "PartnerRack":
+                    connection.Attribute["REMMOD_RACKNO"] = (int)value;
+                    break;
+                case "PartnerSlot":
+                    connection.Attribute["REMMOD_SLOTNO"] = (int)value;
+                    break;
+                case "PartnerConnRes":
+                    connection.Attribute["REMMOD_LFDNR"] = Byte.Parse((string)value, System.Globalization.NumberStyles.HexNumber);
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown connection property {property}.", nameof(property));
+            }
+        }
+
+        /// <inheritdoc/>
         public void EditModule(string project, string station, string rack, string modulePath, Dictionary<string, object> properties)
         {
             using (var wrapper = new ReleaseWrapper())
@@ -1203,9 +1296,110 @@ namespace S7Lib
                 case "RouterActive":
                     module.RouterActive = (bool)value ? 1 : 0;
                     break;
+                case "NtpActive":
+                    if ("CP 443-1" == module.Name)
+                    {
+                        module.Attribute["TIMESYNC_NTP_ACTIVE"] = (bool)value ? 1 : 0;
+                        if ((bool)value)
+                        {
+                            module.Attribute["TIMESYNC_NTP_TIMEZONE"] = 65536; // GMT+00 zone
+                            module.Attribute["TIMESYNC_NTP_INTERVAL"] = 60;    // sync interval 60s
+                            module.Attribute["TIMESYNC_NTP_ACTIVE_NEW"] = 1;   // send time to station
+                        }
+                        else
+                            module.Attribute["TIMESYNC_NTP_SERVER_ADDR"] = GenerateCP4431NtpIPAddressesString("");
+                    }
+                    else
+                    {
+                        // assume S7-300 CPU IO
+                        if (!(bool)value)
+                            module.Attribute["ETHERNET_CLOCK_SYNC_PRM"] = "00";
+                    }
+                        break;
+                case "NtpIPAddresses":
+                    if ("CP 443-1" == module.Name)
+                        module.Attribute["TIMESYNC_NTP_SERVER_ADDR"] = GenerateCP4431NtpIPAddressesString((string)value);
+                    else
+                        module.Attribute["ETHERNET_CLOCK_SYNC_PRM"] = GenerateCPU300NtpIPAddressesString((string)value);
+                    break;
                 default:
                     throw new ArgumentException($"Unknown module property {property}.", nameof(property));
             }
+        }
+
+        private static string GenerateCP4431NtpIPAddressesString(string addresses)
+        {
+            // space separated sequence of hex-encoded bytes:
+            // header: # of bytes, 3* 0, EE, 0, # of addresses, 0
+            // sum: 8 bytes
+            // each address: 4, 4 bytes of address, 12* 0
+            // sum: 17 bytes
+            string[] addresses_list = addresses.Split(',');
+            int num_addresses = addresses.Length == 0 ? 0 : addresses_list.Length;
+            string[] res_bytes_str = new string[8 + 17 * num_addresses];
+            res_bytes_str[0] = ((byte)res_bytes_str.Length).ToString("X2");
+            res_bytes_str[1] = "00";
+            res_bytes_str[2] = "00";
+            res_bytes_str[3] = "00";
+            res_bytes_str[4] = "EE";
+            res_bytes_str[5] = "00";
+            res_bytes_str[6] = ((byte)num_addresses).ToString("X2");
+            res_bytes_str[7] = "00";
+            for (int i = 0; i < num_addresses; i++)
+            {
+                res_bytes_str[8 + 17 * i] = "04";
+                string address_hex_str = AddressToHex(addresses_list[i]);
+                res_bytes_str[8 + 17 * i + 1] = address_hex_str.Substring(0, 2);
+                res_bytes_str[8 + 17 * i + 2] = address_hex_str.Substring(2, 2);
+                res_bytes_str[8 + 17 * i + 3] = address_hex_str.Substring(4, 2);
+                res_bytes_str[8 + 17 * i + 4] = address_hex_str.Substring(6, 2);
+                for (int j = 0; j < 12; j++)
+                    res_bytes_str[8 + 17 * i + 5 + j] = "00";
+            }
+            return string.Join(" ", res_bytes_str);
+        }
+
+        private static string GenerateCPU300NtpIPAddressesString(string addresses)
+        {
+            // space separated sequence of hex-encoded bytes:
+            // header: 1 10 8 0 2 0 2 0, sync interval on 3 bytes (little-endian), 0 2 10, # of bytes after, 0, # of addresses, 0
+            // sum: 18 bytes
+            // each address: 0, 4, 4 bytes of address
+            // sum: 6 bytes
+            string[] addresses_list = addresses.Split(',');
+            int num_addresses = addresses.Length == 0 ? 0 : addresses_list.Length;
+            string[] res_bytes_str = new string[18 + 6 * num_addresses];
+            res_bytes_str[0] = "01";
+            res_bytes_str[1] = "10";
+            res_bytes_str[2] = "08";
+            res_bytes_str[3] = "00";
+            res_bytes_str[4] = "02";
+            res_bytes_str[5] = "00";
+            res_bytes_str[6] = "02";
+            res_bytes_str[7] = "00";
+            // sync interval 60s
+            res_bytes_str[8] = "3C";
+            res_bytes_str[9] = "00";
+            res_bytes_str[10] = "00";
+
+            res_bytes_str[11] = "00";
+            res_bytes_str[12] = "02";
+            res_bytes_str[13] = "10";
+            res_bytes_str[14] = ((byte)(6 * num_addresses + 2)).ToString("X2");
+            res_bytes_str[15] = "00";
+            res_bytes_str[16] = ((byte)num_addresses).ToString("X2");
+            res_bytes_str[17] = "00";
+            for (int i = 0; i < num_addresses; i++)
+            {
+                res_bytes_str[18 + 6 * i] = "00";
+                res_bytes_str[18 + 6 * i + 1] = "04";
+                string address_hex_str = AddressToHex(addresses_list[i]);
+                res_bytes_str[18 + 6 * i + 2] = address_hex_str.Substring(0, 2);
+                res_bytes_str[18 + 6 * i + 3] = address_hex_str.Substring(2, 2);
+                res_bytes_str[18 + 6 * i + 4] = address_hex_str.Substring(4, 2);
+                res_bytes_str[18 + 6 * i + 5] = address_hex_str.Substring(6, 2);
+            }
+            return string.Join(" ", res_bytes_str);
         }
 
         /// <summary>

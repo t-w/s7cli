@@ -196,6 +196,56 @@ namespace S7Cli
         public bool AllowFail { get; set; }
     }
 
+    [Verb("createConnection", HelpText = "Creates a new S7 connection.")]
+    class CreateConnectionOptions : ProjectOptions
+    {
+        [Option("station", Required = true, HelpText = "Name of parent station")]
+        public string Station { get; set; }
+        [Option("rack", Required = true, HelpText = "Name of parent rack")]
+        public string Rack { get; set; }
+        [Option("cpu", Required = true, HelpText = "Name of the CPU")]
+        public string Cpu { get; set; }
+        [Option("name", Required = true, HelpText = "Partner name (e.g. WinCC_OA)")]
+        public string PartnerName { get; set; }
+        [Option("connActive", Required = true, HelpText = "Whether the connection is active {\"true\", \"false\"}")]
+        public string ConnActive { get; set; }
+        [Option("ipAddress", Required = true, HelpText = "Partner IP Address (e.g. 127.0.0.1)")]
+        public string IPAddress { get; set; }
+        [Option("partnerRack", Required = true, HelpText = "Partner rack (e.g. 0)")]
+        public int PartnerRack { get; set; }
+        [Option("partnerSlot", Required = true, HelpText = "Partner slot (e.g. 0)")]
+        public int PartnerSlot { get; set; }
+        [Option("locConnRes", Required = true, HelpText = "Local connection resource (e.g. A0)")]
+        public string LocalConnRes { get; set; }
+        [Option("remConnRes", Required = true, HelpText = "Partner connection resource (e.g. A0)")]
+        public string PartnerConnRes { get; set; }
+    }
+
+    [Verb("editConnection", HelpText = "Edits properties of target S7 connection.")]
+    class EditConnectionOptions : ProjectOptions
+    {
+        [Option("station", Required = true, HelpText = "Name of parent station")]
+        public string Station { get; set; }
+        [Option("rack", Required = true, HelpText = "Name of parent rack")]
+        public string Rack { get; set; }
+        [Option("cpu", Required = true, HelpText = "Name of the CPU")]
+        public string Cpu { get; set; }
+        [Option("name", Required = true, HelpText = "Partner name (e.g. WinCC_OA)")]
+        public string PartnerName { get; set; }
+        [Option("connActive", HelpText = "Whether the connection is active {\"true\", \"false\"}")]
+        public string ConnActive { get; set; }
+        [Option("ipAddress", HelpText = "Partner IP Address (e.g. 127.0.0.1)")]
+        public string IPAddress { get; set; }
+        [Option("partnerRack", HelpText = "Partner rack (e.g. 0)")]
+        public int? PartnerRack { get; set; }
+        [Option("partnerSlot", HelpText = "Partner slot (e.g. 0)")]
+        public int? PartnerSlot { get; set; }
+        [Option("locConnRes", HelpText = "Local connection resource (e.g. A0)")]
+        public string LocalConnRes { get; set; }
+        [Option("remConnRes", HelpText = "Partner connection resource (e.g. A0)")]
+        public string PartnerConnRes { get; set; }
+    }
+
     [Verb("editModule", HelpText = "Edits properties of target module.")]
     class EditModuleOptions : ProjectOptions
     {
@@ -203,7 +253,7 @@ namespace S7Cli
         public string Station { get; set; }
         [Option("rack", Required = true, HelpText = "Name of parent rack")]
         public string Rack { get; set; }
-        [Option("module", Required = true, HelpText = "Logical path to target module")]
+        [Option("module", Required = true, HelpText = "Logical path to target module (\\ as separator)")]
         public string Module { get; set; }
         [Option("ipAddress", HelpText = "IP Address (e.g. 127.0.0.1)")]
         public string IPAddress { get; set; }
@@ -217,6 +267,10 @@ namespace S7Cli
         public string IPActive { get; set; }
         [Option("routerActive", HelpText = "Whether gateway router is active {\"true\", \"false\"}")]
         public string RouterActive { get; set; }
+        [Option("ntpActive", HelpText = "Whether NTP is active {\"true\", \"false\"}")]
+        public string NtpActive { get; set; }
+        [Option("ntpIPAddresses", HelpText = "Comma separated list of IP addresses of NTP servers (e.g. 137.138.16.69,137.138.17.69)")]
+        public string NtpIPAddresses { get; set; }
     }
 
     [Verb("startProgram", HelpText = "[ONLINE] Start/restart a program.")]

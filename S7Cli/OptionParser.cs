@@ -209,6 +209,18 @@ namespace S7Cli
                 case CompileAllStationsOptions opt:
                     Api.CompileAllStations(opt.Project, opt.AllowFail);
                     break;
+                case CreateConnectionOptions opt:
+                    bool parsedBool;
+                    if (!Boolean.TryParse(opt.ConnActive, out parsedBool))
+                        Log.Error($"Could not parse bool from --ntpActive \"{opt.ConnActive}\".");
+                    Api.CreateConnection(opt.Project, opt.Station, opt.Rack, opt.Cpu,
+                                        opt.PartnerName, parsedBool, opt.IPAddress,
+                                        opt.LocalConnRes, opt.PartnerRack, opt.PartnerSlot, opt.PartnerConnRes);
+                    break;
+                case EditConnectionOptions opt:
+                    var connProperties = ParseConnectionProperties(opt);
+                    Api.EditConnection(opt.Project, opt.Station, opt.Rack, opt.Cpu, opt.PartnerName, connProperties);
+                    break;
                 case EditModuleOptions opt:
                     var properties = ParseModuleProperties(opt);
                     Api.EditModule(opt.Project, opt.Station, opt.Rack, opt.Module, properties);
@@ -259,6 +271,30 @@ namespace S7Cli
             return false;
         }
 
+        private Dictionary<string, object> ParseConnectionProperties(EditConnectionOptions opt)
+        {
+            bool parsedBool;
+            var propertyDict = new Dictionary<string, object>();
+            if (!String.IsNullOrEmpty(opt.ConnActive))
+            {
+                if (Boolean.TryParse(opt.ConnActive, out parsedBool))
+                    propertyDict["IsActive"] = parsedBool;
+                else
+                    Log.Warning($"Could not parse bool from --IsActive \"{opt.ConnActive}\". Ignoring.");
+            }
+            if (!String.IsNullOrEmpty(opt.IPAddress))
+                propertyDict["PartnerAddress"] = opt.IPAddress;
+            if (opt.PartnerRack.HasValue)
+                propertyDict["PartnerRack"] = opt.PartnerRack.Value;
+            if (opt.PartnerSlot.HasValue)
+                propertyDict["PartnerSlot"] = opt.PartnerSlot.Value;
+            if (!String.IsNullOrEmpty(opt.LocalConnRes))
+                propertyDict["LocalConnRes"] = opt.LocalConnRes;
+            if (!String.IsNullOrEmpty(opt.PartnerConnRes))
+                propertyDict["PartnerConnRes"] = opt.PartnerConnRes;
+            return propertyDict;
+        }
+
         private Dictionary<string, object> ParseModuleProperties(EditModuleOptions opt)
         {
             bool parsedBool;
@@ -285,6 +321,15 @@ namespace S7Cli
                 else
                     Log.Warning($"Could not parse bool from --routerActive \"{opt.RouterActive}\". Ignoring.");
             }
+            if (!String.IsNullOrEmpty(opt.NtpActive))
+            {
+                if (Boolean.TryParse(opt.NtpActive, out parsedBool))
+                    propertyDict["NtpActive"] = parsedBool;
+                else
+                    Log.Warning($"Could not parse bool from --ntpActive \"{opt.NtpActive}\". Ignoring.");
+            }
+            if (!String.IsNullOrEmpty(opt.NtpIPAddresses))
+                propertyDict["NtpIPAddresses"] = opt.NtpIPAddresses;
             return propertyDict;
         }
     }
